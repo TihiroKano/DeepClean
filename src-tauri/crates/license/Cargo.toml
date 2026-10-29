@@ -1,0 +1,28 @@
+[package]
+name = "deepclean-license"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+# 激活码：校验只做 SHA-256 哈希比对（规格表「使用 sha2」）。哈希表**不在二进制里**，
+# 见 crate 文档里的「注入的数据」一节。
+sha2 = "0.10"
+# 设备绑定：Ed25519 设备密钥（规格表「使用 ed25519-dalek」）。
+# `rand_core` feature 打开 `SigningKey::generate`；私钥本体由 DPAPI 保护后才落盘。
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+# 只要 `OsRng`（`SigningKey::generate` 的熵源）。不引 `rand` 全家桶。
+rand_core = { version = "0.6", features = ["getrandom"] }
+# license.dat 是 JSON 线格式（人能看懂、便于排查），不加密；设备绑定靠 Ed25519 公钥比对。
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# 哈希清单与签名/公钥一律十六进制编码：与 `codes.sha256` 同一种表示，少一种编码少一处分叉。
+hex = "0.4"
+
+[target.'cfg(windows)'.dependencies]
+# 密钥保护走 `windows-sys`（本仓既定口径）：签名即 Win32 原文（BOOL + 裸指针），
+# 不需要 `windows` crate 那层 `Param<>`/`Result<>` 包装。只用 CryptProtectData /
+# CryptUnprotectData（DPAPI，用户作用域）+ LocalFree 释放它返回的缓冲区。
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security_Cryptography",
+] }

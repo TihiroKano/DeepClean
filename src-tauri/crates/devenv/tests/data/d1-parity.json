@@ -1,0 +1,343 @@
+{
+  "_comment": [
+    "派工单 D1 §4-C：与 TS 的零容差对账夹具。两侧跑**同一份**文件：",
+    "  · TS 侧 tests/parity_devenv_ts.mjs 跑真的 core/rules/devenv-view.ts + detectors.ts + core/analyze/model-files.ts",
+    "    （规则表用 core/rules/registry.ts 的 BUILTIN_RULES）",
+    "  · Rust 侧 tests/parity_with_ts.rs 跑 deepclean-devenv（规则表用 deepclean_rules::builtin_rules()）",
+    "golden = tests/data/d1-parity.expected.json，由那条 .mjs 生成。**跑测试之前先重生成并与入库那份 cmp**。",
+    "",
+    "字段口径：",
+    "  · probe.commands / probe.dirs 是**注入的事实**（能跑的命令 / 存在的目录模板）。判定层零文件零进程，",
+    "    这两份清单就是它的整个机器。dirs 的比较按 Windows 口径折叠大小写（那是**探针**的事，",
+    "    表里的模板必须原样递出去 —— askedDirs 那一格钉的就是这件事）。",
+    "  · probe.docker = null → 探针**没有** Docker 只读查询能力面（三格里的一种，不是「没装」也不是 0）。",
+    "  · installStatusOmit / installStatusForce 是 harness 侧塑形：先按表跑一遍 collectInstallStatus，",
+    "    再删键（造「不知道」那一格）/ 改值。两侧同序同法，不属于 crate 的行为。",
+    "  · 形状要求（§4-C）：中文目录名、大小写不同的同一路径、%USERPROFILE% 那一类模板解析后的形态。",
+    "  · 坏数只用 JSON 两侧都能收的形状（负数、0、空串、乱码串）。**1e400 这类超范围字面量不能进夹具**：",
+    "    JS 的 JSON.parse 把它读成 Infinity，serde_json 直接报 \"number out of range\" 让整个夹具读不进来 ——",
+    "    那是两个 JSON 解析器的差异，不是判据差异，混进来只会让对账红得看不懂。这条分叉写在 src/lib.rs 的偏离清单。"
+  ],
+  "cases": [
+    {
+      "name": "all_nine_installed_and_priced",
+      "detectorsTable": "nine",
+      "probe": {
+        "commands": ["npm", "pnpm", "yarn", "pip", "pip3", "mvn", "gradle", "hf", "sdkmanager", "code"],
+        "dirs": [],
+        "docker": null
+      },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {
+        "npm-cache": { "bytes": 33000, "files": 7 },
+        "pnpm-store": { "bytes": 121000, "files": 40 },
+        "yarn-cache": { "bytes": 40000, "files": 12 },
+        "pip-cache": { "bytes": 22000, "files": 5 },
+        "maven-repository": { "bytes": 7168, "files": 3 },
+        "gradle-cache": { "bytes": 12000, "files": 9 },
+        "huggingface-cache": { "bytes": 80000, "files": 2 },
+        "android-sdk-temp": { "bytes": 70000, "files": 1 },
+        "vscode-cache": { "bytes": 15000, "files": 6 }
+      },
+      "territories": [
+        { "ruleId": "npm-cache", "detectorAbsent": false, "present": [ { "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\npm-cache", "bytes": 33000 } ], "notScanned": 0 },
+        { "ruleId": "huggingface-cache", "detectorAbsent": false, "present": [ { "path": "C:\\Users\\楠楠想睡觉了\\.cache\\huggingface", "bytes": 80000 } ], "notScanned": 0 },
+        { "ruleId": "maven-repository", "detectorAbsent": false, "present": [ { "path": "C:\\Users\\楠楠想睡觉了\\.m2\\repository", "bytes": 7168 } ], "notScanned": 0 }
+      ],
+      "modelTallyInput": {
+        "totals": { "count": 137, "bytes": 140288 },
+        "env": { "rootPath": "C:\\Users\\楠楠想睡觉了", "filesSeen": 300123, "truncated": false, "scanStatus": "completed" }
+      },
+      "scannedRoot": "C:\\Users\\楠楠想睡觉了"
+    },
+    {
+      "name": "none_installed_residual_with_chinese_paths",
+      "detectorsTable": "nine",
+      "probe": { "commands": [], "dirs": [], "docker": null },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {
+        "maven-repository": { "bytes": 9216, "files": 12 },
+        "pnpm-store": { "bytes": 4096, "files": 3 },
+        "gradle-cache": { "bytes": 51200, "files": 20 }
+      },
+      "territories": [
+        {
+          "ruleId": "maven-repository",
+          "detectorAbsent": true,
+          "present": [
+            { "path": "C:\\Users\\楠楠想睡觉了\\.m2\\repository", "bytes": 7168 },
+            { "path": "D:\\开发环境\\maven\\仓库", "bytes": 2048 }
+          ],
+          "notScanned": 0
+        },
+        {
+          "ruleId": "pnpm-store",
+          "detectorAbsent": true,
+          "present": [ { "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\pnpm-store\\v3", "bytes": null } ],
+          "notScanned": 1
+        },
+        { "ruleId": "gradle-cache", "detectorAbsent": true, "present": [], "notScanned": 1 },
+        { "ruleId": "npm-cache", "detectorAbsent": true, "present": [ { "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\npm-cache", "bytes": 0 } ], "notScanned": 0 },
+        { "ruleId": "yarn-cache", "detectorAbsent": true, "present": [], "notScanned": 2 },
+        { "ruleId": "pip-cache", "detectorAbsent": true, "present": [], "notScanned": 1 },
+        { "ruleId": "android-sdk-temp", "detectorAbsent": true, "present": [], "notScanned": 1 },
+        { "ruleId": "vscode-cache", "detectorAbsent": true, "present": [], "notScanned": 2 },
+        { "ruleId": "huggingface-cache", "detectorAbsent": true, "present": [], "notScanned": 1 }
+      ],
+      "modelTallyInput": null,
+      "scannedRoot": "D:\\开发环境"
+    },
+    {
+      "name": "unknown_is_not_absent",
+      "detectorsTable": "nine",
+      "probe": { "commands": ["npm"], "dirs": [], "docker": null },
+      "installStatusOmit": ["pip", "yarn", "maven", "vscode"],
+      "installStatusForce": { "pnpm": true },
+      "bytesByRule": {
+        "pip-cache": { "bytes": 22000, "files": 5 },
+        "yarn-cache": { "bytes": 40000, "files": 12 },
+        "maven-repository": { "bytes": 7168, "files": 3 },
+        "vscode-cache": { "bytes": 15000, "files": 6 },
+        "npm-cache": { "bytes": 33000, "files": 7 },
+        "pnpm-store": { "bytes": 121000, "files": 40 }
+      },
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "empty_dir_vs_missing_territory_vs_number",
+      "detectorsTable": "nine",
+      "probe": { "commands": ["npm", "mvn"], "dirs": [], "docker": null },
+      "installStatusOmit": [],
+      "installStatusForce": { "gradle": true, "pnpm": true },
+      "bytesByRule": {
+        "npm-cache": { "bytes": 0, "files": 0 },
+        "gradle-cache": { "bytes": 999, "files": 4 },
+        "maven-repository": { "bytes": 300, "files": 2 },
+        "pnpm-store": { "bytes": 12, "files": 1 }
+      },
+      "territories": [
+        { "ruleId": "npm-cache", "detectorAbsent": false, "present": [ { "path": "C:\\Users\\Nan\\AppData\\Local\\npm-cache", "bytes": 0 } ], "notScanned": 0 },
+        { "ruleId": "gradle-cache", "detectorAbsent": false, "present": [], "notScanned": 1 },
+        { "ruleId": "maven-repository", "detectorAbsent": false, "present": [ { "path": "C:\\Users\\Nan\\.m2\\repository", "bytes": 300 } ], "notScanned": 5 },
+        { "ruleId": "pnpm-store", "detectorAbsent": false, "present": [ { "path": "C:\\Users\\Nan\\AppData\\Local\\pnpm\\store", "bytes": 12 } ], "notScanned": 0 }
+      ],
+      "modelTallyInput": null,
+      "scannedRoot": "C:\\Users\\Nan"
+    },
+    {
+      "name": "docker_measured_modern_object_shape",
+      "detectorsTable": "withDocker",
+      "probe": {
+        "commands": ["docker", "npm"],
+        "dirs": [],
+        "docker": { "kind": "ok", "stdout": "{\"Images\":[{\"Reclaimable\":400},{\"Reclaimable\":60}],\"Containers\":[{\"Size\":60}],\"Volumes\":[{\"Size\":240}]}" }
+      },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": { "npm-cache": { "bytes": 33000, "files": 7 } },
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": "C:\\Users\\楠楠想睡觉了"
+    },
+    {
+      "name": "docker_cli_missing_and_where_also_fails_is_absent",
+      "detectorsTable": "withDocker",
+      "probe": { "commands": ["npm"], "dirs": [], "docker": { "kind": "cli-missing" } },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "docker_cli_missing_but_where_finds_it_is_not_absent",
+      "detectorsTable": "withDocker",
+      "probe": { "commands": ["docker"], "dirs": [], "docker": { "kind": "cli-missing" } },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "docker_daemon_down_cli_failed_keeps_the_cli_text",
+      "detectorsTable": "withDocker",
+      "probe": {
+        "commands": [],
+        "dirs": [],
+        "docker": { "kind": "cli-failed", "message": "Cannot connect to the Docker daemon at npipe:////./pipe/docker_engine." }
+      },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "docker_timed_out_is_neither_absent_nor_zero",
+      "detectorsTable": "withDocker",
+      "probe": { "commands": [], "dirs": [], "docker": { "kind": "timed-out" } },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "docker_legacy_human_readable_rows_with_trailing_note",
+      "detectorsTable": "withDocker",
+      "probe": {
+        "commands": [],
+        "dirs": [],
+        "docker": {
+          "kind": "ok",
+          "stdout": "[{\"Type\":\"Images\",\"Reclaimable\":\"1.586MB\"},{\"Type\":\"Containers\",\"Reclaimable\":\"1kB (1 of 2)\"},{\"Type\":\"Build Output\",\"Reclaimable\":\"0B\"}]"
+        }
+      },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "docker_empty_stdout_is_not_zero_bytes",
+      "detectorsTable": "withDocker",
+      "probe": { "commands": [], "dirs": [], "docker": { "kind": "ok", "stdout": "   " } },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "docker_stdout_that_is_not_json",
+      "detectorsTable": "withDocker",
+      "probe": { "commands": [], "dirs": [], "docker": { "kind": "ok", "stdout": "unknown flag: --format" } },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "docker_one_unreadable_category_voids_the_whole_reading",
+      "detectorsTable": "withDocker",
+      "probe": {
+        "commands": [],
+        "dirs": [],
+        "docker": { "kind": "ok", "stdout": "[{\"Type\":\"Images\",\"Reclaimable\":\"2.5GB\"},{\"Type\":\"Volumes\",\"Reclaimable\":\"-\"}]" }
+      },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "docker_category_absent_from_the_output_is_not_filled_with_zero",
+      "detectorsTable": "withDocker",
+      "probe": {
+        "commands": [],
+        "dirs": [],
+        "docker": { "kind": "ok", "stdout": "{\"Images\":[{\"Reclaimable\":10}],\"Containers\":[{\"Size\":5}],\"Volumes\":null}" }
+      },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    },
+    {
+      "name": "model_tally_is_a_lower_bound_while_running_and_truncated",
+      "detectorsTable": "nine",
+      "probe": { "commands": [], "dirs": ["%USERPROFILE%\\.cache\\huggingface"], "docker": null },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": { "huggingface-cache": { "bytes": 80000, "files": 2 } },
+      "territories": [
+        { "ruleId": "huggingface-cache", "detectorAbsent": false, "present": [ { "path": "C:\\Users\\楠楠想睡觉了\\.cache\\huggingface\\hub", "bytes": 80000 } ], "notScanned": 0 }
+      ],
+      "modelTallyInput": {
+        "totals": { "count": 42, "bytes": 9600000000 },
+        "env": { "rootPath": "D:\\模型权重", "filesSeen": 120000, "truncated": true, "scanStatus": "running" }
+      },
+      "scannedRoot": "D:\\模型权重"
+    },
+    {
+      "name": "model_tally_bad_numbers_are_guarded_before_the_ui_sees_them",
+      "detectorsTable": "nine",
+      "probe": { "commands": ["huggingface-cli"], "dirs": [], "docker": null },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": {
+        "totals": { "count": -3, "bytes": -7 },
+        "env": { "rootPath": "C:\\Users\\楠楠想睡觉了\\Desktop", "filesSeen": 8, "truncated": false, "scanStatus": "failed" }
+      },
+      "scannedRoot": "C:\\Users\\楠楠想睡觉了\\Desktop"
+    },
+    {
+      "name": "mixed_case_paths_and_resolved_template_forms",
+      "detectorsTable": "nine",
+      "probe": {
+        "commands": [],
+        "dirs": ["%LOCALAPPDATA%\\PIP\\cache", "%userprofile%\\.gradle\\CACHES", "%APPDATA%\\code\\cacheddata"],
+        "docker": null
+      },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": { "pip-cache": { "bytes": 30, "files": 2 }, "vscode-cache": { "bytes": 4000, "files": 1 } },
+      "territories": [
+        {
+          "ruleId": "pip-cache",
+          "detectorAbsent": true,
+          "present": [
+            { "path": "C:\\Users\\NAN\\AppData\\Local\\pip\\Cache", "bytes": 10 },
+            { "path": "C:\\Users\\nan\\appdata\\local\\PIP\\cache", "bytes": 20 }
+          ],
+          "notScanned": 0
+        },
+        {
+          "ruleId": "gradle-cache",
+          "detectorAbsent": true,
+          "present": [ { "path": "C:\\Users\\Nan\\.gradle\\caches", "bytes": 1 }, { "path": "C:\\Users\\Nan\\.GRADLE\\Caches", "bytes": 2 } ],
+          "notScanned": 0
+        },
+        {
+          "ruleId": "vscode-cache",
+          "detectorAbsent": false,
+          "present": [ { "path": "C:\\Users\\Nan\\AppData\\Roaming\\Code\\CachedData", "bytes": 4000 } ],
+          "notScanned": 0
+        }
+      ],
+      "modelTallyInput": null,
+      "scannedRoot": "C:\\Users\\Nan"
+    },
+    {
+      "name": "no_ledger_no_scan_root_gives_the_conservative_shape",
+      "detectorsTable": "nine",
+      "probe": { "commands": ["mvn", "adb"], "dirs": [], "docker": null },
+      "installStatusOmit": [],
+      "installStatusForce": {},
+      "bytesByRule": {},
+      "territories": [],
+      "modelTallyInput": null,
+      "scannedRoot": null
+    }
+  ]
+}

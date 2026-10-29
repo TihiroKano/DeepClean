@@ -1,0 +1,35 @@
+# 换行与二进制文件的处置 —— 为什么需要这个文件
+#
+# 本仓在 Windows 上开发，而 `corepack` / `git` 的默认 `core.autocrlf` 会把文本文件
+# 的 LF 改写成 CRLF。这对产品没影响，但对**下面这三类文件**有影响：
+#
+#   1. `src-tauri/resources/codes.sha256` —— 它被 `include_str!` 嵌进二进制，
+#      再与「投到磁盘的那份」逐字节比对。行尾一变，那个判据就从"相等"变成"不等"，
+#      而症状是"授权表加载失败"，看起来像文件损坏。
+#   2. 验收截图（PNG）—— 任何文本处理都会把它们改坏。
+#   3. `.ps1` / `.sh` —— 换行被改写之后，某些工具链会报出与真实原因无关的语法错。
+#
+# 所以显式钉死：文本一律 LF，二进制一律不动。
+
+* text=auto eol=lf
+
+# 二进制：不猜、不转、不 diff（diff 二进制没有意义，只会让 `git log -p` 变噪音）
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.zip   binary
+*.exe   binary
+*.dll   binary
+
+# 嵌入二进制、参与逐字节比对的那一份：**必须是 LF**
+src-tauri/resources/codes.sha256 text eol=lf
+
+# Windows 脚本：保持 CRLF 更安全（有些 PowerShell 版本对纯 LF 的 .ps1 处理不一致）
+*.ps1 text eol=crlf
+*.nsh text eol=crlf
+
+# 统计：让 `git log --stat` 对这几个目录显示为代码而不是文档
+docs/**/*.md linguist-documentation

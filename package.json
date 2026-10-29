@@ -1,0 +1,38 @@
+{
+  "name": "deepclean",
+  "version": "1.0.0",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "description": "Windows 磁盘空间分析与安全清理工具",
+  "author": "Kano",
+  "engines": {
+    "node": ">=20.12.0"
+  },
+  "scripts": {
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
+    "typecheck:web": "tsc -p tsconfig.web.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "fixture": "node scripts/make-fixture.mjs",
+    "oracle": "node scripts/oracle.mjs",
+    "bench": "npx vite-node scripts/bench.mjs",
+    "smoke:real": "npx vite-node scripts/smoke-real.mjs",
+    "build:tauri": "vite build --config vite.config.tauri.ts"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.2",
+    "@types/node": "^24.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.4.3",
+    "vitest": "^5.0.2"
+  }
+}

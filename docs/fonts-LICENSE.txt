@@ -1,0 +1,33 @@
+# 打包字体的来源与授权
+
+`src/renderer/assets/fonts/` 下的 woff2 全部取自
+[TartSlayer/anthropic-style-cn](https://github.com/TartSlayer/anthropic-style-cn) 的 `assets/fonts/`，
+用于复现 Anthropic 官网那套排版风格（衬线标题 + 无衬线 UI + 等宽读数）。
+
+| 文件 | 字体 | 授权 |
+|---|---|---|
+| `dm-sans-latin-{300,400,500,700}-normal.woff2` | DM Sans | OFL 1.1 |
+| `dm-serif-display-latin-400-normal.woff2` | DM Serif Display | OFL 1.1 |
+| `dm-serif-text-latin-400-normal.woff2` | DM Serif Text | OFL 1.1 |
+| `poppins-latin-{300,400,500,600,700}-normal.woff2` | Poppins | OFL 1.1 |
+| `jetbrains-mono-latin-400-normal.woff2` | JetBrains Mono | OFL 1.1 |
+
+OFL 1.1（SIL Open Font License）允许**随应用打包与再分发**，包括商业用途，
+条件是不得单独售卖字体本身、且保留授权声明。上面这张表就是那条声明。
+
+## 为什么不是 Styrene / Copernicus
+
+Anthropic 实际用的是 Styrene（正文）与 Copernicus / Tiempos（标题），
+那是商业授权字体，**不能**随本应用分发。所以这里取"形状等效"的开源组合：
+DM Sans ≈ Styrene 的几何无衬线比例，DM Serif Display ≈ Copernicus 的衬线标题气质。
+
+## 中文为什么不打包
+
+上面每一支都是 **latin 子集**（`unicode-range` 只覆盖 U+0000-00FF 一带）。
+汉字由系统字体接（`Microsoft YaHei UI` → `Noto Sans SC` → `MiSans`），原因有两个：
+
+1. **体积**：一套思源黑体 SC 的完整字重是 10 MB 起步，塞进安装包不划算；
+2. **Windows 上雅黑的汉字字形已经足够**，而拉丁部分的差异才是"看起来像不像 Anthropic"的关键。
+
+排序上**拉丁必须在前、中文在后**（见 `global.css` 的 `--font-ui`）：反过来的话，
+雅黑的拉丁字形会先把字母接走，打包的 DM Sans 就永远轮不到。

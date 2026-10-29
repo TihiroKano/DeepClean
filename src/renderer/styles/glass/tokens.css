@@ -1,0 +1,188 @@
+/**
+ * V0.8 §4.2 —— Liquid Glass 的设计 token（**部分毛玻璃**：只上在浮层与卡片上）。
+ *
+ * 三条边界比数值更容易被后来的人破，所以写在文件头：
+ *
+ * 1. **不采样真实桌面。** 计划书 Step 4 那套主进程事件驱动截屏（`electron/main/env-backdrop.ts`
+ *    + `dc:backdrop:event` + `useBackdrop`）已于 2026-10-08 按人类伙伴「不需要实现反射桌面的效果」
+ *    整条删除，不是留着不用。删它的硬理由：`desktopCapturer` 截的是整块屏，而按那台状态机自己的
+ *    判据，截屏时本窗口必须可见（`eligible = isVisible && !isMinimized`）—— 于是那张"背景"里
+ *    必然含 DeepClean 自己的界面，糊 29px 之后读起来是重影而不是壁纸。这一点只有真机截图看得出来
+ *    （`--shot` 那套按设计不挂截屏器，从来没拍到过玻璃）。
+ *    这里留下的 `backdrop-filter` 糊的是**本页自己的内容**，与 `global.css` 里原有的两处
+ *    （tooltip / `.dc-menu`）同一类，都在裁定 4 允许的那一侧。
+ * 2. **窗口层不做"真"玻璃，但窗口骨架本轮已动。** 本条原文写于 V0.8（当时是原生标题栏 + 直角），
+ *    第一代预览图把右上角画成了 `— □ ×`，所以 V0.9 U5 把窗口改成 `titleBarStyle: 'hidden'` +
+ *    `titleBarOverlay`：内容顶到窗口上沿、圆角由 DWM 给（约 8 px，**不是草图的 28 px**）。
+ *    仍然**没有** `transparent`，所以计划书 §4.2 表里"窗口"那一档（填充 6–10% / blur 28–30px）
+ *    还是画不出来 —— 窗口里那块蓝是 `.dc-app` 自己画的渐变底（草图 PNG 无 alpha 通道，
+ *    它窗外那圈蓝是画上去的，不是透明）。这一档的 token 依旧**不定义**：
+ *    定义了却没人用的 token 表会骗下一个来加玻璃层的人（上一版 12 个 token 里有 6 个是空的，
+ *    还有一条圆角规则指向全仓不存在的 `.dc-panel`）。
+ * 3. **Treemap 区显式豁免**（见文件末尾）：面积=容量是这产品唯一的可读性契约。
+ *
+ * 关于"填充不透明度"：计划书那张表（卡片 8–14%、菜单 24–30%）是浅色底上的**亮色叠加**口径，
+ * 照抄到本项目的深色底上会得到一块几乎全透的板子 —— 而菜单与地图控件浮在**地图**上，
+ * 底下可能是一大片浅色块。所以这里把两档换算成"深色底的不透明度"，取值原则是
+ * **文字对比度优先**。代价如实写着：这不是计划书的原值，浮层比计划书设想的更实。
+ */
+
+:root {
+  /* 圆角网格。第二轮从 20/16/12 收到 16/12/10 —— 20px 的圆角配大色块是"概念图"的读法，
+     桌面工具的窗口里它显得胖。8pt 系统仍然管着间距（`global.css` 的 `--sp-*`）。 */
+  --glass-radius-card: 16px;
+  --glass-radius-control: 12px;
+  --glass-radius-tight: 10px;
+
+  /*
+   * **填充分三档，按"身后是什么 + 这块板有多主"分。**
+   *
+   * 第四轮把页面档从白纱换回蓝调（验收标准换边了，见 `global.css` 的 `:root`），
+   * 但**没有照第一代那个 `rgba(12,44,97,.86)` 抄回去** —— 那是一个 alpha .86 的**不透光蓝板**，
+   * 它的 B−R 也有 85，跟验收图的数字看起来差不多，而它恰恰是被点名要避免的"厚重的蓝色发光面板"。
+   * 图上那些面板是玻璃，因为身后的丝绒**透得过来**。所以这里的原则是：
+   * **色相照图，alpha 压低** —— `--glass-fill-page` 从 .40 再降到 .22（第八轮真机对照：
+   * .40 仍然读作实心蓝板，山脊透不过来；数值与理由记在 `global.css` 那一档的注释里）。
+   *
+   *  · `--glass-fill-float` / `--glass-fill-menu` —— 浮在**地图 canvas** 上的那一层。
+   *    V0.8 独立评审为这对数值量过对比度（次级文字从约 2.7:1 掉到约 2.1:1），
+   *    结论"菜单档必须 ≥ 卡片档"仍然成立，**这一档三轮都不许降**。
+   *    ⚠️ 那两个具体对比度数字是旧灰底下量的、已作废，只剩结论还站着。
+   *  · `--glass-fill-page` / `--glass-fill-quiet` —— 页面里的两块档：主面板亮、次级卡暗，
+   *    实测图上这两档的 B−R 分别是 117–129 与 63–75（合成值），差别全在 alpha 与色相上。
+   */
+  --glass-fill-float: 0.88;
+  --glass-fill-menu: 0.94;
+  /* 页面档 `--glass-fill-page` / 次级卡档 `--glass-fill-quiet` / 侧栏档 `--glass-fill-side`
+     三个值定义在 `global.css` 的 `:root`（它们与整块色板同源，拆到这里就成了两处真相）。 */
+
+  /* 处理链。saturate 从 1.3 抬到 1.5：身后是一床**有彩色**的丝绒而不是灰底，
+     不抬饱和度的话糊出来是一片发闷的蓝灰，那正是"厚玻璃板"的读法。抬过头会发荧光，
+     1.5 是真机截图上"透但不清汤寡水"的那一档。 */
+  --glass-blur-page: 30px;
+  --glass-blur-float: 18px;
+  --glass-saturate: 1.5;
+  --glass-brightness: 1.05;
+
+  /* 玻璃的"边缘"与"内应力"。高光只给 1 px、只给上沿，下沿给一道极暗的内阴影 —— 这两条
+     合起来是 CSS 能做到的最接近真实玻璃边缘的东西了。**真正的折射要 WebGL，
+     V0.8 裁定 3 已经否掉**，所以这里得到的不是折射，是它的暗示。别在注释里把它说成折射。
+     `inset 0 0 22px` 那条极淡内散射是第三轮加的（只有上下两条硬线读起来是"贴纸"不是"板"），
+     这一轮留着。边线从纯白换成淡蓝白：蓝底上的白边会读成"描了一圈霓虹"，而验收图的边是
+     被环境光染过的。 */
+  --glass-edge: rgba(178, 214, 255, 0.22);
+  --glass-edge-strong: rgba(178, 214, 255, 0.36);
+  --glass-inner: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 22px rgba(190, 222, 255, 0.03),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.34);
+  /* 上亮下暗那道 = "非均匀透明度"。这一轮亮头换成淡蓝白，暗头加深。 */
+  --glass-sheen: linear-gradient(178deg, rgba(186, 220, 255, 0.14) 0%, rgba(150, 195, 255, 0.03) 42%, rgba(0, 8, 30, 0.2) 100%);
+  /* 左上角那一小片镜面。它和 sheen 不是一件事 —— sheen 说"光从上面来"，
+     这一层说"光是从**左上**来的"，与夜山背景图"上暗下亮"的大明暗对得上，
+     玻璃才像是"糊住了同一束光"而不是"自己画了个渐变"。
+     ⚠️ 它落在 `background-image` 列表里，所以 computed `background-color` 仍然是那一条
+     纯 `rgba(34,86,186,.40)` —— §23 的 `panelBlue` / `panelAlpha` 读的都是它。
+     合成一条 `background:` 简写会让 color 段退回 `rgba(0,0,0,0)`，那两条判据会一起瞎。 */
+  --glass-specular: radial-gradient(120% 88% at 6% -18%, rgba(206, 230, 255, 0.2), transparent 58%);
+}
+
+/*
+ * 玻璃配方本体。两类表面身后不一样，所以配方也不一样：
+ *  · 浮在地图上的（`.dc-mapctl` / `.dc-menu`）—— 身后是会变的图形，糊它才有意义；
+ *  · 页面内的（`.dc-card` / `.dc-hud`）—— 身后是窗口自己那层淡晕，糊出来的是"透"这个感觉本身。
+ * 只给 `backdrop-filter:`，**不给 `filter:`** —— 给元素自己加 filter 会把它连同文字一起糊掉，
+ * 那是把可读性换成装饰。
+ */
+.dc-mapctl,
+.dc-menu {
+  backdrop-filter: blur(var(--glass-blur-float)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+}
+
+.dc-menu {
+  /* 浮层档：全表最实的一层，且底色退回中性暗灰（第一轮这里是 `rgba(18,50,106)` 一块蓝）。
+     不透明度**这一轮仍然不许降**，理由见上面 `--glass-fill-menu` 那段。 */
+  background: rgba(26, 28, 33, var(--glass-fill-menu));
+  border-radius: var(--glass-radius-control);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-inner), 0 14px 36px -10px rgba(0, 0, 0, 0.6);
+}
+
+.dc-mapctl {
+  /* 浮在地图上，取中性深灰。地图格子颜色多，压一层蓝会把格子的色相带跑，那正是 §4 豁免要防的事 */
+  background: rgba(18, 20, 24, var(--glass-fill-float));
+  border-radius: var(--glass-radius-control);
+}
+
+/*
+ * 页面玻璃的本体。
+ *
+ * **为什么 `background-color` 与 `background-image` 分开写而不是合成一条 `background:`**：
+ * `--shot` 的 §23 呈现层判据读的是 computed `background-color` 的 alpha（它要抓的是
+ * "token 没解析出来 → 卡变全透 → 盒子在但看不见"那一族）。整条写成渐变的话，
+ * computed `background-color` 会退回 `rgba(0, 0, 0, 0)`，判据会对一块**画得好好的**玻璃报红。
+ * 分两行写，两边各得其所。
+ */
+.dc-card {
+  background-color: var(--glass-fill-page);
+  background-image: var(--glass-specular), var(--glass-sheen);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-card);
+  padding: var(--sp-4);
+  /* 外投影：`0 1px 2px` 那条管"确实压在底上这条缝"，第二条带**负扩散半径**的管"它把底下的
+     环境光挡住了一块"。负 spread 是关键 —— 不带它投影会均匀围一圈，那读起来是"卡片在发光"。 */
+  box-shadow: var(--glass-inner), 0 1px 2px rgba(0, 0, 0, 0.45), 0 22px 54px -18px rgba(2, 10, 32, 0.7);
+  backdrop-filter: blur(var(--glass-blur-page)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  min-width: 0;
+}
+
+/*
+ * 次级卡：同一副材质，**只把填充换暗一档**（`--glass-fill-quiet`）。
+ * 验收图里主面板与其余四块卡就是这个关系 —— 合成值 B−R 分别 117–129 与 63–75，
+ * 差别不在圆角、不在描边、不在投影，只在"这块板有多主"。
+ */
+.dc-card--quiet {
+  background-color: var(--glass-fill-quiet);
+}
+
+/* 页面内的卡片：只统一圆角（它们身后没有会变的东西，不透明度维持 global.css 的原值） */
+.dc-side-panel,
+.dc-clean-total,
+.dc-estimate,
+.dc-clean-task {
+  border-radius: var(--glass-radius-card);
+}
+
+.dc-btn {
+  border-radius: var(--glass-radius-tight);
+}
+
+/*
+ * ── Treemap 区豁免 ────────────────────────────────────────────────
+ * canvas 上方不许叠半透明层，也不许给它自己或它的祖先加 filter/blur。
+ * 这一条不是审美偏好：地图唯一的可读性契约是"面积 = 容量"，而颜色/对比度是它唯一的载体。
+ * 半透明层压上去，小格子和它的边界就先于"谁大谁小"消失 —— 那等于把功能换成装饰。
+ *
+ * **不透明底色只能落在容器 `.dc-treemap` 上，绝不能落在 `.dc-canvas` 上。**
+ * 这一格 2026-10-08 用像素抓出来一条已提交的缺陷：`.dc-treemap` 里叠着**两个** `.dc-canvas`
+ * （`TreemapCanvas.tsx:246` 底色层与 `:249` 交互层，两者在 `global.css:351` 都是
+ * `position:absolute; inset:0; width/height:100%`，后者盖在前者上面）。豁免最初写成
+ * `.dc-canvas { background: var(--bg) }`，于是那张不透明的板子被铺到了**交互层**上，
+ * 把底下画好的格子整个盖掉 —— 截图 169 个采样点全是 `rgb(32,32,36)`，一像素内容都没有，
+ * 而 40 步判据全是 DOM 与命中测试（`34 文件格 => x:459` 照样取到坐标），所以整套零红。
+ * 同一份文件里原本还列着 `.dc-map-wrap`，全仓查无此类 —— 想保护的容器真名是 `.dc-treemap`。
+ * 名字写错的那一半没生效，名字写对的那一半生效在了错的东西上。
+ */
+.dc-treemap {
+  background: var(--bg);
+}
+
+.dc-canvas {
+  filter: none;
+  backdrop-filter: none;
+}
+
+.dc-treemap::before,
+.dc-treemap::after,
+.dc-canvas::before,
+.dc-canvas::after {
+  content: none;
+}

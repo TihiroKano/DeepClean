@@ -1,0 +1,383 @@
+{
+  "_comment": [
+    "M5-P2 P2-T2 的**跨语言共用夹具**（计划 §2.8）。两侧跑同一份文件：",
+    "  · Rust 侧 tests/collect.rs + tests/parity_ts.rs（deepclean-appfacts），",
+    "  · TS 侧 tests/unit/appfacts.test.ts（core/facts/appfacts.ts，判据基准）。",
+    "期望值 `expect` 是**两侧各自都要满足**的那一份；Rust 侧另外把算出来的表投影到",
+    "`reference-shapes.rust-table.json`，TS 侧直接比那一份 —— 于是「TS 与 Rust 同意」不是",
+    "两句各自的话，是同一张表被比了一遍。",
+    "",
+    "字段口径：",
+    "  · 路径一律**虚拟**、一律用正斜杠（`C:/Users/x/…`）。Rust 侧把整棵树搬到 %TEMP% 下",
+    "    （`C:` → `C_`）再让 fs_probe 真去 read_dir；TS 侧不碰盘，`contents` 就是它的全部机器。",
+    "    两侧同判据、不同取数方式，这一格差异**不在** parity 的等式里（那是 Rust 独占的读盘面）。",
+    "  · `contents` 是**目录索引**：key = 目录，value = 它的一级条目。判据用的目录清单由两侧",
+    "    各自按下述同一套规则算：显式条目 ∪ 所有**严格后代 key** 的第一段（Rust 那侧是",
+    "    create_dir_all 之后 read_dir 自然看到的）。夹具的写法保证这里不会分叉：",
+    "    每个 key 的父路径要么也是某个 key，要么是某个 root。",
+    "  · `status`：listed = 看过了（`entries` 就是看到的），missing = 那个位置不存在（也是看过了，",
+    "    是「证出来的空」），unavailable = **没看成**（配 `why`，这一路对所有候选一律弃权）。",
+    "    ⚠️ 后一档与前一档在判据里是两句话 —— 折叠它就是把「没看」读成「没有」，多删的那一侧。",
+    "  · `expect` 的值只有 present / absent / unknown 三档。**`why` 串不进等式判据**：两侧各写一份",
+    "    中文措辞然后把它钉成等式，得到的只会是一条天天红的闸（计划 §4.3 同一条口径）。",
+    "  · 三个 §0.2 反例的真形状来自 `crates/rules/tests/data/m5-p-audit-crossref.csv`",
+    "    （Claude：Un=0 Ax=1 SM=1 PF=0 Run=0；kazumi 的包 + 活进程；urban-friendship-story：全 0）。",
+    "    唯一**合成**的形状是 case `d-drive-name-mismatch` 与 `install-location-unexpandable` ——",
+    "    它们是为了让 §4.4 那两半各自可测而搭的，不是对本机的描述，注释里各自点名了。"
+  ],
+  "cases": [
+    {
+      "name": "claude-msix",
+      "_why": "本机真形状：卸载表无、无 exe、无进程，靠 Packages 的 MSIX 目录 + 开始菜单快捷方式活着。规格 §4.2 那次误杀。",
+      "candidates": ["Claude"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "install", "path": "C:/Program Files (x86)", "status": "listed", "extra": false },
+        { "channel": "install", "path": "C:/Users/x/AppData/Local/Programs", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "status": "listed" },
+        { "channel": "startMenu", "path": "C:/Users/x/AppData/Roaming/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [{ "name": "Claude_pzs8sxrjxfjjc", "kind": "dir" }],
+        "C:/Program Files": [{ "name": "Common", "kind": "dir" }],
+        "C:/Program Files (x86)": [],
+        "C:/Users/x/AppData/Local/Programs": [],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs": [
+          { "name": "Claude.lnk", "kind": "file" },
+          { "name": "Accessories", "kind": "dir" }
+        ],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs/Accessories": [
+          { "name": "System Tools.lnk", "kind": "file" }
+        ],
+        "C:/Users/x/AppData/Roaming/Microsoft/Windows/Start Menu/Programs": [],
+        "C:/Users/x/AppData/Roaming/Claude": [{ "name": "electron", "kind": "dir" }]
+      },
+      "registry": {
+        "uninstall": [
+          { "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）", "status": "listed", "entries": [] },
+          { "path": "HKLM/SOFTWARE/WOW6432Node/…/Uninstall（32 位视图）", "status": "missing", "entries": [] },
+          { "path": "HKCU/SOFTWARE/…/Uninstall", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Microsoft", "NVIDIA", "Intel"] },
+          { "path": "HKLM/SOFTWARE/WOW6432Node（32 位视图顶层键）", "status": "listed", "keys": ["Microsoft"] },
+          { "path": "HKCU/SOFTWARE（顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": {
+        "status": "listed",
+        "records": [
+          { "exe": "svchost.exe", "image": "C:/Windows/System32/svchost.exe" }
+        ]
+      },
+      "env": {},
+      "expect": { "claude": "present" }
+    },
+    {
+      "name": "claude-registered-on-d",
+      "_why": "计划 §4.4 点名的那类：卸载表登记了，InstallLocation 在 D 盘，默认三根看不见。",
+      "candidates": ["Claude"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "install", "path": "C:/Program Files (x86)", "status": "listed", "extra": false },
+        { "channel": "install", "path": "C:/Users/x/AppData/Local/Programs", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [],
+        "C:/Program Files": [{ "name": "Common", "kind": "dir" }],
+        "C:/Program Files (x86)": [],
+        "C:/Users/x/AppData/Local/Programs": [],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs": [{ "name": "Claude.lnk", "kind": "file" }],
+        "D:/Software/Claude": [
+          { "name": "claude.exe", "kind": "file" },
+          { "name": "resources", "kind": "dir" }
+        ]
+      },
+      "registry": {
+        "uninstall": [
+          {
+            "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）",
+            "status": "listed",
+            "entries": [
+              { "key": "claude_user_iscc", "displayName": "Claude", "installLocation": "D:/Software/Claude" }
+            ]
+          },
+          { "path": "HKLM/SOFTWARE/WOW6432Node/…/Uninstall（32 位视图）", "status": "listed", "entries": [] },
+          { "path": "HKCU/SOFTWARE/…/Uninstall", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Microsoft", "NVIDIA"] },
+          { "path": "HKCU/SOFTWARE（顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": { "status": "listed", "records": [{ "exe": "svchost.exe", "image": "C:/Windows/System32/svchost.exe" }] },
+      "env": {},
+      "expect": { "claude": "present" }
+    },
+    {
+      "name": "d-drive-name-mismatch",
+      "_why": "**合成形状**（不是对本机的描述）：卸载条目只有 GUID 键名（DisplayName 缺席），本体证据只剩 InstallLocation 的最后一段。这一条是 §4.4 的刀锋 —— 把反馈环摘掉，它就必须变成 absent，正是「多判 Absent = 多删」那一侧。",
+      "candidates": ["urban-friendship-story"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "install", "path": "C:/Users/x/AppData/Local/Programs", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [],
+        "C:/Program Files": [{ "name": "Common", "kind": "dir" }],
+        "C:/Users/x/AppData/Local/Programs": [],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs": [
+          { "name": "urban-friendship-story.lnk", "kind": "file" }
+        ],
+        "D:/Games/urban-friendship-story": [
+          { "name": "game.exe", "kind": "file" },
+          { "name": "saves", "kind": "dir" }
+        ],
+        "D:/Games/urban-friendship-story/saves": [{ "name": "memory_history.db", "kind": "file" }]
+      },
+      "registry": {
+        "uninstall": [
+          {
+            "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）",
+            "status": "listed",
+            "entries": [
+              {
+                "key": "D8A1F2B3-11C2-4A5E-9F01",
+                "displayName": null,
+                "installLocation": "D:/Games/urban-friendship-story"
+              }
+            ]
+          },
+          { "path": "HKLM/SOFTWARE/WOW6432Node/…/Uninstall（32 位视图）", "status": "missing", "entries": [] },
+          { "path": "HKCU/SOFTWARE/…/Uninstall", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Microsoft", "NVIDIA", "Intel"] },
+          { "path": "HKCU/SOFTWARE（顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": { "status": "listed", "records": [{ "exe": "explorer.exe", "image": "C:/Windows/explorer.exe" }] },
+      "env": {},
+      "expect": { "urban-friendship-story": "present" }
+    },
+    {
+      "name": "kazumi-running",
+      "_why": "本机真形状：MSIX 包族名带点 + 活进程；候选是它写在 LOCAL 下的运行缓存（golden 那 367.8 MiB）。外层目录名与包族名在名字层面对不上 —— 落 unknown，不许落 absent。",
+      "candidates": ["kazumi", "flutter_webview_windows"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "install", "path": "C:/Users/x/AppData/Local/Programs", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [
+          { "name": "com.flutter.kazumi_wbnnev551gwxy", "kind": "dir" }
+        ],
+        "C:/Program Files": [{ "name": "Common", "kind": "dir" }],
+        "C:/Users/x/AppData/Local/Programs": [],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs": [],
+        "C:/Users/x/AppData/Local/flutter_webview_windows/kazumi": [{ "name": "Cache", "kind": "dir" }]
+      },
+      "registry": {
+        "uninstall": [
+          { "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）", "status": "listed", "entries": [] },
+          { "path": "HKCU/SOFTWARE/…/Uninstall", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Microsoft", "NVIDIA"] },
+          { "path": "HKCU/SOFTWARE（顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": {
+        "status": "listed",
+        "records": [
+          {
+            "exe": "kazumi.exe",
+            "image": "C:/Users/x/AppData/Local/Packages/com.flutter.kazumi_wbnnev551gwxy/Local/kazumi.exe"
+          },
+          { "exe": "SecureGuard.exe", "image": null }
+        ]
+      },
+      "env": {},
+      "expect": { "kazumi": "present", "flutter_webview_windows": "unknown" }
+    },
+    {
+      "name": "urban-no-evidence",
+      "_why": "本机真形状（crossref 那一行全 0）：里面是游戏存档，六条通道一条痕迹都没有。判据的第 ③ 步接住 —— 「这台机器装过它」都证不出来，谈何残留。",
+      "candidates": ["urban-friendship-story"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "install", "path": "C:/Users/x/AppData/Local/Programs", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "status": "listed" },
+        { "channel": "startMenu", "path": "C:/Users/x/AppData/Roaming/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [],
+        "C:/Program Files": [{ "name": "Common", "kind": "dir" }],
+        "C:/Users/x/AppData/Local/Programs": [],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs": [],
+        "C:/Users/x/AppData/Roaming/Microsoft/Windows/Start Menu/Programs": [],
+        "C:/Users/x/AppData/Roaming/urban-friendship-story": [
+          { "name": "game_settings.json", "kind": "file" },
+          { "name": "memory_history.db", "kind": "file" }
+        ]
+      },
+      "registry": {
+        "uninstall": [
+          { "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）", "status": "listed", "entries": [] },
+          { "path": "HKLM/SOFTWARE/WOW6432Node/…/Uninstall（32 位视图）", "status": "missing", "entries": [] },
+          { "path": "HKCU/SOFTWARE/…/Uninstall", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Microsoft", "NVIDIA", "Intel"] },
+          { "path": "HKCU/SOFTWARE（顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": { "status": "listed", "records": [{ "exe": "explorer.exe", "image": "C:/Windows/explorer.exe" }] },
+      "env": {},
+      "expect": { "urban-friendship-story": "unknown" }
+    },
+    {
+      "name": "acme-residual",
+      "_why": "真残留的形状：有厂商键 + 有快捷方式，四条本体通道逐条证完且都没命中 —— 这一格**必须**是 absent，否则「Absent 到不了」这件事会伪装成「判据安全」。候选 ab 只有 2 个字符，测的是匹配长度闸。",
+      "candidates": ["Acme-tool", "ab"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "install", "path": "C:/Users/x/AppData/Local/Programs", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/Users/x/AppData/Roaming/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [],
+        "C:/Program Files": [{ "name": "Other", "kind": "dir" }],
+        "C:/Users/x/AppData/Local/Programs": [],
+        "C:/Users/x/AppData/Roaming/Microsoft/Windows/Start Menu/Programs": [
+          { "name": "Acme-tool.lnk", "kind": "file" }
+        ],
+        "C:/Users/x/AppData/Roaming/Acme-tool": [{ "name": "logs", "kind": "dir" }]
+      },
+      "registry": {
+        "uninstall": [
+          {
+            "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）",
+            "status": "listed",
+            "entries": [{ "key": "{12345678-9ABC}", "displayName": "Other Product", "installLocation": "" }]
+          },
+          { "path": "HKLM/SOFTWARE/WOW6432Node/…/Uninstall（32 位视图）", "status": "listed", "entries": [] },
+          { "path": "HKCU/SOFTWARE/…/Uninstall", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Acme", "Microsoft"] },
+          { "path": "HKCU/SOFTWARE（顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": {
+        "status": "listed",
+        "records": [{ "exe": "Other.exe", "image": "C:/Program Files/Other/Other.exe" }]
+      },
+      "env": {},
+      "expect": { "acme-tool": "absent", "ab": "unknown" }
+    },
+    {
+      "name": "registry-unavailable",
+      "_why": "核心 fail-safe：C1 那一根打不开（权限拒）。有痕迹、其余本体清白，也**不许**因为「剩下几路都说没有」就落 absent。",
+      "candidates": ["Ghost"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [],
+        "C:/Program Files": [{ "name": "Common", "kind": "dir" }],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs": [{ "name": "Ghost.lnk", "kind": "file" }]
+      },
+      "registry": {
+        "uninstall": [
+          {
+            "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）",
+            "status": "unavailable",
+            "why": "RegOpenKeyExW 失败（错误码 5）—— 这一路给不出证据",
+            "entries": []
+          },
+          { "path": "HKLM/SOFTWARE/WOW6432Node/…/Uninstall（32 位视图）", "status": "missing", "entries": [] },
+          { "path": "HKCU/SOFTWARE/…/Uninstall", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": { "status": "listed", "records": [{ "exe": "explorer.exe", "image": "C:/Windows/explorer.exe" }] },
+      "env": {},
+      "expect": { "ghost": "unknown" }
+    },
+    {
+      "name": "install-location-unexpandable",
+      "_why": "**合成形状**：卸载条目只有 GUID 键名，InstallLocation 里的 %GAMEDIR% 注入表里没有。展不开的**那串路径的最后一段**才是盲区 token（GUID 永远匹配不上候选，条目名当 token 会是死代码 —— 理由见 registry.rs 的文档）。没有这一档它就是 absent，有这一档必须 unknown。",
+      "candidates": ["ghost-app"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [],
+        "C:/Program Files": [{ "name": "Common", "kind": "dir" }],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs": [{ "name": "ghost-app.lnk", "kind": "file" }]
+      },
+      "registry": {
+        "uninstall": [
+          {
+            "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）",
+            "status": "listed",
+            "entries": [{ "key": "D8A1F2B3-11C2-4A5E-9F01", "displayName": null, "installLocation": "%GAMEDIR%/ghost-app" }]
+          },
+          { "path": "HKCU/SOFTWARE/…/Uninstall", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": { "status": "listed", "records": [{ "exe": "updater.exe", "image": "C:/Windows/Temp/updater.exe" }] },
+      "env": {},
+      "expect": { "ghost-app": "unknown" }
+    },
+    {
+      "name": "processes-broke",
+      "_why": "C5 中途断了（快照没建起来 / Process32NextW 报错）：后面的进程根本没进表，「没在进程里看到它」推不出「它没在跑」。",
+      "candidates": ["Solo"],
+      "roots": [
+        { "channel": "packages", "path": "C:/Users/x/AppData/Local/Packages", "status": "listed" },
+        { "channel": "install", "path": "C:/Program Files", "status": "listed", "extra": false },
+        { "channel": "startMenu", "path": "C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "status": "listed" }
+      ],
+      "contents": {
+        "C:/Users/x/AppData/Local/Packages": [],
+        "C:/Program Files": [{ "name": "Common", "kind": "dir" }],
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs": [{ "name": "Solo.lnk", "kind": "file" }]
+      },
+      "registry": {
+        "uninstall": [
+          { "path": "HKLM/SOFTWARE/…/Uninstall（64 位视图）", "status": "listed", "entries": [] }
+        ],
+        "vendors": [
+          { "path": "HKLM/SOFTWARE（64 位视图顶层键）", "status": "listed", "keys": ["Microsoft"] }
+        ]
+      },
+      "processes": {
+        "status": "unavailable",
+        "why": "Process32NextW 在第 12 个进程处中断（错误码 5）—— 后面的进程没进表",
+        "records": []
+      },
+      "env": {},
+      "expect": { "solo": "unknown" }
+    }
+  ]
+}

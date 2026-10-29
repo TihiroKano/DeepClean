@@ -1,0 +1,31 @@
+[package]
+name = "deepclean-scanner"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+# 用 windows-sys 而不是 windows：前者的签名就是 Win32 原文（返回 BOOL、裸指针），
+# 不需要猜 `Param<>` / `Result<>` 包装层的形状；`FILE_ID_BOTH_DIR_INFO` 我们自己按
+# 微软文档定义（见 enumerate.rs），这样也不受 crate 小版本结构体增删的影响。
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Storage_FileSystem",
+    # CreateFileW 的 lpSecurityAttributes 形参是 Win32::Security::SECURITY_ATTRIBUTES，
+    # windows-sys 因此把它门控在这个 feature 后面（少了它报 "no CreateFileW"）。
+    "Win32_Security",
+    # rawvol.rs 的 ReadFile 签名里有 OVERLAPPED 指针，被门控在 Win32_System_IO
+    # 后面（少了它报 "unresolved import ReadFile"）—— 跟我们自己用不用 IOCP 无关。
+    "Win32_System_IO",
+    # 峰值工作集。真盘验收必须同时记 RSS（本项目 §35.3 的规矩），
+    # 不是"差不多就行"的数字 —— 它是判断要不要上落盘方案的唯一依据。
+    "Win32_System_ProcessStatus",
+    "Win32_System_Threading",
+    # M1-T6 提权重扫：`ShellExecuteExW` + `runas` 动词（见 src/elevate.rs）。
+    "Win32_UI_Shell",
+    # windows-sys 0.61 把 x86_64 那份 `SHELLEXECUTEINFOW` / `ShellExecuteExW` 门在这个 feature
+    # 后面（32 位那份门在 `target_arch = "x86"`）—— 少了它报 "no SHELLEXECUTEINFOW in Shell"，
+    # 而它跟注册表一点关系都没有。
+    "Win32_System_Registry",
+] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

@@ -1,0 +1,68 @@
+[package]
+name = "deepclean-app"
+version = "1.0.0"
+edition = "2021"
+description = "DeepClean —— Windows 磁盘空间分析与安全清理工具"
+
+[workspace]
+members = ["crates/scanner", "crates/rules", "crates/cleaner", "crates/license", "crates/devenv", "crates/appfacts"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+deepclean-scanner = { path = "crates/scanner" }
+deepclean-rules = { path = "crates/rules" }
+deepclean-cleaner = { path = "crates/cleaner" }
+deepclean-license = { path = "crates/license" }
+deepclean-devenv = { path = "crates/devenv" }
+deepclean-appfacts = { path = "crates/appfacts" }
+
+# 「打开」那一格走 ShellExecuteW —— 与 Electron 的 shell.openPath 底下是同一个 API。
+# 不用 `cmd /c start`：那要多起一个进程，还要处理"第一个带引号的参数是窗口标题"那套语义。
+#
+# `Win32_System_Threading` 是 `scanner_host.rs` 要的：`stop` 那一条兜底按 pid 硬杀
+# （`OpenProcess` / `TerminateProcess`）。正常路径走 `Child::kill`，这条只在句柄丢了时用。
+# `Win32_Graphics_Gdi` 也是它要的：`ClientToScreen` 在 windows-sys 里挂在 Gdi 下
+# （按头文件分模块），宿主矩形的换算要用它。
+#
+# 2026-10-27 加两项，都是背景壁纸那条链要的：
+#   · `Win32_UI_Controls_Dialogs` —— `GetOpenFileNameW` / `OPENFILENAMEW` 住在这里。
+#     ⚠️ 踩过的坑：`Win32::UI::Shell` 下**也有**同名的两条 `link!` 声明，于是第一版
+#     照着名字导 Shell 那一支，编译报 E0432 解不出来（那两条挂在别的 feature 组合下）。
+#     正确的路径是 `Win32::UI::Controls::Dialogs`。
+#   · `Win32_System_Com` —— `CoInitializeEx` / `CoUninitialize`。
+#     `GetOpenFileNameW` 内部走 shell 那一套，在没初始化 COM 的线程上它会回 0 且原因说不清；
+#     Tauri 的 `async` 命令跑在线程池上，那上面的线程**不保证**初始化过 COM。
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_System_Com",
+    "Win32_System_Threading",
+    "Win32_UI_Controls_Dialogs",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+# ---------------------------------------------------------------------------
+# 发布产物体积
+#
+# 实测（2026-10-20，x86_64-pc-windows-gnu）：
+#   默认 profile        24.20 MB  (25,374,959 B)
+#   strip = "symbols"   14.92 MB  (15,640,064 B)   -> 省 9.28 MB / 38.4%
+#
+# 那 9.28 MB 全是 DWARF 调试信息（.debug_info / .debug_line / .debug_str 那一族，
+# 落在 PE 节表之外、贴在文件尾部），发布包里没有读者。
+# 验证方式不是只看进程活着：strip 后的 exe 放在**自己的目录**（WebView2Loader.dll 在
+# 同一处）启动，CDP 截到首页完整渲染、6 个 WebView2 子进程、74.4 GB / 80.0 GB 读数正确。
+# 踩过的坑：把 exe 复制到别处再跑会报「找不到 WebView2Loader.dll」，
+# 那是**复制**造成的、与 strip 无关 —— 别把它当成 strip 弄坏了二进制。
+#
+# strip = "symbols" 是 cargo 自带开关（走 rustc -C strip），比在构建脚本里调外部
+# strip.exe 可靠：不依赖 MinGW 路径，也不会漏掉未来新增的产物。
+# ---------------------------------------------------------------------------
+[profile.release]
+strip = "symbols"

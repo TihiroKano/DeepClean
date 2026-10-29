@@ -1,0 +1,4624 @@
+{
+ "cases": [
+  {
+   "name": "all_nine_installed_and_priced",
+   "installStatus": {
+    "android-sdk": true,
+    "gradle": true,
+    "huggingface": true,
+    "maven": true,
+    "npm": true,
+    "pip": true,
+    "pnpm": true,
+    "vscode": true,
+    "yarn": true
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "注入的探针没有 Docker 只读查询能力面 → 无从判断，按「量不到」处理（不是未安装）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": {
+    "count": 137,
+    "bytes": 140288,
+    "rootPath": "C:\\Users\\楠楠想睡觉了",
+    "filesSeen": 300123,
+    "truncated": false,
+    "scanStatus": "completed",
+    "extensions": [
+     ".safetensors",
+     ".gguf",
+     ".ckpt",
+     ".pt",
+     ".pth",
+     ".onnx",
+     ".h5",
+     ".tflite"
+    ]
+   },
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "installed",
+        "displayBytes": 33000,
+        "displayFiles": 7,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "installed",
+        "displayBytes": 121000,
+        "displayFiles": 40,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "installed",
+        "displayBytes": 40000,
+        "displayFiles": 12,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "installed",
+        "displayBytes": 12000,
+        "displayFiles": 9,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "installed",
+        "displayBytes": 7168,
+        "displayFiles": 3,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "installed",
+        "displayBytes": 22000,
+        "displayFiles": 5,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "installed",
+        "displayBytes": 15000,
+        "displayFiles": 6,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "installed",
+        "displayBytes": 70000,
+        "displayFiles": 1,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "installed",
+        "displayBytes": 80000,
+        "displayFiles": 2,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": {
+       "count": 137,
+       "bytes": 140288,
+       "rootPath": "C:\\Users\\楠楠想睡觉了",
+       "filesSeen": 300123,
+       "truncated": false,
+       "scanStatus": "completed",
+       "extensions": [
+        ".safetensors",
+        ".gguf",
+        ".ckpt",
+        ".pt",
+        ".pth",
+        ".onnx",
+        ".h5",
+        ".tflite"
+       ]
+      }
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": "C:\\Users\\楠楠想睡觉了"
+   }
+  },
+  {
+   "name": "none_installed_residual_with_chinese_paths",
+   "installStatus": {
+    "android-sdk": false,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "注入的探针没有 Docker 只读查询能力面 → 无从判断，按「量不到」处理（不是未安装）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": {
+         "bytes": 0,
+         "paths": [
+          "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\npm-cache"
+         ]
+        },
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": {
+         "bytes": null,
+         "paths": [
+          "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\pnpm-store\\v3"
+         ]
+        },
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": true,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": true,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": {
+         "bytes": 9216,
+         "paths": [
+          "C:\\Users\\楠楠想睡觉了\\.m2\\repository",
+          "D:\\开发环境\\maven\\仓库"
+         ]
+        },
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": true,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": true,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": true,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": true,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": "D:\\开发环境"
+   }
+  },
+  {
+   "name": "unknown_is_not_absent",
+   "installStatus": {
+    "android-sdk": false,
+    "gradle": false,
+    "huggingface": false,
+    "npm": true,
+    "pnpm": true
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "注入的探针没有 Docker 只读查询能力面 → 无从判断，按「量不到」处理（不是未安装）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "installed",
+        "displayBytes": 33000,
+        "displayFiles": 7,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "installed",
+        "displayBytes": 121000,
+        "displayFiles": 40,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "empty_dir_vs_missing_territory_vs_number",
+   "installStatus": {
+    "android-sdk": false,
+    "gradle": true,
+    "huggingface": false,
+    "maven": true,
+    "npm": true,
+    "pip": false,
+    "pnpm": true,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "注入的探针没有 Docker 只读查询能力面 → 无从判断，按「量不到」处理（不是未安装）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "installed",
+        "displayBytes": 0,
+        "displayFiles": 0,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "installed",
+        "displayBytes": 12,
+        "displayFiles": 1,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "installed",
+        "displayBytes": 999,
+        "displayFiles": 4,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": true,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "installed",
+        "displayBytes": 300,
+        "displayFiles": 2,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": "C:\\Users\\Nan"
+   }
+  },
+  {
+   "name": "docker_measured_modern_object_shape",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": true,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "measured",
+    "reclaimableBytes": 760,
+    "categories": [
+     {
+      "name": "images",
+      "reclaimableBytes": 460
+     },
+     {
+      "name": "containers",
+      "reclaimableBytes": 60
+     },
+     {
+      "name": "volumes",
+      "reclaimableBytes": 240
+     }
+    ],
+    "detail": "容量来自只读查询 `docker system df --format json`（类目：images、containers、volumes）。口径提醒：这是 df 自己报的逻辑字节，不是本次清理能释放的磁盘字节；build cache 未计入（形状跨版本差别最大，拿不准就不并进总数）。清理动作不归 DeepClean，交给 Docker 本身。"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "installed",
+        "displayBytes": 33000,
+        "displayFiles": 7,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": 760,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": "C:\\Users\\楠楠想睡觉了"
+   }
+  },
+  {
+   "name": "docker_cli_missing_and_where_also_fails_is_absent",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": false,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": true,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "absent",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "这台机器的 PATH 上没有 docker（连进程都起不来）→ 未安装。注意：这是探测结论，不等于盘上没有 Docker 数据；容量本就不由 FS 通配推断"
+   },
+   "dockerInstalled": false,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code",
+    "docker",
+    "docker",
+    "docker"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "docker_cli_missing_but_where_finds_it_is_not_absent",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "起进程报 ENOENT，但 `where docker` 找得到（`.cmd` 垫片 / PATHEXT 这一类）→ 量不到，不是未安装"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code",
+    "docker",
+    "docker",
+    "docker"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "docker_daemon_down_cli_failed_keeps_the_cli_text",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "docker 在 PATH 上，但那次只读查询非 0 退出（daemon 没起是这一格最常见的一种）→ 量不到，不是未安装、也不是 0 字节（CLI 返回：Cannot connect to the Docker daemon at npipe:////./pipe/docker_engine.）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "docker_timed_out_is_neither_absent_nor_zero",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "`docker system df` 到了有限超时被杀 → 量不到，不是未安装、也不是 0 字节"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "docker_legacy_human_readable_rows_with_trailing_note",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "measured",
+    "reclaimableBytes": 1587000,
+    "categories": [
+     {
+      "name": "images",
+      "reclaimableBytes": 1586000
+     },
+     {
+      "name": "containers",
+      "reclaimableBytes": 1000
+     },
+     {
+      "name": "build output",
+      "reclaimableBytes": 0
+     }
+    ],
+    "detail": "容量来自只读查询 `docker system df --format json`（类目：images、containers、build output）。口径提醒：这是 df 自己报的逻辑字节，不是本次清理能释放的磁盘字节；build cache 未计入（形状跨版本差别最大，拿不准就不并进总数）。清理动作不归 DeepClean，交给 Docker 本身。"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": 1587000,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "docker_empty_stdout_is_not_zero_bytes",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "`docker system df` 退出码 0 但一个字都没给 → 量不到；这是没量到，不是 0 字节"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "docker_stdout_that_is_not_json",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "`docker system df --format json` 的输出不是合法 JSON（版本不认识这个参数、或输出被截断都会走到这里）→ 量不到，不是 0 字节"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "docker_one_unreadable_category_voids_the_whole_reading",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "df 报了东西但这一层读不出可回收字节（类目「volumes」的 Reclaimable 读不成字节）→ 量不到"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "docker_category_absent_from_the_output_is_not_filled_with_zero",
+   "installStatus": {
+    "android-sdk": false,
+    "docker": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "measured",
+    "reclaimableBytes": 15,
+    "categories": [
+     {
+      "name": "images",
+      "reclaimableBytes": 10
+     },
+     {
+      "name": "containers",
+      "reclaimableBytes": 5
+     }
+    ],
+    "detail": "容量来自只读查询 `docker system df --format json`（类目：images、containers）。口径提醒：这是 df 自己报的逻辑字节，不是本次清理能释放的磁盘字节；build cache 未计入（形状跨版本差别最大，拿不准就不并进总数）。清理动作不归 DeepClean，交给 Docker 本身。"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "installed",
+        "displayBytes": 15,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  },
+  {
+   "name": "model_tally_is_a_lower_bound_while_running_and_truncated",
+   "installStatus": {
+    "android-sdk": false,
+    "gradle": false,
+    "huggingface": true,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "注入的探针没有 Docker 只读查询能力面 → 无从判断，按「量不到」处理（不是未安装）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": {
+    "count": 42,
+    "bytes": 9600000000,
+    "rootPath": "D:\\模型权重",
+    "filesSeen": 120000,
+    "truncated": true,
+    "scanStatus": "running",
+    "extensions": [
+     ".safetensors",
+     ".gguf",
+     ".ckpt",
+     ".pt",
+     ".pth",
+     ".onnx",
+     ".h5",
+     ".tflite"
+    ]
+   },
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "installed",
+        "displayBytes": 80000,
+        "displayFiles": 2,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": {
+       "count": 42,
+       "bytes": 9600000000,
+       "rootPath": "D:\\模型权重",
+       "filesSeen": 120000,
+       "truncated": true,
+       "scanStatus": "running",
+       "extensions": [
+        ".safetensors",
+        ".gguf",
+        ".ckpt",
+        ".pt",
+        ".pth",
+        ".onnx",
+        ".h5",
+        ".tflite"
+       ]
+      }
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": "D:\\模型权重"
+   }
+  },
+  {
+   "name": "model_tally_bad_numbers_are_guarded_before_the_ui_sees_them",
+   "installStatus": {
+    "android-sdk": false,
+    "gradle": false,
+    "huggingface": true,
+    "maven": false,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "注入的探针没有 Docker 只读查询能力面 → 无从判断，按「量不到」处理（不是未安装）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": {
+    "count": 0,
+    "bytes": 0,
+    "rootPath": "C:\\Users\\楠楠想睡觉了\\Desktop",
+    "filesSeen": 8,
+    "truncated": false,
+    "scanStatus": "failed",
+    "extensions": [
+     ".safetensors",
+     ".gguf",
+     ".ckpt",
+     ".pt",
+     ".pth",
+     ".onnx",
+     ".h5",
+     ".tflite"
+    ]
+   },
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": {
+       "count": 0,
+       "bytes": 0,
+       "rootPath": "C:\\Users\\楠楠想睡觉了\\Desktop",
+       "filesSeen": 8,
+       "truncated": false,
+       "scanStatus": "failed",
+       "extensions": [
+        ".safetensors",
+        ".gguf",
+        ".ckpt",
+        ".pt",
+        ".pth",
+        ".onnx",
+        ".h5",
+        ".tflite"
+       ]
+      }
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": "C:\\Users\\楠楠想睡觉了\\Desktop"
+   }
+  },
+  {
+   "name": "mixed_case_paths_and_resolved_template_forms",
+   "installStatus": {
+    "android-sdk": false,
+    "gradle": true,
+    "huggingface": false,
+    "maven": false,
+    "npm": false,
+    "pip": true,
+    "pnpm": false,
+    "vscode": true,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "注入的探针没有 Docker 只读查询能力面 → 无从判断，按「量不到」处理（不是未安装）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "installed",
+        "displayBytes": 30,
+        "displayFiles": 2,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "installed",
+        "displayBytes": 4000,
+        "displayFiles": 1,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": "C:\\Users\\Nan"
+   }
+  },
+  {
+   "name": "no_ledger_no_scan_root_gives_the_conservative_shape",
+   "installStatus": {
+    "android-sdk": true,
+    "gradle": false,
+    "huggingface": false,
+    "maven": true,
+    "npm": false,
+    "pip": false,
+    "pnpm": false,
+    "vscode": false,
+    "yarn": false
+   },
+   "dockerUsage": {
+    "verdict": "unmeasurable",
+    "reclaimableBytes": null,
+    "categories": [],
+    "detail": "注入的探针没有 Docker 只读查询能力面 → 无从判断，按「量不到」处理（不是未安装）"
+   },
+   "dockerInstalled": true,
+   "askedCommands": [
+    "npm",
+    "pnpm",
+    "yarn",
+    "pip",
+    "pip3",
+    "mvn",
+    "gradle",
+    "hf",
+    "huggingface-cli",
+    "sdkmanager",
+    "adb",
+    "code"
+   ],
+   "askedDirs": [
+    "%LOCALAPPDATA%\\npm-cache",
+    "%USERPROFILE%\\.npm-global\\cache",
+    "%LOCALAPPDATA%\\pnpm-store",
+    "%LOCALAPPDATA%\\pnpm\\store",
+    "%LOCALAPPDATA%\\Yarn\\Cache",
+    "%LOCALAPPDATA%\\pip\\Cache",
+    "%USERPROFILE%\\.m2\\repository",
+    "%USERPROFILE%\\.gradle\\caches",
+    "%USERPROFILE%\\.cache\\huggingface",
+    "%LOCALAPPDATA%\\Android\\Sdk",
+    "%APPDATA%\\Code\\CachedData",
+    "%USERPROFILE%\\.vscode"
+   ],
+   "detectorByRule": {
+    "npm-cache": "npm",
+    "pip-cache": "pip",
+    "gradle-cache": "gradle",
+    "vscode-cache": "vscode",
+    "maven-repository": "maven",
+    "pnpm-store": "pnpm",
+    "yarn-cache": "yarn",
+    "huggingface-cache": "huggingface",
+    "android-sdk-temp": "android-sdk",
+    "windows-temp": null,
+    "docker": null
+   },
+   "modelTally": null,
+   "view": {
+    "groups": [
+     {
+      "id": "node",
+      "label": "Node / 前端包管理",
+      "rows": [
+       {
+        "ruleId": "npm-cache",
+        "name": "npm 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "pnpm-store",
+        "name": "pnpm 存储",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "yarn-cache",
+        "name": "Yarn 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "java",
+      "label": "Java / JVM 构建",
+      "rows": [
+       {
+        "ruleId": "gradle-cache",
+        "name": "Gradle 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       },
+       {
+        "ruleId": "maven-repository",
+        "name": "Maven 仓库缓存",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "python",
+      "label": "Python",
+      "rows": [
+       {
+        "ruleId": "pip-cache",
+        "name": "pip 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ide",
+      "label": "编辑器与 IDE",
+      "rows": [
+       {
+        "ruleId": "vscode-cache",
+        "name": "VS Code 缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "android",
+      "label": "Android SDK",
+      "rows": [
+       {
+        "ruleId": "android-sdk-temp",
+        "name": "Android SDK 安装残留",
+        "installState": "installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": false,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "toggle-include",
+         "group-select-all"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ai",
+      "label": "AI 模型与权重",
+      "rows": [
+       {
+        "ruleId": "huggingface-cache",
+        "name": "Hugging Face 下载缓存",
+        "installState": "not-installed",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "detail",
+         "go-large-files"
+        ]
+       }
+      ],
+      "modelFiles": null
+     },
+     {
+      "id": "container",
+      "label": "容器",
+      "rows": [
+       {
+        "ruleId": "docker",
+        "name": "Docker",
+        "installState": "unknown",
+        "displayBytes": null,
+        "displayFiles": null,
+        "excludedFromDefaultSelection": true,
+        "residual": null,
+        "territoryMissing": false,
+        "actions": [
+         "view",
+         "prune-hint"
+        ],
+        "pruneCommand": "docker system prune"
+       }
+      ]
+     }
+    ],
+    "declaredRuleCount": 9,
+    "scannedRoot": null
+   }
+  }
+ ]
+}

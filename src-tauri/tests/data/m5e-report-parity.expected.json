@@ -1,0 +1,783 @@
+{
+ "note": "由 scripts/../src-tauri/tests/parity_report_ts.mjs 生成，勿手改；重生成命令写在该文件头上",
+ "cases": [
+  {
+   "name": "full",
+   "report": {
+    "schema": "deepclean.scan-report/1",
+    "generatedAtMs": 1700000000000,
+    "app": {
+     "name": "DeepClean",
+     "version": "0.1.0"
+    },
+    "scan": {
+     "scanId": "t-parity",
+     "root": "D:\\r",
+     "status": "completed",
+     "elapsedMs": 1500,
+     "truncated": false,
+     "counters": {
+      "files": 10,
+      "dirs": 4,
+      "totalBytes": 1000
+     },
+     "errors": {
+      "denied": 3,
+      "missing": 1,
+      "busy": 2,
+      "otherErrors": 3,
+      "skipped": 4,
+      "sample": [
+       "D:\\locked0",
+       "D:\\locked1"
+      ],
+      "sampleOverflow": 1
+     },
+     "speed": {
+      "filesPerSec": 6.67,
+      "bytesPerSec": 667,
+      "dirsPerSec": 2.67
+     },
+     "peakRssBytes": null
+    },
+    "topFiles": [
+     {
+      "path": "D:\\r\\da\\f.bin",
+      "name": "f.bin",
+      "size": 200,
+      "mtimeMs": 31
+     },
+     {
+      "path": "D:\\r\\d00\\f.bin",
+      "name": "f.bin",
+      "size": 700,
+      "mtimeMs": 11
+     },
+     {
+      "path": "D:\\r\\root-b.bin",
+      "name": "root-b.bin",
+      "size": 9,
+      "mtimeMs": 2
+     },
+     {
+      "path": "D:\\r\\d00\\deep\\deeper\\h.bin",
+      "name": "h.bin",
+      "size": 300,
+      "mtimeMs": 13
+     }
+    ],
+    "tree": {
+     "path": "D:\\r",
+     "size": 9316,
+     "files": 2,
+     "dirs": 16,
+     "foldedDirs": 4,
+     "foldedBytes": 300,
+     "children": [
+      {
+       "path": "D:\\r\\d00",
+       "size": 1300,
+       "files": 1,
+       "dirs": 1,
+       "foldedDirs": 0,
+       "foldedBytes": 0,
+       "children": [
+        {
+         "path": "D:\\r\\d00\\deep",
+         "size": 600,
+         "files": 1,
+         "dirs": 1,
+         "foldedDirs": 0,
+         "foldedBytes": 0,
+         "children": [
+          {
+           "path": "D:\\r\\d00\\deep\\deeper",
+           "size": 300,
+           "files": 1,
+           "dirs": 0,
+           "foldedDirs": 0,
+           "foldedBytes": 0
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "path": "D:\\r\\d01",
+       "size": 1200,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d02",
+       "size": 1100,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d03",
+       "size": 1000,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d04",
+       "size": 900,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d05",
+       "size": 800,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d06",
+       "size": 700,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d07",
+       "size": 600,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d08",
+       "size": 500,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d09",
+       "size": 400,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d10",
+       "size": 300,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\da",
+       "size": 200,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      }
+     ]
+    },
+    "treeLimits": {
+     "maxDepth": 3,
+     "topPerLevel": 12
+    }
+   }
+  },
+  {
+   "name": "no-denied-still-has-sample",
+   "report": {
+    "schema": "deepclean.scan-report/1",
+    "generatedAtMs": 1700000000000,
+    "app": {
+     "name": "DeepClean",
+     "version": "0.1.0"
+    },
+    "scan": {
+     "scanId": "t-parity",
+     "root": "D:\\r",
+     "status": "completed",
+     "elapsedMs": 1500,
+     "truncated": false,
+     "counters": {
+      "files": 10,
+      "dirs": 4,
+      "totalBytes": 1000
+     },
+     "errors": {
+      "denied": 0,
+      "missing": 1,
+      "busy": 2,
+      "otherErrors": 3,
+      "skipped": 2
+     },
+     "speed": {
+      "filesPerSec": 6.67,
+      "bytesPerSec": 667,
+      "dirsPerSec": 2.67
+     },
+     "peakRssBytes": null
+    },
+    "topFiles": [
+     {
+      "path": "D:\\r\\da\\f.bin",
+      "name": "f.bin",
+      "size": 200,
+      "mtimeMs": 31
+     },
+     {
+      "path": "D:\\r\\d00\\f.bin",
+      "name": "f.bin",
+      "size": 700,
+      "mtimeMs": 11
+     },
+     {
+      "path": "D:\\r\\root-b.bin",
+      "name": "root-b.bin",
+      "size": 9,
+      "mtimeMs": 2
+     },
+     {
+      "path": "D:\\r\\d00\\deep\\deeper\\h.bin",
+      "name": "h.bin",
+      "size": 300,
+      "mtimeMs": 13
+     }
+    ],
+    "tree": {
+     "path": "D:\\r",
+     "size": 9316,
+     "files": 2,
+     "dirs": 16,
+     "foldedDirs": 4,
+     "foldedBytes": 300,
+     "children": [
+      {
+       "path": "D:\\r\\d00",
+       "size": 1300,
+       "files": 1,
+       "dirs": 1,
+       "foldedDirs": 0,
+       "foldedBytes": 0,
+       "children": [
+        {
+         "path": "D:\\r\\d00\\deep",
+         "size": 600,
+         "files": 1,
+         "dirs": 1,
+         "foldedDirs": 0,
+         "foldedBytes": 0,
+         "children": [
+          {
+           "path": "D:\\r\\d00\\deep\\deeper",
+           "size": 300,
+           "files": 1,
+           "dirs": 0,
+           "foldedDirs": 0,
+           "foldedBytes": 0
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "path": "D:\\r\\d01",
+       "size": 1200,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d02",
+       "size": 1100,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d03",
+       "size": 1000,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d04",
+       "size": 900,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d05",
+       "size": 800,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d06",
+       "size": 700,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d07",
+       "size": 600,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d08",
+       "size": 500,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d09",
+       "size": 400,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d10",
+       "size": 300,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\da",
+       "size": 200,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      }
+     ]
+    },
+    "treeLimits": {
+     "maxDepth": 3,
+     "topPerLevel": 12
+    }
+   }
+  },
+  {
+   "name": "zero-elapsed-running",
+   "report": {
+    "schema": "deepclean.scan-report/1",
+    "generatedAtMs": 1700000000000,
+    "app": {
+     "name": "DeepClean",
+     "version": "0.1.0"
+    },
+    "scan": {
+     "scanId": "t-parity",
+     "root": "D:\\r",
+     "status": "running",
+     "elapsedMs": 0,
+     "truncated": true,
+     "counters": {
+      "files": 10,
+      "dirs": 4,
+      "totalBytes": 1000
+     },
+     "errors": {
+      "denied": 5,
+      "missing": 1,
+      "busy": 2,
+      "otherErrors": 3,
+      "skipped": 6,
+      "sample": [
+       "D:\\locked0",
+       "D:\\locked1"
+      ],
+      "sampleOverflow": 3
+     },
+     "speed": {
+      "filesPerSec": 10000,
+      "bytesPerSec": 1000000,
+      "dirsPerSec": 4000
+     },
+     "peakRssBytes": null
+    },
+    "topFiles": [
+     {
+      "path": "D:\\r\\da\\f.bin",
+      "name": "f.bin",
+      "size": 200,
+      "mtimeMs": 31
+     },
+     {
+      "path": "D:\\r\\d00\\f.bin",
+      "name": "f.bin",
+      "size": 700,
+      "mtimeMs": 11
+     },
+     {
+      "path": "D:\\r\\root-b.bin",
+      "name": "root-b.bin",
+      "size": 9,
+      "mtimeMs": 2
+     },
+     {
+      "path": "D:\\r\\d00\\deep\\deeper\\h.bin",
+      "name": "h.bin",
+      "size": 300,
+      "mtimeMs": 13
+     }
+    ],
+    "tree": {
+     "path": "D:\\r",
+     "size": 9316,
+     "files": 2,
+     "dirs": 16,
+     "foldedDirs": 4,
+     "foldedBytes": 300,
+     "children": [
+      {
+       "path": "D:\\r\\d00",
+       "size": 1300,
+       "files": 1,
+       "dirs": 1,
+       "foldedDirs": 0,
+       "foldedBytes": 0,
+       "children": [
+        {
+         "path": "D:\\r\\d00\\deep",
+         "size": 600,
+         "files": 1,
+         "dirs": 1,
+         "foldedDirs": 0,
+         "foldedBytes": 0,
+         "children": [
+          {
+           "path": "D:\\r\\d00\\deep\\deeper",
+           "size": 300,
+           "files": 1,
+           "dirs": 0,
+           "foldedDirs": 0,
+           "foldedBytes": 0
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "path": "D:\\r\\d01",
+       "size": 1200,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d02",
+       "size": 1100,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d03",
+       "size": 1000,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d04",
+       "size": 900,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d05",
+       "size": 800,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d06",
+       "size": 700,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d07",
+       "size": 600,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d08",
+       "size": 500,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d09",
+       "size": 400,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d10",
+       "size": 300,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\da",
+       "size": 200,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      }
+     ]
+    },
+    "treeLimits": {
+     "maxDepth": 3,
+     "topPerLevel": 12
+    }
+   }
+  },
+  {
+   "name": "no-sample-at-all",
+   "report": {
+    "schema": "deepclean.scan-report/1",
+    "generatedAtMs": 1700000000000,
+    "app": {
+     "name": "DeepClean",
+     "version": "0.1.0"
+    },
+    "scan": {
+     "scanId": "t-parity",
+     "root": "D:\\r",
+     "status": "completed",
+     "elapsedMs": 1500,
+     "truncated": false,
+     "counters": {
+      "files": 10,
+      "dirs": 4,
+      "totalBytes": 1000
+     },
+     "errors": {
+      "denied": 2,
+      "missing": 1,
+      "busy": 2,
+      "otherErrors": 3,
+      "skipped": 2
+     },
+     "speed": {
+      "filesPerSec": 6.67,
+      "bytesPerSec": 667,
+      "dirsPerSec": 2.67
+     },
+     "peakRssBytes": null
+    },
+    "topFiles": [
+     {
+      "path": "D:\\r\\da\\f.bin",
+      "name": "f.bin",
+      "size": 200,
+      "mtimeMs": 31
+     },
+     {
+      "path": "D:\\r\\d00\\f.bin",
+      "name": "f.bin",
+      "size": 700,
+      "mtimeMs": 11
+     },
+     {
+      "path": "D:\\r\\root-b.bin",
+      "name": "root-b.bin",
+      "size": 9,
+      "mtimeMs": 2
+     },
+     {
+      "path": "D:\\r\\d00\\deep\\deeper\\h.bin",
+      "name": "h.bin",
+      "size": 300,
+      "mtimeMs": 13
+     }
+    ],
+    "tree": {
+     "path": "D:\\r",
+     "size": 9316,
+     "files": 2,
+     "dirs": 16,
+     "foldedDirs": 4,
+     "foldedBytes": 300,
+     "children": [
+      {
+       "path": "D:\\r\\d00",
+       "size": 1300,
+       "files": 1,
+       "dirs": 1,
+       "foldedDirs": 0,
+       "foldedBytes": 0,
+       "children": [
+        {
+         "path": "D:\\r\\d00\\deep",
+         "size": 600,
+         "files": 1,
+         "dirs": 1,
+         "foldedDirs": 0,
+         "foldedBytes": 0,
+         "children": [
+          {
+           "path": "D:\\r\\d00\\deep\\deeper",
+           "size": 300,
+           "files": 1,
+           "dirs": 0,
+           "foldedDirs": 0,
+           "foldedBytes": 0
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "path": "D:\\r\\d01",
+       "size": 1200,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d02",
+       "size": 1100,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d03",
+       "size": 1000,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d04",
+       "size": 900,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d05",
+       "size": 800,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d06",
+       "size": 700,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d07",
+       "size": 600,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d08",
+       "size": 500,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d09",
+       "size": 400,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\d10",
+       "size": 300,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      },
+      {
+       "path": "D:\\r\\da",
+       "size": 200,
+       "files": 1,
+       "dirs": 0,
+       "foldedDirs": 0,
+       "foldedBytes": 0
+      }
+     ]
+    },
+    "treeLimits": {
+     "maxDepth": 3,
+     "topPerLevel": 12
+    }
+   }
+  }
+ ]
+}

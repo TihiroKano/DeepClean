@@ -1,0 +1,340 @@
+{
+ "appVersion": "0.1.0",
+ "nowMs": 1700000000000,
+ "maxDepth": 3,
+ "topPerLevel": 12,
+ "root": {
+  "name": "r",
+  "files": [
+   {
+    "name": "root-a.bin",
+    "size": 7,
+    "mtimeMs": 1
+   },
+   {
+    "name": "root-b.bin",
+    "size": 9,
+    "mtimeMs": 2
+   }
+  ],
+  "dirs": [
+   {
+    "name": "d00",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 700,
+      "mtimeMs": 11
+     }
+    ],
+    "dirs": [
+     {
+      "name": "deep",
+      "files": [
+       {
+        "name": "g.bin",
+        "size": 300,
+        "mtimeMs": 12
+       }
+      ],
+      "dirs": [
+       {
+        "name": "deeper",
+        "files": [
+         {
+          "name": "h.bin",
+          "size": 300,
+          "mtimeMs": 13
+         }
+        ],
+        "dirs": []
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "d01",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 1200,
+      "mtimeMs": 20
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d02",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 1100,
+      "mtimeMs": 21
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d03",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 1000,
+      "mtimeMs": 22
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d04",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 900,
+      "mtimeMs": 23
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d05",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 800,
+      "mtimeMs": 24
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d06",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 700,
+      "mtimeMs": 25
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d07",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 600,
+      "mtimeMs": 26
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d08",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 500,
+      "mtimeMs": 27
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d09",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 400,
+      "mtimeMs": 28
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "d10",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 300,
+      "mtimeMs": 29
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "da",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 200,
+      "mtimeMs": 31
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "dZ",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 200,
+      "mtimeMs": 32
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "e1",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 50,
+      "mtimeMs": 33
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "e2",
+    "files": [
+     {
+      "name": "f.bin",
+      "size": 50,
+      "mtimeMs": 34
+     }
+    ],
+    "dirs": []
+   },
+   {
+    "name": "empty",
+    "files": [],
+    "dirs": []
+   }
+  ],
+  "path": "D:\\r"
+ },
+ "topFiles": [
+  {
+   "path": "D:\\r\\da\\f.bin",
+   "name": "f.bin",
+   "size": 200,
+   "mtimeMs": 31
+  },
+  {
+   "path": "D:\\r\\d00\\f.bin",
+   "name": "f.bin",
+   "size": 700,
+   "mtimeMs": 11
+  },
+  {
+   "path": "D:\\r\\root-b.bin",
+   "name": "root-b.bin",
+   "size": 9,
+   "mtimeMs": 2
+  },
+  {
+   "path": "D:\\r\\d00\\deep\\deeper\\h.bin",
+   "name": "h.bin",
+   "size": 300,
+   "mtimeMs": 13
+  }
+ ],
+ "cases": [
+  {
+   "name": "full",
+   "snapshot": {
+    "scanId": "t-parity",
+    "root": "D:\\r",
+    "status": "completed",
+    "elapsedMs": 1500,
+    "truncated": false,
+    "files": 10,
+    "dirs": 4,
+    "totalBytes": 1000,
+    "denied": 3,
+    "missing": 1,
+    "busy": 2,
+    "otherErrors": 3,
+    "skipped": 4
+   },
+   "skipped": {
+    "sample": [
+     "D:\\locked0",
+     "D:\\locked1"
+    ],
+    "overflowed": false
+   }
+  },
+  {
+   "name": "no-denied-still-has-sample",
+   "snapshot": {
+    "scanId": "t-parity",
+    "root": "D:\\r",
+    "status": "completed",
+    "elapsedMs": 1500,
+    "truncated": false,
+    "files": 10,
+    "dirs": 4,
+    "totalBytes": 1000,
+    "denied": 0,
+    "missing": 1,
+    "busy": 2,
+    "otherErrors": 3,
+    "skipped": 2
+   },
+   "skipped": {
+    "sample": [
+     "D:\\locked0",
+     "D:\\locked1"
+    ],
+    "overflowed": false
+   }
+  },
+  {
+   "name": "zero-elapsed-running",
+   "snapshot": {
+    "scanId": "t-parity",
+    "root": "D:\\r",
+    "status": "running",
+    "elapsedMs": 0,
+    "truncated": true,
+    "files": 10,
+    "dirs": 4,
+    "totalBytes": 1000,
+    "denied": 5,
+    "missing": 1,
+    "busy": 2,
+    "otherErrors": 3,
+    "skipped": 6
+   },
+   "skipped": {
+    "sample": [
+     "D:\\locked0",
+     "D:\\locked1"
+    ],
+    "overflowed": true
+   }
+  },
+  {
+   "name": "no-sample-at-all",
+   "snapshot": {
+    "scanId": "t-parity",
+    "root": "D:\\r",
+    "status": "completed",
+    "elapsedMs": 1500,
+    "truncated": false,
+    "files": 10,
+    "dirs": 4,
+    "totalBytes": 1000,
+    "denied": 2,
+    "missing": 1,
+    "busy": 2,
+    "otherErrors": 3,
+    "skipped": 2
+   },
+   "skipped": null
+  }
+ ]
+}

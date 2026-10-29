@@ -1,0 +1,19 @@
+[package]
+name = "deepclean-cleaner"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# M3-B 的预览吃的就是引擎的 `RuleReport`；判据（`is_forbidden_path` / `normalize_key`）也**复用**它，
+# 不另写一份 —— 第三套「禁止」语义正是本项目付过学费的那种分叉。
+deepclean-rules = { path = "../rules" }
+# M3-C：默认进回收站，用 Windows Shell API。
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_UI_Shell", "Win32_Foundation", "Win32_Storage_FileSystem"] }
+
+[dev-dependencies]
+# 只给 `tests/preview_parity.rs` 用：对账要**真跑一遍 Rust 引擎**取报告，
+# 而那一步要 `TreeIndex` + `TreeSource`（scanner 的树）。产品代码不需要它。
+deepclean-scanner = { path = "../scanner" }

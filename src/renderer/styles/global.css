@@ -1,0 +1,4175 @@
+:root {
+  color-scheme: dark;
+
+  /*
+   * 字体族（2026-10-23）：**Anthropic 风格 = 开源等效字体本地打包**，不是只写名字。
+   * 文件与授权见 `styles/fonts.css` 的头注释；这里只管"谁在谁前面"。
+   *
+   * 顺序有意义，别调换：
+   *  ① DM Sans —— 拉丁与数字走它（打包进来的那几支是 latin 子集）；
+   *  ② 中文字体 —— DM Sans 里没有汉字字形（`unicode-range` 之外），浏览器逐字往后回退，
+   *     于是汉字自然落到雅黑/Noto。**中文字体必须排在拉丁之后**：放前面连拉丁字母
+   *     也会被它接走（雅黑有拉丁字形），DM Sans 就白打包了。
+   *
+   * 上一版那串 `'Segoe UI Variable Text', Inter, 'MiSans', …` 全撤掉了 ——
+   * 留着会让"这台机器装了什么"重新变成运行时变量，而那正是这条注释一直在防的事。
+   */
+  --font-ui: 'DM Sans', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans SC', 'MiSans', sans-serif;
+  /** 页面大标题：Anthropic 那一族是衬线标题，开源等效取 DM Serif Display。 */
+  --font-title: 'DM Serif Display', 'DM Sans', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans SC', serif;
+  /** 品牌字标：官方 heading 档是 Poppins，比 DM Sans 更圆、更像一枚标志。 */
+  --font-brand: 'Poppins', 'DM Sans', 'Microsoft YaHei UI', sans-serif;
+  /** 等宽：路径、指纹、要逐字符对齐的读数走 JetBrains Mono。 */
+  --font-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, 'Microsoft YaHei UI', monospace;
+
+
+  /*
+   * V0.9 第四轮 —— **验收标准换边了，这一版按图取色**。
+   *
+   * 人类伙伴把 `docs/design/2026-10-08-v0.9-gen1-home.png` 原图重贴回来，说"要达到这种效果
+   * 才能验收"。第三轮那条"80% 灰黑 / 5% 蓝"的配比因此**作废**，连它下面那对机判闸一起
+   * （`panelBlue ≤ 12` 现在正好挡住新标准，见 `electron/main/index.ts` §23 那一段的改写）。
+   *
+   * 下面每个值都是**从那张图上量出来的**，脚本 `tmp-shots/ref/sample.cjs`（区域中位数 +
+   * p5/p95，逐区打 `B−R`），不是照着记忆拼的：
+   *   窗外丝绒 `#0a2d79`（B−R 111，最亮带 p95 `#448ffb`）· 侧栏 `#06245c`（86）
+   *   主面板 `#0a3a8b`～`#16408b`（117–129）· 次级卡 `#102856`/`#0f2856`（70–71）
+   *   快速入口 tile `#15366c`（87）· CTA 药丸 `#2386fd`（218）· 线性用量条 `#2b7efd`（210）
+   *
+   * ⚠️ **但"像图"不等于"照抄图的不透明度"**。第一代那块板子实测是 `rgba(12,44,97,.86)` ——
+   * 一个 alpha .86 的**不透光蓝板**，它 B−R 也有 85，跟图上的数字看起来差不多，
+   * 而它恰恰是被点名要避免的"厚重的蓝色发光面板"。图上那些面板之所以是玻璃，
+   * 是因为身后的丝绒**透得过来**。所以这里的配方是：**色相照图，alpha 压低**，
+   * 让 `--glass-fill-page`（第八轮已降到 .22）去糊夜山背景图（`assets/mountain-bg.jpg`）。判据 ⑩⑪ 钉的就是这一条。
+   *
+   * 第三轮那批值不删，留在 `docs/acceptance/2026-10-08-v0.9-round3-ambient-glass.md`，
+   * 那份文档的 §1（"成对的判据只钉住它量得到的那一维"）这一轮仍然成立 —— 只是那一维换了。
+   */
+  /*
+   * 只有 `--bg` 一个底色了。原来那四个（`--bg-top` / `--bg-deep` / `--bg-2` / `--bg-3`）
+   * 是"一层不透明的深色面"这条路线的产物：第四轮把环境底换成 `glass/silk.svg` 之后前两个
+   * 就没人读了，第五轮给其余六页上玻璃之后后两个也没人读了。
+   * **定义了却没人用的 token 会骗下一个来加表面的人**（`glass/tokens.css` 文件头为这条
+   * 付过学费：上一版 12 个 token 里有 6 个是空的），所以删掉，不留"以后可能用得上"。
+   */
+  --bg: #081d4a;
+  --line: rgba(198, 222, 255, 0.14);
+  --line-strong: rgba(198, 222, 255, 0.24);
+  --fg: #f2f6fc;
+  --fg-dim: #a9bdd8;
+  --accent: #4d8ff5;
+  --accent-2: #6fb0ff;
+  --accent-3: #8ad4ff;
+  --accent-grad: linear-gradient(135deg, #3f7fe8, #6fb0ff);
+  --fg-on-accent: #ffffff;
+
+  /* 玻璃的三档蓝填充。**色相照图、alpha 压低**，理由见上面那段。
+   *
+   * 第八轮真机截图对照再降一档：.40/.62 糊出来是"实心蓝板"，夜山完全透不过来；
+   * 例图（`_d875f9d8....webp`）里三块的身后山脊**看得清轮廓**。降到 .22/.36 后
+   * computed `background-color` 的 B−R 不变（判据 ⑨ 读的只是色相那一行 rgba 的 B−R，
+   * alpha 不进 B−R），判据 ⑪ `panelAlpha ≤ .6` 与 `> .02` 也都还站着。侧栏那档没动 ——
+   * 用户点名的"三个模块"是主页三块卡，侧栏的实是刻意留的（它身后是拖拽区与导航文字）。 */
+  --glass-fill-page: rgba(34, 86, 186, 0.22);
+  --glass-fill-quiet: rgba(10, 28, 70, 0.36);
+  --glass-fill-side: rgba(6, 30, 78, 0.66);
+
+  /*
+   * 间距体系：8 / 12 / 16 / 24 / 32 五档，**只有这五档**。
+   * 上一版首页里 14/15/17/18/22/26 都出现过，卡片因此互相挤着 —— 草图那一屏的呼吸感
+   * 来自留白而不是来自组件，所以这一轮把它收成 token，别再往下写第 6 个数。
+   */
+  --sp-1: 8px;
+  --sp-2: 12px;
+  --sp-3: 16px;
+  --sp-4: 24px;
+  --sp-5: 32px;
+
+  /*
+   * §23 语义色（V0.9 S1 收口）—— 一份语义一个名字。**值与收口前逐字相同**，
+   * 所以这一笔是零视觉变化的机械收口，不是改配色。
+   *
+   * `--risk-*` 与 `shared/classify.ts` 的 `RISK_COLORS` 是同一档语义，两侧各写了一份字面量。
+   * 谁为准没有单一答案（地图取色走 TS、DOM 取色走 CSS），所以这里不假装合并，改成
+   * **加一条运行时判据钉住两侧同值**：`electron/main/index.ts` 的 `--shot` 步骤里
+   * 把 `RISK_COLORS` 插进探针字符串，跟浏览器实际解析出来的自定义属性比 —— 见那里注释。
+   * 只改一边颜色，那一跑就红。
+   */
+  --risk-safe: #3fb950;
+  --risk-caution: #d4a72c;
+  --risk-high: #f85149;
+  --risk-forbidden: #a8071a;
+
+  /*
+   * 置灰文字（禁用项、次要标注）
+   *
+   * ⚠️ 这里原来挂着 `--usage-low / --usage-mid / --usage-high` 三档"磁盘用量色"，第四轮删掉了。
+   * 不是清理死代码 —— 验收图整屏**一处红都没有**：环心那个 95.5% 是白的，环与线性条都是蓝。
+   * 而本项目里红色已经有主了（`--risk-high` / `--risk-forbidden` = 风险等级，地图与清理页在用），
+   * 让首页的百分比也发红就是**一个颜色两种语义**。所以"盘快满了"这一判据现在只由
+   * 「环几乎满 + 那个数本身」说，没有颜色报警。代价如实记：不读数字的人扫一眼看不出严重性。
+   */
+  --fg-disabled: #6b83a6;
+}
+
+* {
+  box-sizing: border-box;
+  /* 滚动条整条隐藏（2026-10-17 用户点名）。这份主题**从来没给滚动条上过任何样式**
+     —— 本文件此前 `scrollbar` 出现 0 次 —— 所以露出来的是内核默认那根条。
+     隐藏的是**条**，不是**滚动**：滚轮、键盘、触控板、程序化 scrollTop 全部照旧
+     （矩阵第四轴量的就是"程序化还滚得动"，13 个真可滚元素全滚得动）。
+     ⚠️ **这一条在本机量不出效果，别把它写成"已验证看不见条"**：这台 WebView2(Edg/155) 用
+     覆盖式滚动条 —— 一个 220×150、内容 900×900、overflow:scroll 的盒子，**删掉下面这条规则之后**
+     `offsetWidth - clientWidth` 仍然是 0（布局本来就不占），用真滚轮事件（scrollTop 确实走到 360）
+     在滚动瞬间截同一块区域，加规则与删规则两张图**逐字节相同**。
+     也就是说：本机根本拍不出"一条可见的滚动条"，这条规则在这里是**跨内核的保险**
+     （目标机若开着"始终显示滚动条"、或换非覆盖式滚动的 Windows 版本/内核，它才起作用），
+     不是一条已在本机观测到效果的改动。它的**代价**是确定的：长列表与窄表少了一个
+     "这里还能滚"的视觉提示。
+     `::-webkit-scrollbar` 是 WebView2/Chromium 认的那条；`scrollbar-width` / `-ms-overflow-style`
+     给别的内核兜底，在这里都无害。 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+::-webkit-scrollbar,
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner,
+::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  min-width: 0;
+  display: none;
+  background: transparent;
+  border: 0;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  /*
+   * **整窗深色的根开关**：Chromium 用它决定所有原生控件的皮肤 ——
+   * `<select>` 展开后的 option 列表、`input[type=date]` 弹出的日历、
+   * 滚动条、以及表单控件的默认描边。少了这一条，逐个控件补
+   * `color-scheme: dark` 只会此起彼伏（2026-10-20 实测：清理记录页
+   * 三个下拉与那颗日期选择器各自漏）。
+   *
+   * 放 `body` 而不是 `:root`：本仓的样式表按"global 先、tokens 后"加载，
+   * 而 tokens.css 里没有再声明 color-scheme，放这里不会被覆盖。
+   */
+  color: var(--fg);
+  /*
+   * 字体族（2026-10-23）：**Anthropic 风格 = 开源等效字体本地打包**，不是只写名字。
+   * 文件与授权见 `styles/fonts.css` 的头注释；这里只管"谁在谁前面"。
+   *
+   * 顺序有意义，别调换：
+   *  ① DM Sans —— 拉丁与数字走它（打包进来的那几支是 latin 子集）；
+   *  ② 中文字体 —— DM Sans 没有汉字字形，一个汉字都没有的字体在 `unicode-range` 外，
+   *     浏览器会往后找，于是汉字自然落到雅黑/Noto。**中文字体必须排在拉丁之后**：
+   *     放前面的话连拉丁字母也会被它接走（雅黑有拉丁字形），DM Sans 就白打包了。
+   *
+   * 上一版那串 `'Segoe UI Variable Text', Inter, 'MiSans', …` 全撤掉了 ——
+   * 留着会让"这台机器装了什么"重新变成运行时变量，而那正是这条注释一直在防的事。
+   */
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/*
+ * 数字一律等宽对齐 + 不许超过 600。上一版首页那几个 700 的大号数字，
+ * 加上渐变和发光，就是它被说成"科技大屏"的一半原因 —— 层级靠字号与留白做，不靠笔画粗细。
+ */
+.dc-mono,
+.dc-num,
+.dc-gauge-pct,
+.dc-stat b {
+  /* 等宽族真正落到 JetBrains Mono（原来只设了 `tabular-nums`，字形仍是无衬线）。
+     `tabular-nums` 留着：它是**数字宽度**那条约束，与字形无关，两条一起才对齐。 */
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+button,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* 拖窗口：草图没有标题栏，能拖的地方必须由我们自己点名（见计划 §5 裁定 U5）。
+   规则是"容器可拖、控件不可拖"，漏一个 no-drag 就是一个点不动的按钮。 */
+.dc-side,
+.dc-bar,
+.dc-titlebar {
+  -webkit-app-region: drag;
+}
+
+.dc-side button,
+.dc-bar button,
+.dc-bar select,
+.dc-bar input,
+.dc-titlebar button,
+.dc-titlebar select,
+.dc-titlebar input {
+  -webkit-app-region: no-drag;
+}
+
+.dc-muted {
+  color: var(--fg-dim);
+}
+
+.dc-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 窄窗（760 px）那一版拍到的第二条：记录页页脚那句里的落盘日志路径是一个
+   **不可断行的长 token**（`C:\Users\…\com.deepclean.app\logs\deepclean.log`），
+   它顶到窗口右缘被截，页面底因此还挂着一条横向滚动条 —— 与 `.dc-bar` 那条无关，
+   这条是段落里的长 URL 样 token 缺断行规则。只放开 `.dc-fineprint` 里的 `code`：
+   表格那些路径列有自己的 `td` 宽度与省略号判据（`ellClip` 量着），不去动它们。 */
+.dc-fineprint code {
+  overflow-wrap: anywhere;
+}
+
+.dc-live {
+  color: var(--accent);
+}
+
+/*
+ * 「还没有可用内容」时的 Loading（`Cleanup.tsx` 的 `RevalueLoading`）。
+ *
+ * 2026-10-21 人类伙伴四轮要求，逐版落点：
+ *  ① 「重新计价这段改成 Loading」→ 撤掉不确定态进度条；
+ *  ② 换成他给的 **16 颗点跳动**动画；
+ *  ③ 「只在第一次进入垃圾清理页面加载就好」→ 勾选后不再闪（语义改在 `shouldShowLoading`）；
+ *  ④ **「首次打开 Loading 加特效放中间放大些，loading 用白色字体」** ← 现在这一版。
+ *
+ * 第 ④ 条落成三件事，全在这个文件里：
+ *   · 位置：`.dc-revalue-stage` 占满内容区、内容居中（不再是工具栏里的一格）；
+ *   · 尺寸：点阵 34px → **64px**、文字 12px → **18px**；
+ *   · 颜色：文字改 **白色**（原来跟 `--accent` 走，偏蓝）。
+ *
+ * ⚠️ 根类名 `.dc-revalue` 必须留着：验收脚本靠 `document.querySelector('.dc-revalue')`
+ * 判"这一页有没有在等"（`cleanup-layout-probe.mjs` / `cleanup-layout-loading-probe.mjs`）。
+ */
+.dc-revalue-row {
+  margin: 0 0 var(--sp-3);
+}
+
+/*
+ * 居中舞台：占满剩余内容区，把 Loading 摆在正中间。
+ *
+ * `min-height` 给下限而不是 `100%`：这一格挂在 `.dc-clean` 里，而后者是 `overflow: auto`
+ * 的滚动容器 —— 用百分比高度会随内容高度变化，Loading 就会跟着跳。
+ * 240px 是"在 880 高窗口里明显居中"的那一档，同时不会在窄窗里撑出滚动条。
+ */
+.dc-revalue-stage {
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+  flex: 1;
+}
+
+/* 点阵 + 「Loading」。竖排居中：点在上、字在下，比横排更像"一整块在等"的提示。 */
+.dc-revalue,
+.dc-revalue-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  /* 白色字体（人类伙伴 2026-10-21 点名）。不跟 `--accent` 走 —— 那是链接/强调色，
+     放在"等待"这件事上会读成可点。 */
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex: none;
+}
+
+/*
+ * 16 颗点。**颜色跟着主题走**（原作的 `--uib-color: black` 在深钴蓝底上等于看不见）。
+ *
+ * 尺寸：原始 60px，这里给 **64px**（第 ④ 条"放大些"）。
+ * 中间经过 26px → 34px 两档：26px 在真机截图上是"一小团斜点"，认不出是 Loading；
+ * 34px 够认但配不上"放中间"这个位置；64px 时点径 6.4px、阵列 41px 见方，居中才站得住。
+ */
+.dc-jump {
+  --uib-size: 64px;
+  --uib-color: #ffffff;
+  --uib-speed: 1.5s;
+  --uib-dot-size: calc(var(--uib-size) * 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: calc(var(--uib-size) * 0.64);
+  width: calc(var(--uib-size) * 0.64);
+  flex: none;
+}
+
+@keyframes dc-jump {
+  0%,
+  100% {
+    transform: translateY(120%);
+  }
+
+  50% {
+    transform: translateY(-120%);
+  }
+}
+
+.dc-jump-dot {
+  --uib-d1: -0.48;
+  --uib-d2: -0.4;
+  --uib-d3: -0.32;
+  --uib-d4: -0.24;
+  --uib-d5: -0.16;
+  --uib-d6: -0.08;
+  --uib-d7: -0;
+  position: absolute;
+  bottom: calc(var(--uib-bottom) + var(--uib-dot-size) / 2);
+  right: calc(var(--uib-right) + var(--uib-dot-size) / 2);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: var(--uib-dot-size);
+  width: var(--uib-dot-size);
+  animation: dc-jump var(--uib-speed) ease-in-out infinite;
+  opacity: var(--uib-scale);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.dc-jump-dot::before {
+  content: '';
+  height: 100%;
+  width: 100%;
+  background-color: var(--uib-color);
+  border-radius: 50%;
+  transform: scale(var(--uib-scale));
+  transition: background-color 0.3s ease;
+}
+
+/* ---- 下面这 16 条是原作逐条照抄的排布（位置 + 延迟 + 缩放），只换了类名前缀 ---- */
+.dc-jump-dot:nth-child(1) {
+  --uib-bottom: 24%;
+  --uib-right: -35%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d1));
+}
+.dc-jump-dot:nth-child(2) {
+  --uib-bottom: 16%;
+  --uib-right: -6%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d2));
+}
+.dc-jump-dot:nth-child(3) {
+  --uib-bottom: 8%;
+  --uib-right: 23%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d3));
+}
+.dc-jump-dot:nth-child(4) {
+  --uib-bottom: -1%;
+  --uib-right: 51%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d4));
+}
+.dc-jump-dot:nth-child(5) {
+  --uib-bottom: 38%;
+  --uib-right: -17.5%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d2));
+}
+.dc-jump-dot:nth-child(6) {
+  --uib-bottom: 30%;
+  --uib-right: 10%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d3));
+}
+.dc-jump-dot:nth-child(7) {
+  --uib-bottom: 22%;
+  --uib-right: 39%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d4));
+}
+.dc-jump-dot:nth-child(8) {
+  --uib-bottom: 14%;
+  --uib-right: 67%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d5));
+}
+.dc-jump-dot:nth-child(9) {
+  --uib-bottom: 53%;
+  --uib-right: -0.8%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d3));
+}
+.dc-jump-dot:nth-child(10) {
+  --uib-bottom: 44.5%;
+  --uib-right: 27%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d4));
+}
+.dc-jump-dot:nth-child(11) {
+  --uib-bottom: 36%;
+  --uib-right: 55.7%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d5));
+}
+.dc-jump-dot:nth-child(12) {
+  --uib-bottom: 28.7%;
+  --uib-right: 84.3%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d6));
+}
+.dc-jump-dot:nth-child(13) {
+  --uib-bottom: 66.8%;
+  --uib-right: 15%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d4));
+}
+.dc-jump-dot:nth-child(14) {
+  --uib-bottom: 58.8%;
+  --uib-right: 43%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d5));
+}
+.dc-jump-dot:nth-child(15) {
+  --uib-bottom: 50%;
+  --uib-right: 72%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d6));
+}
+.dc-jump-dot:nth-child(16) {
+  --uib-bottom: 42%;
+  --uib-right: 100%;
+  animation-delay: calc(var(--uib-speed) * var(--uib-d7));
+}
+
+/* 缩放：中间那几颗大、两端小 —— 一排排"波浪"才有纵深，全一样大是一块方阵 */
+.dc-jump-dot:nth-child(3) {
+  --uib-scale: 0.98;
+}
+.dc-jump-dot:nth-child(2),
+.dc-jump-dot:nth-child(8) {
+  --uib-scale: 0.96;
+}
+.dc-jump-dot:nth-child(1),
+.dc-jump-dot:nth-child(7) {
+  --uib-scale: 0.94;
+}
+.dc-jump-dot:nth-child(6),
+.dc-jump-dot:nth-child(12) {
+  --uib-scale: 0.92;
+}
+.dc-jump-dot:nth-child(5),
+.dc-jump-dot:nth-child(11) {
+  --uib-scale: 0.9;
+}
+.dc-jump-dot:nth-child(10),
+.dc-jump-dot:nth-child(16) {
+  --uib-scale: 0.88;
+}
+.dc-jump-dot:nth-child(9),
+.dc-jump-dot:nth-child(15) {
+  --uib-scale: 0.86;
+}
+.dc-jump-dot:nth-child(14) {
+  --uib-scale: 0.84;
+}
+.dc-jump-dot:nth-child(13) {
+  --uib-scale: 0.82;
+}
+
+/* 尊重系统「减少动态效果」：关掉跳动，让 16 颗点停在原位（图案本身仍然是可辨认的"点阵"），
+   而不是让它们在 60 fps 上抖个不停（前庭敏感用户会难受）。 */
+@media (prefers-reduced-motion: reduce) {
+  .dc-jump-dot {
+    animation: none;
+    transform: translateY(0);
+  }
+}
+
+.dc-warn {
+  color: var(--risk-caution);
+}
+
+.dc-placeholder {
+  color: var(--fg-dim);
+  font-style: italic;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+/* ---------- 布局 ---------- */
+
+.dc-app {
+  display: grid;
+  /* 第二列必须是 `minmax(0, 1fr)`，不能是光秃秃的 `1fr`：
+     grid 项的自动最小尺寸是 `auto`（= 内容的最小宽度），而地图那一块里有一张 canvas
+     与一列不可断的目录名，它的"最小宽度"就等于内容宽度。写成 `1fr` 时这一列**不肯缩**，
+     整行被撑出视口右缘 —— `.dc-map-body` 里那套 `minmax(180px, 1fr) minmax(0, 320px)`
+     于是完全失效（它自己早就被撑宽了），右侧面板与顶栏右端控件一起被推出可视区。
+     2026-10-20 真机实测：1440 与 1900 宽下 `aside.dc-side-panel` 都在屏幕外，
+     看上去像"侧栏不见了"，实际是被推到了窗口右边之外。 */
+  grid-template-columns: 200px minmax(0, 1fr);
+  height: 100vh;
+  /*
+   * 窗口自己画的那层环境底。V0.9 第八轮换成 `assets/mountain-bg.jpg` —— 一张**深蓝夜山**
+   * 的实拍感底图（AI 生成后裁掉水印）：层叠山脊沉在雾里，顶半屏近黑、亮雾带压在底部，
+   * 与验收图的窗外景观同族。玻璃卡糊的就是它，"透"这件事由它供给。
+   *
+   * 为什么必须画在我们自己窗口里而不是采样桌面：`desktopCapturer` 截整块屏、截屏时本窗口
+   * 必须可见 ⇒ 那张"背景"必然含 DeepClean 自己，糊完是重影不是壁纸（V0.8 按人类伙伴明令
+   * 整条删除，理由全文在 `glass/tokens.css` 文件头第 1 条）。
+   *
+   * 两条继承自 silk.svg 时代的约束仍然成立：
+   *  1. **右上角必须最暗** —— 系统胶囊按钮那 138×40 只配一个底色。这张图顶半屏近黑，
+   *     天然满足；若换图，先检查右上角。
+   *  2. **不许挂 `::before`**（§4 地图叠放第 ⑦ 道判据）—— 叠层只走 `background-image`。
+   *
+   * 颗粒那层留着：照片糊过之后暗部仍会出现 8 位色深下的等高线，
+   * 一层 .045 的中性噪声就是专门揉掉它的。
+   */
+  background-color: var(--bg);
+  /*
+   * 壁纸那一层走 `--dc-wallpaper`（2026-10-27）。**变量的默认值就是原来那张夜山**，
+   * 所以没有设置时逐字等于改之前 —— 这一条是"加设置不改默认外观"的落点。
+   * 设置页选图之后 `useSettings` 把内联值写到 `documentElement`，这一层跟着换。
+   *
+   * 为什么用变量而不是在 JSX 里写 `style.backgroundImage`：
+   * `.dc-app` 这条规则里还有噪声层与 `background-size/position/repeat` 三格成对的控制。
+   * 拆成"JS 管图、CSS 管铺法"会有两处真相，而漏掉 `cover` 的那一版表现是
+   * "壁纸被平铺成一片小格子"—— 看起来像用户选了张坏图。
+   */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
+    var(--dc-wallpaper, url('../assets/mountain-bg.jpg'));
+  background-size: 140px 140px, cover;
+  background-position: center, center;
+  background-repeat: repeat, no-repeat;
+}
+
+/*
+ * 左侧那条栏。宽度 200 px：这张验收图量出来侧栏约占窗口宽 12%（127 / 1023），
+ * 1440 DIP 下约 179，取 200 是"图标 + 四字标签放得下、又不把主区挤瘦"的那一档。
+ * 底色照图取实测值 `#06245c`（B−R 86），但同样靠 alpha 撑透 —— 见 `--glass-fill-side`。
+ */
+.dc-side {
+  background: linear-gradient(180deg, rgba(12, 44, 104, 0.72) 0%, var(--glass-fill-side) 46%, rgba(4, 18, 52, 0.8) 100%);
+  backdrop-filter: blur(38px) saturate(1.35);
+  border-right: 1px solid rgba(160, 200, 255, 0.13);
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.28), 16px 0 44px -18px rgba(0, 0, 0, 0.6);
+  padding: var(--sp-2) var(--sp-2) var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  overflow: visible;
+}
+
+/*
+ * 品牌行：**完整的应用图标** + 「DeepClean」字标，横排，占满栏宽。
+ *
+ * 两条来历，都别改回去：
+ * ① 为什么是一张 PNG 而不是内联 SVG —— 人类伙伴点名"Logo 使用那版 DeepClean 图标"，
+ *    而 `build/icon.png` **不能直接引**：`package.json` 的 `files` 只收 `out/` 整棵与
+ *    `package.json`，`build/**` 整个不进 asar，引它就只有开发模式看得见、打包版是一块空图
+ *    （`components/icons.tsx:78` 记着这条）。正解是从 `build/icon.ico` 里把 256² 那一帧 PNG
+ *    抽出来放进 `src/renderer/assets/`，它随渲染端一起进 `out/`，两边都成立。
+ * ② 为什么是**整张**而不是第五轮那版裁掉的"D + 扫帚"局部 —— 裁掉是因为这张图标底部自带
+ *    "DeepClean" 字样，32 px 下会糊成一团纹理、还和右边的字标重复。人类伙伴 2026-10-09
+ *    点名要"应用图标"，所以换回整张：**代价就是那行字在 32 px 下读作纹理而不是字**，
+ *    这是照要求付的账，不是漏改。要再裁，先问过。
+ */
+/*
+ * 品牌行：**图标 + 字标**（人类伙伴 2026-10-23 第六轮：主 logo 精修版）。
+ *
+ * 精修版原图是「裸 D 字形图标 + DeepClean 字标」的横向组合，所以这里拆成两张图摆，
+ * 而不是把宣传图整张铺进来（那张有深蓝底与装饰光弧，铺进 200px 侧栏会像贴了张海报）。
+ *
+ * 侧栏内容宽约 168px（200 - 两侧 padding）。图标 26px + 间距 8px + 字标，
+ * 字标按比例拿到约 134px —— 600×109 的原图在 DPR 1.5 下仍然锐利。
+ *
+ * ## 基线对齐（2026-10-25 人类伙伴：「图标和 D 和 DeepClean 的 D 下方对齐能做到吗」）
+ *
+ * 原来 `align-items: center` 让两者**中线**对齐，视觉上图标的底边比 D 的底边低一截。
+ * 改成底边对齐时踩到一个不明显的坑，记在这里免得下次又算一遍：
+ *
+ * 字标画布 600×109，但 **D 的墨迹只到 y=81**，y=82..108 那 27 行是 `p` 的**下伸尾巴**。
+ * 所以「两图底边对齐」对出来的是 **`p` 的尾巴**与图标底边齐，D 仍然悬空 —— 那不是要的效果。
+ * 实测数字（画布 109 行、D 底在 81 行 ⇒ 基线在 75%）：
+ *   字标渲染 20px 高时，D 的底边落在 14.86px，画布底边在 20px ⇒ 两者差 5.14px。
+ * 于是做法是两步：`align-items: flex-end` 先让**画布底边**齐，
+ * 再把字标抬起来这 5.14px（见 `.dc-brand-logo` 的 `margin-bottom`）。
+ * 换图或改字号时按 `(1 - D底行/画布高) × 字标高` 重算，别照抄数字。
+ */
+.dc-brand {
+  display: flex;
+  /* 底边对齐而不是中线对齐：依据见上面「基线对齐」那段的实测 */
+  align-items: flex-end;
+  gap: 8px;
+  padding: var(--sp-1) 6px var(--sp-3);
+  flex: none;
+  min-width: 0;
+}
+
+/* 图标：与字标同一视觉高度（26px）。`height` + `width: auto` 由图片比例决定宽度，
+   不写死两维 —— 将来换图不会拉变形。 */
+.dc-brand-icon {
+  height: 26px;
+  width: auto;
+  flex: none;
+  /* 侧栏是拖窗区（`.dc-side` 有 `-webkit-app-region: drag`）：图片必须让点击穿透，
+     否则按住它拖不动窗口、还会拖出一张浏览器默认的拖拽残影。 */
+  -webkit-user-drag: none;
+  user-select: none;
+  /* 图标自带蓝色渐变，压在深蓝侧栏上给一点提亮，避免"沉进背景" */
+  filter: drop-shadow(0 2px 8px rgba(20, 90, 200, 0.45));
+}
+
+/* 字标：宽度自适应剩余空间，但**不许超过图片本身的比例高度** ——
+   `min-width: 0` 让它在窄栏里能被压缩而不是撑破侧栏（配套 `overflow: hidden`）。 */
+.dc-brand-logo {
+  height: 20px;
+  width: auto;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+  -webkit-user-drag: none;
+  user-select: none;
+  /* 把 `p` 的下伸尾巴压出容器底边，让 **D 的基线**与图标底边齐（不是画布底边）。
+     算式：字标画布 109 行、D 墨迹底在 81 行 ⇒ 尾部占 (109-81)/109 ≈ 25.7%；
+     字标高 20px ⇒ 尾巴 5.14px。
+     **必须是负值**：`align-items: flex-end` 下画布底边本来就贴着容器底边，
+     正的 `margin-bottom` 会把字标整体**向上推**（第一版就是这么写错的，实测差 8 物理像素）。
+     负值才让画布底边伸出容器 5.14px，D 的基线因此落在容器底边上。
+     换图/改字号时按同一式子重算，别照抄数字。 */
+  margin-bottom: -5.14px;
+  filter: drop-shadow(0 2px 8px rgba(20, 90, 200, 0.35));
+}
+
+
+/*
+ * Poppins 的落点（2026-10-23）。
+ *
+ * ⚠️ 这条不是可有可无的：`--font-brand` 上一版**只定义、没引用**，于是浏览器从不加载
+ * Poppins 那五个 woff2 —— 它们躺在产物里但一个字节都没用上，而"字体优化"这件事
+ * 在有文字用到它之前只是文件、不是效果。真机探针就是这么抓到的：
+ * `document.fonts` 里 Poppins 一个 face 都不是 `loaded`。
+ *
+ * 现在让它管"品牌气最重的那些短标签"：侧栏导航文字 + 卡片上的项目名。
+ * 它们都是一两个词的标题式短串，Poppins 的圆润几何笔形在这种长度上最好看；
+ * 正文与长句仍然走 DM Sans（`.dc-modal-title` 那种衬线标题另有 `--font-title`）。
+ * 中文照样逐字回退到雅黑 —— Poppins 只有 latin 子集。
+ */
+.dc-nav-label,
+.dc-clean-name,
+.dc-clean-stat-label {
+  font-family: var(--font-brand);
+}
+
+.dc-side nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  overflow: visible;
+}
+
+.dc-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  height: 40px;
+  flex: none;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  padding: 0 12px;
+  cursor: pointer;
+  color: var(--fg-dim);
+  font-size: 13px;
+}
+
+.dc-nav-ic {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  flex: none;
+}
+
+/*
+ * 文字标签。**它必须一直是 DOM 里那个真实 `<span>`，不能换成 CSS `content`** ——
+ * 两个理由，这一轮比上一轮更硬：① 标签现在**常驻可见**（验收图就是图标+文字），
+ * 做成 `content` 它虽然还看得见，但 `--shot` 有四处靠 `.dc-side button` 的 `textContent`
+ * 找导航入口，生成内容不进 textContent，那四步会全红；② `content` 里的字读屏软件念不出来。
+ * 上一轮把它做成"平时透明、悬停浮出"是窄栏逼的；栏变宽之后它回到该在的地方。
+ */
+.dc-nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dc-nav:hover:not(:disabled) {
+  background: rgba(140, 190, 255, 0.09);
+  color: var(--fg);
+}
+
+/*
+ * 选中态：一颗**蓝色玻璃胶囊** —— 淡蓝染色 + 上沿高光 + 一道很柔的蓝外发光 + 左端一条亮边。
+ * 验收图量的就是这个形状。它不是"大面积亮蓝色选中框"：填充 alpha 只有 .34，
+ * 发光半径 14 px、alpha .18，靠的是"亮起来一点"而不是"涂一块蓝"。
+ */
+.dc-nav-on {
+  background-color: rgba(58, 122, 224, 0.34);
+  /* 高光走 background-image、底色留在 background-color：合成一条 `background:` 简写会把
+     color 那段重置成 `rgba(0,0,0,0)`，而 `--shot` 的 §23 正好把 `onBg` 打进日志。
+     `.dc-card` 同一个坑、同一条解法，见 `glass/tokens.css`。 */
+  background-image: linear-gradient(180deg, rgba(190, 224, 255, 0.22), rgba(120, 175, 255, 0.02) 72%);
+  border-color: rgba(170, 212, 255, 0.34);
+  color: #eaf3ff;
+  /*
+   * ⚠️ **上沿那条高光不能用 `inset 0 1px 0`**（2026-10-23 人类伙伴：「选择框上有高光露出来了」）。
+   *
+   * 那个写法描的是**盒子**的顶边，而盒子是矩形 —— 圆角只是把它裁掉，描边本身在四个角上
+   * 仍然笔直地走到矩形边缘，于是角上一小段高光会露在胶囊轮廓之外，看起来像"角上有一道白刺"。
+   * 真机截图放大到 10 倍能直接看到那截亮边脱离圆角。
+   *
+   * 正解：让高光跟着**边框形状**走。`inset 0 0 0 1px` 画的是贴内沿的一整圈，
+   * 由 `border-radius` 一起收圆；再叠一条只有上沿的柔和渐变（`background-image` 那条已经在做），
+   * 层次就与原来一样，但不越界。左端那条亮边同理改成贴内沿的 2px。
+   */
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 2px 0 0 rgba(160, 208, 255, 0.75),
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    0 0 14px rgba(90, 155, 245, 0.18);
+  /*
+   * `overflow: hidden` 是第二道保险：万一将来有人又把高光写成盒子级阴影或伪元素，
+   * 这一条会把它裁在圆角之内。它不影响布局（`.dc-nav` 是固定高度的 flex 行）。
+   */
+  overflow: hidden;
+}
+
+.dc-nav-on:hover:not(:disabled) {
+  color: #eaf3ff;
+  background-color: rgba(64, 130, 232, 0.4);
+}
+
+.dc-nav:disabled {
+  color: var(--fg-disabled);
+  cursor: not-allowed;
+}
+
+/* 栏底那两格：slogan 靠 auto margin 沉下去，「设置」跟在它下面 */
+.dc-side-slogan {
+  margin: auto 6px 0;
+  padding: var(--sp-2) 0 0;
+  flex: none;
+  color: var(--accent-2);
+  font-size: 13px;
+  line-height: 1.5;
+  /* 验收图里这两行是手写体。本机不保证有中文手写字体，而"拿本机恰好装了某个字体"
+     当运行时保证是本项目吃过亏的假设 —— 所以这里**不写 font-family**，
+     只用斜体 + 字距 + 一点旋转去读成"手写的一句批注"。装了就更好，没装也不塌。 */
+  font-style: italic;
+  letter-spacing: 0.04em;
+  transform: rotate(-2.4deg);
+  transform-origin: left bottom;
+  opacity: 0.9;
+}
+
+.dc-side-slogan b {
+  display: block;
+  font-weight: 600;
+}
+
+.dc-nav-rail-foot {
+  margin-top: var(--sp-1);
+}
+
+/*
+ * 页面容器。`.dc-page` 这个类名从 V0.7 起就挂在开发环境页的根上，
+ * 但**两份样式表里从来没有它的规则** —— 那一页因此是贴着窗口边缘画的。
+ * 上一轮的死类清点把它列进过 S3 的待删名单；这次不删它，反过来给它一条真规则，
+ * 因为新加的「设置」页需要同一个容器，而"给一个已经有人在用的类名补上样式"
+ * 比"再造一个类名、留那条死的继续骗人"干净。
+ */
+.dc-page {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--sp-5);
+  max-width: 920px;
+}
+
+/*
+ * 设置页那个折叠。它必须**看起来可以点开**，否则"收起来"就等于"藏起来"——
+ * 那一档改的是删除建议的口径，把它的代价藏成一个看不见的小三角是这一页最不该有的形状。
+ */
+.dc-details {
+  margin-top: var(--sp-2);
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: var(--glass-radius-tight);
+  background-color: rgba(255, 255, 255, 0.022);
+  padding: var(--sp-1) var(--sp-2);
+}
+
+.dc-details summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--fg-dim);
+  /* 原生那个三角在深色底上几乎看不见，给它一点品牌色 */
+  accent-color: var(--accent);
+}
+
+.dc-details summary:hover {
+  color: var(--fg);
+}
+
+.dc-details[open] summary {
+  margin-bottom: var(--sp-1);
+  color: var(--fg);
+}
+
+.dc-tag {
+  font-size: 10px;
+  color: var(--fg-disabled);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+/*
+ * 顶部那条 40 px：只负责"能拖窗口"和给系统胶囊按钮让位，**字标不在这里**。
+ * 验收图的标题条是空的（品牌位整窗只有一处，就在左侧栏顶上），而第四轮点名要的
+ * 「左上角 DeepClean 图标 + DeepClean 品牌文字」由那一行兑现 —— 这里再放一个 "DeepClean"
+ * 就是同一屏两个品牌字标，那条约束两轮都没变。
+ */
+.dc-titlebar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  height: 40px;
+  flex: none;
+  padding: 0 var(--sp-3);
+  -webkit-app-region: drag;
+}
+
+/*
+ * 右上角那三颗窗控（最小化 / 最大化·还原 / 关闭）。
+ *
+ * `decorations: false` 之后系统不再提供它们，由 `WindowControls` 自绘。
+ * 总宽 3×40+缝 ≈ 124 px —— 正是背景图换图纪律里"右上角必须最暗"那段 138×40 让位区的
+ * 落点：按钮铺在最暗处，白字才永远读得出。按钮本身的 no-drag 由 `.dc-titlebar button`
+ * 那条统一兜住，不在这里重复声明。
+ */
+.dc-winctl {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.dc-winctl-btn {
+  width: 40px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  /* 照 Windows 原生窗控那一套：平时透明底 + 中性灰白描线，不带一点蓝 —
+     蓝色在本界面是「强调/可选中」的语义，窗控不是内容，不占那个色。 */
+  background: transparent;
+  color: rgba(255, 255, 255, 0.66);
+  cursor: pointer;
+}
+
+.dc-winctl-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* 关闭那颗的悬停红是 Windows 的肌肉记忆，别换成主题蓝 —— 点上去了就不是"主题色"，是"要关了" */
+.dc-winctl-close:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+.dc-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * 页面顶部那 40 px 标题条 + 页面自己的 `.dc-bar`，在**带条子的页面**上合成一条。
+ *
+ * 症状（人类伙伴 2026-10-20 指出的两张图）：空间地图页顶上是一整条空白深蓝的
+ * 标题条（只有最右边三颗窗控），真正的蓝色工具条被压在它下面 —— 而工具条里空着
+ * 152 px 的让位区，右边还写着口径读数与两个下拉。等于**同一行的事情被拆成了两行**。
+ *
+ * 处置只做一半、且必须做这一半：隐藏标题条本身（`height: 0`）但不隐藏窗控，
+ * 让窗控用 `position: absolute` 浮到工具条那一行的右端。所以工具条的
+ * `padding-right` 必须够放三颗按钮（3×40+缝 ≈ 124 px，取 132 留余量）。
+ *
+ * 用**一个显式的类**（`dc-titlebar-inline`，由 `App.tsx` 按 `view` 直接加）而不是 `:has()`：
+ * `:has()` 依赖 DOM 深度，实测在这棵树上匹配不到 —— 标题条收起来了、窗控却没有浮出来，
+ * 右侧因此空出 200 px 纯蓝（2026-10-20 截图量到的）。类名是确定的判据，深度改了也不会失效。
+ */
+/* 标题条本身不再占高度：它整块变成一条**浮在工具条上方的层**。
+   三个值缺一不可：
+   · `height: 0` —— 不吃掉那 40 px；
+   · `overflow: visible` —— 不然 0 高的盒子会把窗控裁掉（这是第一版的实际症状：
+     标题条确实收了、蓝色也确实上提了，但右侧 200 px 纯蓝、连一颗窗控都没有）；
+   · `position: relative` + `z-index` —— 让窗控的 `absolute` 以它为参照并压在工具条之上。 */
+.dc-titlebar-inline {
+  position: relative;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* 窗控浮到工具条那一行的右端；`padding-right: 132px` 是给它腾的位置。 */
+.dc-titlebar-inline > .dc-winctl {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+}
+
+/* `.dc-main` 得是定位上下文，否则上面那个 `absolute` 会跑到窗口外面去。 */
+.dc-main {
+  position: relative;
+}
+
+.dc-main {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ---------- 控件 ---------- */
+
+/*
+ * 圆角一律引 `--glass-radius-*`（定义在 `glass/tokens.css`）。
+ * 这一版之前这里是 6px、tokens.css 又给 `.dc-btn` 盖一条 12px，于是同一排两个按钮
+ * 一个是 12 一个是 6 —— 那是"没人收口"的直接证据，不是风格。声明点还分在两处，
+ * 但**值只有一个来源**，S3 那一刀再把声明点也并掉。
+ */
+.dc-btn {
+  background: rgba(150, 195, 255, 0.12);
+  border: 1px solid var(--line);
+  border-radius: var(--glass-radius-tight);
+  padding: 6px 13px;
+  cursor: pointer;
+  color: var(--fg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.dc-btn:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: rgba(150, 195, 255, 0.2);
+}
+
+.dc-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/*
+ * `.dc-btn-danger` 这个类名从 V0.5 起就挂在「取消扫描」那颗钮上，而两份样式表里
+ * **从来没有它的规则** —— 于是"取消一次正在删东西的扫描"长得和"暂停"一模一样。
+ * 上一轮的死类清点把它列进了 S3 待删名单；这次反过来给它补一条真规则，
+ * 因为"给一个已经有人在用的类名补上样式"比"再造一个类名、留那条死的继续骗人"干净。
+ * 红色在这里是合法的：`--risk-high` 那一档语义就是"危险动作"，跟首页百分比不是一回事。
+ */
+.dc-btn-danger {
+  border-color: rgba(248, 81, 73, 0.42);
+  color: #ffd9d5;
+  background: rgba(168, 7, 26, 0.26);
+}
+
+.dc-btn-danger:hover:not(:disabled) {
+  border-color: rgba(248, 81, 73, 0.66);
+  background: rgba(168, 7, 26, 0.42);
+}
+
+.dc-primary {
+  background: var(--accent-grad);
+  border: 0;
+  border-radius: var(--glass-radius-tight);
+  color: var(--fg-on-accent);
+  font-weight: 600;
+  padding: 9px 20px;
+  cursor: pointer;
+}
+
+.dc-primary:hover {
+  filter: brightness(1.08);
+}
+
+.dc-input {
+  flex: 1;
+  min-width: 0;
+  /* 第三轮曾把这里从 `rgba(4,18,46,.55)` 改成中性白，理由是"那是第二轮漏改的蓝残留"。
+     第四轮验收标准换边，深蓝底又是对的了 —— 但这条注释留着是有用的：
+     它记着**同一个值在两轮里一次是缺陷、一次是正解**，判据跟着翻了一面。
+     别把它当"改来改去"删掉。 */
+  background: rgba(4, 20, 54, 0.55);
+  border: 1px solid var(--line);
+  border-radius: var(--glass-radius-tight);
+  padding: 6px 10px;
+  user-select: text;
+  color: var(--fg);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/*
+ * 勾选框与单选钮。**自绘，不用 `accent-color` 那一招**：只设 accent 的话，未勾选的那一面
+ * 是 Chromium 按 `color-scheme: dark` 自己给的深灰，压在钴蓝底上会读成一块**发褐的方片**
+ * （真机截图 10-cleanup-list.png 上那一列就是）。而"哪些条目会被删"是这一页最要紧的一列，
+ * 它不该看起来像坏了。
+ *
+ * 勾上的对勾走 `background-image` 而不是 `::after { content }` —— 本项目有一条硬规矩是
+ * **界面文字不许搬进 CSS 生成内容**（`--shot` 靠 textContent 找导航入口，见 `.dc-nav-label`），
+ * 一个对勾符号虽然不是文字，但用同一条形状去画它，下一个人就分不清哪种 `content` 是允许的。
+ *
+ * ⚠️ 尺寸必须是 15×15 且 `flex: none`：`--shot` 有 20 多步在点 `.dc-clean-check input` 并读
+ *    `checked`，把命中面积改小或让它跟着字走，那些步会点空。
+ */
+input[type='checkbox'],
+input[type='radio'] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  border: 1px solid rgba(178, 214, 255, 0.34);
+  background-color: rgba(3, 14, 40, 0.55);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+input[type='checkbox'] {
+  border-radius: 4px;
+}
+
+input[type='radio'] {
+  border-radius: 50%;
+}
+
+input[type='checkbox']:hover:not(:disabled),
+input[type='radio']:hover:not(:disabled) {
+  border-color: rgba(200, 226, 255, 0.6);
+}
+
+input[type='checkbox']:checked {
+  border-color: var(--accent-2);
+  background-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.4 8.4l3 3 6.2-6.6' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 12px 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 8px rgba(77, 143, 245, 0.45);
+}
+
+input[type='radio']:checked {
+  border-color: var(--accent-2);
+  /* 内圈用描边宽度的算法画不出来，改成一层径向渐变的小圆点 */
+  background-image: radial-gradient(circle at 50% 50%, #ffffff 0 3.2px, transparent 3.6px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+/* 🔴 那一行**根本勾不动**是 §28 原则四的界面半边，置灰必须看得出来 */
+input[type='checkbox']:disabled,
+input[type='radio']:disabled {
+  opacity: 0.34;
+  cursor: not-allowed;
+}
+
+.dc-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/*
+ * 全窗唯一下拉的皮肤（人类伙伴 2026-10-20：图二「全部状态」那颗展开时是一片死白，
+ * 与整窗钴蓝玻璃不是一族）。**改这里等于改所有下拉** —— 面包屑的口径/按类型、
+ * 首页的切盘、清理记录的三个筛选、本页的选择位置，全部走这一个类。
+ *
+ * 三条是刻意的：
+ *  1. `appearance: none` —— 去掉系统那支灰色箭头，自己用 `background-image` 画一支，
+ *     否则 Windows 会按 `color-scheme: dark` 给一支浅灰箭头，跟深底不配；
+ *  2. `color-scheme: dark` —— **关键**：Chromium 据此把展开后的 `<option>` 列表画成
+ *     深底浅字，而不是一片死白（这正是图二那颗的病症）；
+ *  3. 底色与 `dc-input` 同一支（`rgba(4,20,54,.55)`）+ 同一条内阴影 ——
+ *     同一屏里输入框与下拉并排时，两者深浅一致，不再一个发蓝一个发褐。
+ */
+.dc-select {
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: dark;
+  background-color: rgba(4, 20, 54, 0.55);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23a9c9ff' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  border: 1px solid var(--line);
+  border-radius: var(--glass-radius-tight);
+  padding: 5px 24px 5px 9px;
+  color: var(--fg);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+  cursor: pointer;
+  max-width: 100%;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 展开后那一列：深底浅字、 hover 一条淡蓝高亮。没有它 Chromium 仍会按系统色给白底。 */
+.dc-select option {
+  background-color: #0a1c3c;
+  color: #eaf2ff;
+}
+
+/* 聚焦时描边换成强调色，与 `.dc-input:focus` 同一支。 */
+.dc-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* 扫描范围那颗要撑满整行（它替代了原来那个文本框的位置）。 */
+.dc-scope-drive {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- 首页（第七轮：填满一屏 + 下排收成一栏） ---------- */
+
+/*
+ * 验收图给的是**两层**：上面一行"主面板 + 右栏"等高，下面一行**一栏**（一根竖线隔开
+ * 最近一次扫描 / 扫描范围）。第四轮那版下排是三块（最近一次扫描 / 快速入口 / 磁盘管理）
+ * —— 图里不是那样：六格快速入口与「磁盘管理」一起撤了（那六格本就是侧栏六项的第二个入口，
+ * 侧栏仍在；切盘改成标题行右侧那颗下拉），扫描范围从主面板搬下来。
+ *
+ * ⚠️ `.dc-home-grid` 是**两条列轨道**（§23 那条 `tracks === 2` 照旧成立）；
+ * 下排 `.dc-home-cards` 也是两条轨道，但它是**一张卡**里的两半（`gap: 0` + 右半的 `border-left`
+ * 画那根竖线）—— 不是两张并排的卡。判据照旧数轨道，另外两条几何闸钉住"零缝"与"那根线还在"。
+ *
+ * 2026-10-10 用户实拍指出两件事，这一轮就是冲它们去的：
+ *  ① **"下面空出太多了"**：内容按自然高度排完就停，底下留了一大块背景。
+ *     现在 `.dc-home` 撑满 `.dc-view`，上排 `flex: 1` 吃掉全部余量，下排保持自然高。
+ *  ② **"上下的间距应该保持一致"**：此前是 上 8 / 排间 12 / 下 24 三档不等。
+ *     现在统一成 `--sp-4`，且有一条判据直接量这三个数字（见 `--shot` 的 §23 rhythm）。
+ */
+
+/*
+ * 竖向预算：窗口 900 DIP、标题条 40 ⇒ 内容区 860。这一屏四段（上边距 / 上排 / 排间 / 下排 / 下边距）
+ * 必须压进 860，否则右侧出现一根原生滚动条 —— 验收图里没有它，
+ * 而它一出现就说明"一屏只做一件事"这句话破了。`flex: 1` 之后多出来的余量全给上排，
+ * 所以"再往上加一行"仍然会顶出一个滚动条，这条约束没松。
+ */
+.dc-home {
+  flex: 1;
+  min-height: 0;
+  /* 三处一律 --sp-4：上边距 / 排间 / 下边距。**不许只改一处** —— 判据量的是它们的相等。 */
+  padding: var(--sp-4) var(--sp-5);
+  gap: var(--sp-4);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  max-width: 1320px;
+}
+
+.dc-home-grid {
+  /* 吃掉内容区里剩下的全部高度：下排保持自然高，余量归这一排 —— 正是验收图上排明显更高那条。 */
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--sp-3);
+  /* 这一行两侧等高（图里就是齐平的），所以 stretch；右栏靠内容铺开去撑，不靠中间留空白 */
+  align-items: stretch;
+}
+
+/* 下排：**一张卡、一根竖线**。比例照验收图：左半（最近一次扫描）最宽，中间留给文件夹插画，
+   右半（扫描范围）约 1/3。`flex: none` = 只吃自然高 —— 余量归上排，这一栏不该跟着一起长。 */
+.dc-home-cards {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) auto minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
+}
+
+/* 插画格：玻璃文件夹 + 对勾，居中 —— 图上它骑在左右两半之间，是这一卡的"完成态"暗示。 */
+.dc-home-art {
+  display: grid;
+  place-items: center;
+  padding: 0 var(--sp-2);
+  pointer-events: none;
+}
+
+/* 两个半栏共用骨架。`align-items: flex-start` 不是装饰：这一列默认 `stretch`，
+   「查看扫描结果」那颗按钮于是成了一条横贯整栏的横杠 —— 它必须按内容定宽。 */
+.dc-home-half {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.dc-home-half:first-child {
+  padding-right: var(--sp-4);
+}
+
+/* 那根竖线。它随两半一起撑满整卡内高（grid 的 `align-items: stretch`），
+   不是一条定高的短线 —— 所以"零缝 + border-left"这一对形状由 `--shot` 的 §23 下排闸钉住。
+   中间那格是插画（`.dc-home-art`），不吃这根线。 */
+.dc-home-half:last-child {
+  border-left: 1px solid var(--line);
+  padding-left: var(--sp-4);
+}
+
+/* 上排主面板：被 `flex: 1` 撑高之后，余量**均摊到四块内容之间**（`space-between`），
+   不是全塞进环那一行上下。两种排法都"填满了"，但前者是一段 170px 的空白带，
+   读起来像某块内容没渲染出来；后者是均分的呼吸感，也和"上下的间距保持一致"同一种语汇。
+   `gap: --sp-3` 仍在，它是**下限**：空间不够时它兜底，富余时才由 space-between 摊开。 */
+.dc-panel-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.dc-panel-side {
+  display: flex;
+  flex-direction: column;
+  /* 不用 space-between：概览态它会把四行压到卡底、栏头下面留一大块空洞（截图对照抓到的）。
+     空态的居中由 `.dc-side-empty` 的 `margin: auto 0` 自己负责，不依赖这一条。 */
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+/*
+ * 主页三块卡的**透明档**（2026-10-13 用户点名，第二轮再压）：主面板、空间概览、下排卡要改成
+ * 参考图二那种"能看见身后夜山"的薄玻璃。第一轮（0.10/0.18）真机反馈"还是泛蓝"，第二轮：
+ *  · 填充再砍半 —— main 0.07→0.04、quiet 0.12→0.08，只剩一层防文字贴底的浅纱；
+ *  · `saturate(1.3)→1`：背景本来就是蓝调夜山，再抬饱和度等于把"泛蓝"又画了一道；
+ *  · sheen 从蓝白（200,225,255）换成中性白（255,255,255）—— 玻璃只负责"光从上面来"，
+ *    不再自带颜色；底端那截压暗也一并减弱。
+ * 糊化 15px 保持：再小玻璃感就没了，再大山脊就糊平了。
+ *
+ * **为什么覆盖在这里而不是改 `--glass-fill-page` / `--glass-fill-quiet`**：那两个 token
+ * 是全站 `.dc-card` 共用的（记录页、清理页、设置页都踩着），只点名这三块就不该动公共档。
+ * 选择器都比 `.dc-card` / `.dc-card--quiet` 高一级（两个类 vs 一个类），顺序无关照样赢。
+ * 侧栏那档（`--glass-fill-side`）刻意不动，它的实是留的（身后是拖拽区与导航文字）。
+ */
+.dc-home-grid .dc-panel-main {
+  background-color: rgba(34, 86, 186, 0.04);
+  background-image: linear-gradient(178deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.008) 42%, rgba(0, 0, 0, 0.08) 100%);
+  backdrop-filter: blur(15px) saturate(1);
+}
+
+.dc-home-grid .dc-panel-side,
+.dc-home .dc-home-cards {
+  background-color: rgba(10, 28, 70, 0.08);
+  background-image: linear-gradient(178deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.008) 42%, rgba(0, 0, 0, 0.08) 100%);
+  backdrop-filter: blur(15px) saturate(1);
+}
+
+.dc-panel-side .dc-fineprint,
+.dc-panel-main .dc-fineprint {
+  margin-top: 0;
+  line-height: 1.6;
+}
+
+/*
+ * 右栏空态那唯一一句话。第七轮上排被 `flex: 1` 撑到 571 px 之后，它原本贴着栏顶、
+ * 底下留一大块虚空（首屏 `00-home-idle` 那张图就是这么拍出来的 —— 这一屏在补那张图之前
+ * 没有任何判据看得见它）。`margin: auto 0` 在 flex 列里就是"上下余量对半分"，把它摆到栏心。
+ * ⚠️ 必须排在上面那条 `.dc-panel-side .dc-fineprint` **之后**：两者特异性相同（都是两个类），
+ * 谁在后面谁生效；挪到前面就会被那句 `margin-top: 0` 按回栏顶。
+ */
+.dc-panel-side .dc-side-empty {
+  margin: auto 0;
+  text-align: center;
+}
+
+/* 主面板的标题行：盘符图标 + 「本地磁盘 (C:)」+ 右侧那颗切盘下拉 */
+.dc-panel-h {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.dc-panel-h-ic {
+  display: grid;
+  place-items: center;
+  color: var(--accent-2);
+}
+
+.dc-panel-h-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--fg);
+}
+
+/* 切盘药丸：标题行右侧那颗。全窗唯一的 `root` 写入点 —— 图里它画成一枚
+   带盘符与下拉箭头的胶囊。原生 `<select>` 只负责语义与交互，外观由这层壳兜住。 */
+.dc-drive-pick {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--glass-radius-control);
+  background-color: rgba(150, 195, 255, 0.14);
+  background-image: var(--glass-sheen);
+  box-shadow: var(--glass-inner);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.dc-drive-select {
+  appearance: none;
+  -webkit-appearance: none;
+  /* 这颗是「药丸容器 + 透明 select」的画法：外形由外层 `.dc-drive-pick` 给，
+     所以这里不设底色。但**展开后的 option 列表仍要深色** —— 少了 color-scheme，
+     Chromium 按系统浅色画，就是 2026-10-20 图二那片死白。
+     这两行不影响药丸本身的外观（它只是告诉浏览器 option 用什么底色）。 */
+  color-scheme: dark;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+/* 药丸那颗与所有 `.dc-select` 共用同一条 option 底色：一处改，处处生效。 */
+.dc-drive-select option {
+  background-color: #0a1c3c;
+  color: #eaf2ff;
+}
+
+.dc-drive-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dc-drive-caret {
+  flex: none;
+  color: var(--fg-dim);
+}
+
+/* 环 + 两个大数（中间一根竖线）+ 条子。
+   **不给它 `flex: 1`**：那一行会独自吃掉全部余量，环与数字被推到卡上部、
+   条子与 CTA 之间留出一整段空白（实测 170px，看着像丢了内容）。
+   余量归 `.dc-panel-main` 的 `space-between` 均摊 —— 这一行只要自然高度。 */
+.dc-gauge-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+/* 数字那一列：两个大数在上，线性条 + 图例在下（图上条子只在数字这一列里，不横穿环）。 */
+.dc-gauge-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.dc-donut {
+  position: relative;
+  flex: none;
+}
+
+/* 环本体那圈柔蓝外发光：验收图里环是全屏第二亮的东西，光晕跟着弧走（drop-shadow 沿形状描）。
+   它糊的是 DOM SVG，不在 Treemap 豁免的管辖里（那是 canvas 那一层的事）。 */
+.dc-donut-arc {
+  filter: drop-shadow(0 0 10px rgba(77, 143, 245, 0.4)) drop-shadow(0 0 26px rgba(77, 143, 245, 0.22));
+}
+
+.dc-donut-cap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.dc-donut-pct {
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.dc-donut-sub {
+  font-size: 11.5px;
+  color: var(--fg-dim);
+  margin-top: 3px;
+}
+
+.dc-stats {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sp-4);
+}
+
+/* 两个大数之间那根竖线。图里是分隔，不是第二套内容 —— 所以它 `aria-hidden`。 */
+.dc-stat-sep {
+  flex: none;
+  width: 1px;
+  align-self: stretch;
+  background: var(--line);
+}
+
+.dc-stat b {
+  display: block;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.dc-stat b small {
+  font-size: 15px;
+  font-weight: 500;
+  margin-left: 3px;
+  color: var(--fg-dim);
+}
+
+.dc-stat i {
+  display: block;
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--fg-dim);
+  margin-top: 3px;
+}
+
+/* 线性用量条下面那对图例（已使用 / 剩余） */
+.dc-usage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.dc-usage-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: 12px;
+  color: var(--fg-dim);
+  flex-wrap: wrap;
+}
+
+.dc-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(90, 155, 245, 0.6);
+}
+
+.dc-dot-free {
+  background: #7f93b5;
+  box-shadow: none;
+}
+
+.dc-dot-system {
+  background: #4d8ff5;
+  box-shadow: 0 0 6px rgba(77, 143, 245, 0.55);
+}
+
+.dc-dot-app {
+  background: #6fb0ff;
+  box-shadow: 0 0 6px rgba(111, 176, 255, 0.5);
+}
+
+.dc-dot-user {
+  background: #f0b64a;
+  box-shadow: 0 0 6px rgba(240, 182, 74, 0.5);
+}
+
+.dc-dot-other {
+  background: #ef9b63;
+  box-shadow: 0 0 6px rgba(239, 155, 99, 0.5);
+}
+
+/*
+ * 「空间概览」四档行（验收图右栏）：每行一个色点 + 名称 + 右对齐百分比，行下一根细条。
+ * 条的填充色**跟自己的点同色** —— 图上 系统/应用 是蓝、用户/其他 是暖色，颜色即档位身份。
+ * 四档加起来不等于已扫描容量（折叠/排除/截断三笔没路径可归），残差由组件里的 fineprint 点名，
+ * 这里的条不许伪装成"把盘分完了"。
+ */
+.dc-ov-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  /* 撑满栏头之下的全部卡高、四行均匀分布 —— 照验收图：四行摊满整卡，不挤在顶部留半截空洞 */
+  flex: 1;
+  justify-content: space-evenly;
+}
+
+.dc-ov-row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dc-ov-name {
+  font-size: 12.5px;
+  color: var(--fg);
+}
+
+.dc-ov-pct {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.dc-ov-bar {
+  display: block;
+  height: 5px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: rgba(4, 18, 52, 0.55);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(160, 200, 255, 0.08);
+  overflow: hidden;
+}
+
+.dc-ov-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.dc-ov-system .dc-ov-bar i {
+  background: #4d8ff5;
+  box-shadow: 0 0 8px rgba(77, 143, 245, 0.5);
+}
+
+.dc-ov-app .dc-ov-bar i {
+  background: #6fb0ff;
+  box-shadow: 0 0 8px rgba(111, 176, 255, 0.45);
+}
+
+.dc-ov-user .dc-ov-bar i {
+  background: #f0b64a;
+  box-shadow: 0 0 8px rgba(240, 182, 74, 0.4);
+}
+
+.dc-ov-other .dc-ov-bar i {
+  background: #ef9b63;
+  box-shadow: 0 0 8px rgba(239, 155, 99, 0.4);
+}
+
+/* 「空间概览」的栏头（饼图图标 + 标题 + 盘符小标） */
+.dc-panel-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+  flex: none;
+}
+
+.dc-panel-head-ic {
+  display: grid;
+  place-items: center;
+  color: var(--accent-2);
+}
+
+.dc-panel-head .dc-panel-title {
+  margin: 0;
+  font-size: 14px;
+}
+
+.dc-panel-tag {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--fg-disabled);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+/* 扫描范围：第五轮它从主面板搬进下排那块卡（图上就在下排右侧），radio 竖排。
+   搬的是位置不是能力 —— "扫哪儿"仍然可选中，选「指定位置」才升出来那个输入框。 */
+.dc-scope {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+  width: 100%;
+}
+
+/* 卡片头那句「扫描范围」已经是可见标题，fieldset 的 legend 只做语义，不上屏。 */
+.dc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.dc-scope-opts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+
+.dc-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--fg);
+}
+
+.dc-scope-custom {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  width: 100%;
+  /* **不许再写 min-width: 280px** —— 2026-10-20 用户实拍（图一）：
+     卡片右半可用宽度不足 280 时，这行把整个 `.dc-scope` 顶出容器右缘。
+     现在靠 `min-width: 0` + `width: 100%` 自适应：容器多宽它就多宽，绝不超过。 */
+  min-width: 0;
+}
+
+.dc-scope-custom-ic {
+  display: grid;
+  place-items: center;
+  color: var(--fg-dim);
+}
+
+/* 主行动：那颗又大又亮、带柔蓝边缘光的药丸。验收图里它是全屏第二响的东西（第一是环） */
+.dc-cta-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: none;
+}
+
+.dc-cta-stack {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dc-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px var(--sp-5);
+  border: 1px solid rgba(190, 222, 255, 0.42);
+  border-radius: 999px;
+  background-color: rgba(45, 130, 250, 0.62);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.04) 52%, rgba(0, 20, 60, 0.18));
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  /* ⚠️ 底色必须继续写成 `background-color` + 渐变另起一行：§23 的 `ctaBlue` 读的就是
+     computed `background-color` 的 B−R（这里 250−45=205），合成一条简写会退回 0，
+     那条判据与它要防的那个"整屏一个蓝"的排序约束会一起失效。 */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 6px rgba(0, 20, 60, 0.28),
+    inset 0 0 22px rgba(150, 200, 255, 0.22),
+    0 6px 20px -4px rgba(10, 40, 110, 0.6),
+    0 0 26px rgba(70, 145, 250, 0.34);
+  backdrop-filter: blur(20px) saturate(1.4);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+.dc-cta:hover:not(:disabled) {
+  background-color: rgba(58, 143, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(0, 20, 60, 0.28),
+    inset 0 0 22px rgba(160, 210, 255, 0.28),
+    0 8px 24px -4px rgba(10, 40, 110, 0.65),
+    0 0 32px rgba(80, 155, 255, 0.44);
+}
+
+.dc-cta:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.dc-cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.dc-panel-notes {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.dc-panel-notes .dc-fineprint {
+  margin-top: 0;
+}
+
+.dc-notes-tail {
+  margin-left: auto;
+}
+
+/* 下排两个半栏共用的栏头 */
+.dc-tile-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: var(--sp-2);
+}
+
+.dc-tile-head-ic {
+  display: grid;
+  place-items: center;
+  color: var(--accent-2);
+}
+
+/* 「最近一次扫描」半栏的骨架就是 `.dc-home-half`（上面那份），这里只留它自己的字号 */
+.dc-recent-when {
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.dc-recent-v {
+  font-size: 12.5px;
+  color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.dc-recent-sep {
+  opacity: 0.4;
+}
+
+.dc-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dc-recent .dc-btn,
+.dc-recent .dc-link {
+  margin-top: var(--sp-1);
+}
+
+/*
+ * 线性用量条。首页主面板读它。
+ *
+ * 上一版这里挂着两句历史（"绿黄红三档换成蓝渐变""严不严重改由百分比数字说"），
+ * 第四轮那两件事都不成立了：恒蓝是验收图给的，而**数字也不再变色**（`--usage-*` 三个 token
+ * 与 `Donut` 的 `pctColor` prop 一起删了，理由见 `:root` 里那段）。
+ * 所以这里只留一条真约束：**这条不许再长出第三种颜色** —— 红色在本项目里是风险等级专用。
+ */
+.dc-meter {
+  display: block;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(4, 18, 52, 0.55);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(160, 200, 255, 0.08);
+  overflow: hidden;
+}
+
+.dc-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2) 70%, var(--accent-3));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 10px rgba(90, 155, 245, 0.45);
+}
+
+.dc-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+/*
+ * 扫描进度那一格。第二轮把它从"一张玻璃卡"降成一条轻带：它是**过程**读数，
+ * 不该比首页那两块面板更抢眼，而第一代给它配了 blur + 大圆角 + 16px 的粗数字，
+ * 结果整屏最重的东西变成了进度条 —— 那正是"看起来像仪表盘"的来源。
+ * 配套的 `.dc-cell b` 字号与 `.dc-hud-grid` 间距一起收小。
+ */
+.dc-hud {
+  margin-top: var(--sp-1);
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: var(--glass-radius-tight);
+  background-color: rgba(14, 38, 92, 0.6);
+  background-image: linear-gradient(180deg, rgba(186, 220, 255, 0.1), rgba(0, 8, 30, 0.16));
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  padding: var(--sp-2);
+}
+
+/*
+ * 「正在扫描」在首页右栏（V0.9 第六轮搬进来，第七轮摊平）。
+ *
+ * **不再自成一格玻璃**：外层那张 `.dc-card--quiet` 已经是它的底，`.dc-hud` 再画一层描边 +
+ * 底 + blur + 内高光，就成了"卡里套卡"——用户 2026-10-10 明确否掉那一层（"不要再加一层，
+ * 填满整个栏里面"）。所以这里把 `.dc-hud` 自带的那层玻璃整条撤掉，只留两件事：
+ * 填满整栏、六格撑开占满剩下的高度。横条形态（默认 variant）的规则一律不动。
+ */
+.dc-hud--card {
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  /* `flex: 1` 而不是 `height: 100%`：父级 `.dc-panel-side` 是 flex 列，
+     让它按剩余空间分而不是依赖"父高是确定值"这个前提。 */
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * 窄栏里六格从 3 列改 2 列 × 3 行，并且**三行等高铺满整栏**。
+ *
+ * 用 `grid-auto-rows: minmax(0, 1fr)` 而不是 `align-content: space-between`：
+ * 后者把三行按自然高排开、把全部余量塞进行与行之间 —— 实测那一列里"已扫描文件"贴着栏顶、
+ * "跳过项目"贴着栏底，中间两格悬空，读起来像布局坏了。等高行 + 格内容在行内垂直居中，
+ * 余量就摊到六个格子各自的留白里，是"疏"而不是"散"。
+ */
+.dc-hud--card .dc-hud-grid {
+  grid-template-columns: repeat(2, 1fr);
+  flex: 1;
+  min-height: 0;
+  align-content: stretch;
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+.dc-hud--card .dc-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dc-hud--card .dc-hud-line {
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/*
+ * 当前路径**全量展示**（用户 2026-10-10 裁定："扫描的文件地址全部展示出来"）。
+ * 这一支因此不再走省略号：允许换行、按字符断（Windows 路径里没有空格可断）、方向恢复 ltr
+ * —— `.dc-ell` 那个 `direction: rtl` 是为了让省略号落在左侧，这里不需要了。
+ * `align-self: stretch` 仍是**必需的**：column 容器里 `align-items: flex-start` 让子项按
+ * max-content 定尺，不拉满宽就没有可换行的宽度，路径会一路冲出卡片与视口
+ * （实测症状就是整页多出一条横向滚动条）。撤掉它复现，装上则折行。
+ * `flex: none` 是另一半：`.dc-ell` 的 `flex: 1` 在 row 下是"吃掉横向剩余"，
+ * 换成 column 后它变成纵向撑高，横宽反而没人管了。
+ *
+ * ⚠️ `.dc-ell` 本体（省略号那套）**不许动**：跳过项面板与大文件页共用它。
+ */
+.dc-hud--card .dc-hud-line .dc-ell {
+  align-self: stretch;
+  flex: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  direction: ltr;
+}
+
+.dc-hud-line {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.dc-ell {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* rtl 让长路径的尾部（真正在看哪个叶子）可见，中间省略 */
+  direction: rtl;
+}
+
+.dc-hud-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.dc-cell i {
+  display: block;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--fg-dim);
+}
+
+.dc-cell b {
+  /* 16 → 13：这一格是过程读数，不该和首页那三个 22px 的主数字争层级 */
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dc-empty {
+  margin: auto;
+  text-align: center;
+  color: var(--fg);
+}
+
+/* ---------- 空间地图 ---------- */
+
+.dc-map {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.dc-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  /* 右上角那 138×40 是系统胶囊按钮的（U5：`titleBarStyle: 'hidden'` + `titleBarOverlay`）。
+     不给这块让位，地图/大文件/清理记录三页顶栏右端的控件会被按钮**盖住且点不动** ——
+     这条不是看图看出来的，是 `--shot` 的 §23 让位区判据抓出来的（它抓到了 `dc-select@1351,9`）。
+     152 = 138 + 一颗按钮的余量。 */
+  padding-right: 152px;
+  /* 窄窗（<900px）那一头从没量过，直到 M5-M 真机把窗口拖到 760 宽：这一行不换行，
+     日期框 + 两个 select + 两个按钮 + 右边那句"未筛选"再叠上 152px 的让位区，
+     整行**撑出视口** ⇒ 页面根出现横向滚动，而「全部风险」被窗口右缘切掉。
+     换行而不是缩字号：这一行里每个控件都已经小到不能再小，缩下去就点不准了。 */
+  flex-wrap: wrap;
+  row-gap: 6px;
+  border-bottom: 1px solid rgba(160, 200, 255, 0.13);
+  /* 第五轮：这一条从"一块不透明 navy"改成一条玻璃带。它身下是丝绒，糊一下才和首页
+     那两块卡是同一种东西。**清理记录页的筛选器行复用的就是它**（`dc-bar dc-journal-filters`），
+     所以这一处改完那一页跟着好了 —— 别再去给 `.dc-journal-filters` 单开一条底。 */
+  background: linear-gradient(180deg, rgba(24, 58, 124, 0.72) 0%, rgba(10, 32, 82, 0.66) 100%);
+  backdrop-filter: blur(26px) saturate(1.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* Tauri 版没有那枚系统胶囊：三颗窗控由 `WindowControls` 画在**上面那条 `.dc-titlebar`**
+   里（`decorations: false` 之后系统不管了），与本条不是同一行。所以上面那 152px 让位
+   在 Tauri 版里是**纯浪费** —— 一整个 select 的宽度被空着，右端控件因此被挤到看不见。
+   `body` 上带 `dc-tauri` 才给（见 `tauri-main.tsx`），Web 预览与 Electron 侧行为不变。 */
+/* Tauri 版没有那枚系统胶囊（三颗窗控由 `WindowControls` 自绘）。但地图页把它们浮到了
+   这一行的右端（见 `.dc-titlebar-inline` 那段），所以这里仍要留出它们的位置：
+   3×40 + 2×缝 ≈ 124，取 132 留一点余量。其余页面（清理/记录/设置）的 `.dc-bar`
+   是独立一行、底下没有浮窗控，但也一并留出 —— 那些页面上窗控在自家标题条里，
+   这条留白只是让右端不贴边，132 与「不贴边」两者都不坏。 */
+body.dc-tauri .dc-bar {
+  padding-right: 132px;
+}
+
+/* 只加 `flex-wrap` 会把一个缺陷换成另一个更难看的：flex 子项默认**允许收缩**，而中文
+   能在字与字之间断行 ⇒ 「清除筛选」「刷新」「未筛选」被挤成**竖排单字**
+   （M5-M 修完上一版就是这样拍出来的，与 4af6d36 那次"操作列竖排单字"同一症状）。
+   钉住不许断行，换行就只会发生在**控件之间**。范围只限这一行的直接子项，
+   不去动表格里那些列。 */
+.dc-bar > * {
+  white-space: nowrap;
+}
+
+.dc-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+  flex-wrap: nowrap;
+  /* **必须有**，否则 `overflow: hidden` 形同虚设：
+     flex 子项的默认 `min-width` 是 `auto`（= 内容最小宽度），而路径是一长串不可断的文本，
+     于是这一块的"最小宽度"就等于整条路径的宽度 —— 它不肯缩，`.dc-spacer` 那个 `flex: 1`
+     就被压成 0，右端的口径读数 / 两个 select 被整段推出 `.dc-bar` 的可见区
+     （2026-10-20 真机实测：`C:\Users\楠楠想睡觉了\AppData\L…` 这条路径下右侧控件全部消失，
+     窗口拉到 1900 依然不出现）。给 0 之后路径按 `overflow: hidden` 截断，右侧控件回到位。 */
+  min-width: 0;
+}
+
+.dc-crumb-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dc-crumb {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--fg);
+  padding: 3px 6px;
+  cursor: pointer;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dc-crumb:hover {
+  background: rgba(150, 198, 255, 0.14);
+}
+
+.dc-sep {
+  color: var(--fg-dim);
+}
+
+.dc-spacer {
+  flex: 1;
+}
+
+.dc-map-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  /* 第二栏原来是**定宽 320px**：窄窗下它一点都不能缩，于是整块面板被推出视口右缘 ——
+     M6-B Task 4 的溢出矩阵量到的那一格：窗口 760 物理 / 492 CSS，扣掉 200px 导航栏只剩 292 可用，
+     面板仍占 320 ⇒ `aside.dc-side-panel` 越过右缘 28px，而它祖先链里没有可滚容器，
+     那 28px 用户**滚不到**（根不产生横向滚动条是因为被 overflow 吃了，不是排版没问题）。
+     两侧都给 minmax(0, …) ⇒ 挤的时候缩面板而不是推出去；面板自己有 overflow:auto，
+     窄到极限时里面的详情仍然滚得到。
+     ⚠️ 但**首栏不能是 minmax(0, 1fr)**：第一版就是这么改的，矩阵两条轴当场全绿，
+     而 CDP 量出画布宽 = **0** —— 挤掉的其实是这一页的主内容，"没有溢出"变成了"地图没了"。
+     所以首栏的下限取 180px：292 可用时留 180 给地图、112 给面板（面板自己 overflow:auto 兜底）。
+     180 不是随手挑的：它是这条网格在**主内容仍然可辨认**的前提下能退到的地方，
+     而矩阵里第三轴（画布宽 ≥180）就是钉这一格的 —— 少任何一条，另一条都会假绿。 */
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 320px);
+}
+
+.dc-map-canvas {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+}
+
+/* SpaceSniffer 的宿主层。`position:absolute; inset:0` 与 `.dc-treemap` 同一形状 ——
+   两份画布占同一个盒子，谁可见由 display 决定（见 SpaceMap.tsx 里那段注释）。
+   **不设 z-index**：宿主层与 treemap 不同时可见，叠放次序没有意义；
+   而它上面的子窗口是另一个进程的顶层窗口被 SetParent 进来，z-index 由 Win32 管。 */
+.dc-ss-host {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* 引擎这一层不在线时的一句真话。绝对定位在宿主层顶上，**不推挤** treemap 的布局。 */
+.dc-ss-note {
+  position: absolute;
+  inset: auto var(--sp-4) var(--sp-4) var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--glass-fill-quiet);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-card);
+  box-shadow: var(--glass-inner);
+  backdrop-filter: blur(24px) saturate(1.4);
+  color: var(--fg-dim);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.dc-treemap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.dc-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dc-canvas-top {
+  cursor: default;
+}
+
+/* ---------- 地图视图控件（§13 缩放/平移/适应窗口/重新布局） ---------- */
+
+.dc-mapctl {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  /* 半透明底：贴在小块上也不糊住图，但文字仍读得清 */
+  background: rgba(41, 41, 46, 0.88);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.dc-mapctl .dc-btn {
+  padding: 2px 9px;
+}
+
+.dc-mapctl-scale {
+  min-width: 46px;
+  text-align: center;
+  color: var(--fg-dim);
+  font-size: 12px;
+}
+
+.dc-side-panel {
+  /* 这块面板今天读起来是"窗口右边贴了一张不透明的 navy 纸"。改成首页次级卡
+     同一族材质（`--glass-fill-quiet` + 糊 + 一条亮边），它才和左边那块地图是同一个产品。 */
+  border-left: 1px solid rgba(160, 200, 255, 0.13);
+  background: linear-gradient(180deg, rgba(20, 52, 116, 0.72) 0%, var(--glass-fill-quiet) 60%, rgba(6, 22, 60, 0.78) 100%);
+  backdrop-filter: blur(30px) saturate(1.4);
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.05);
+  padding: var(--sp-3);
+  overflow: auto;
+}
+
+.dc-panel-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+/* Task 7：详情面板标题那一行（名称 + 「已固定」+ 取消）。名称仍只在 .dc-panel-title 里，
+   截图步骤靠它读"现在看的是哪一格"，混进标记就成了假判据。 */
+.dc-detail-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dc-pin {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0 7px;
+}
+
+.dc-path {
+  user-select: text;
+  word-break: break-all;
+  color: var(--fg-dim);
+  background: rgba(3, 14, 40, 0.6);
+  border-radius: var(--glass-radius-tight);
+  padding: 6px 8px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(160, 200, 255, 0.07);
+}
+
+.dc-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 12px 0 0;
+}
+
+.dc-dl dt {
+  color: var(--fg-dim);
+}
+
+.dc-dl dd {
+  margin: 0;
+  text-align: right;
+}
+
+/* ---------- §10 Top 空间面板（侧栏里 DetailPanel 之后，最多 10+1 行 DOM） ---------- */
+
+.dc-top {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.dc-top-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dc-top-row {
+  display: grid;
+  /* 名次 | 名字（可收缩省略）| 容量 | 占比 —— 数字列右对齐才扫得快 */
+  grid-template-columns: 22px minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: baseline;
+  width: 100%;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dc-top-row:hover:not(:disabled) {
+  background: rgba(150, 198, 255, 0.14);
+}
+
+.dc-top-rank {
+  color: var(--fg-dim);
+  font-size: 11px;
+}
+
+.dc-top-size {
+  white-space: nowrap;
+}
+
+.dc-top-pct {
+  min-width: 44px;
+  text-align: right;
+  font-size: 12px;
+}
+
+/* 折叠行：它是合计，不是一块能点的地方 —— disabled 就是全部交互，样式负责把它说出来 */
+.dc-top-folded {
+  cursor: default;
+  color: var(--fg-dim);
+}
+
+.dc-top-folded .dc-top-name {
+  font-style: italic;
+}
+
+/* ---------- §15 跳过项清单（侧栏最后一块：先讲这一格、再讲这一层、最后才讲"有什么没算进来"） ---------- */
+
+.dc-skip {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.dc-skip-body {
+  margin-top: 6px;
+}
+
+.dc-skip-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  /* 最多 200 条（MAX_DENIED_SAMPLE）：给它一个自己的滚动区，否则侧栏被一栏路径拉成一公里长。
+     上限只约束"能点名哪些"，`共跳过 N 个` 那个 N 从来不受它影响，溢出由下面那句点名。 */
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* ---------- tooltip ---------- */
+
+.dc-tip {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  min-width: 200px;
+  max-width: 300px;
+  /* 第二处蓝残留：`rgba(11, 32, 74, .92)`，B−R = 63。它是浮在地图上的那一档，
+     不透明度维持 `--glass-fill-menu` 的水平没降（V0.8 量过对比度），但色相退回中性。 */
+  background: rgba(12, 30, 66, 0.94);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-tight);
+  padding: 8px 10px;
+  backdrop-filter: blur(var(--glass-blur-float)) saturate(var(--glass-saturate));
+  box-shadow: var(--glass-inner), 0 10px 28px rgba(0, 0, 0, 0.55);
+}
+
+.dc-tip-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dc-tip-path {
+  color: var(--fg-dim);
+  font-size: 11px;
+  word-break: break-all;
+  margin: 2px 0 6px;
+}
+
+.dc-tip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+/* ---------- 详情徽标 ---------- */
+
+.dc-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.dc-badge {
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--fg-on-accent);
+}
+
+/*
+ * 风险药丸本体：**圆点 + 文字必须是一个 flex 行**，而且这条规则要长在 `.dc-badge-risk` 上，
+ * 不能只挂在某个容器底下。
+ *
+ * ⚠️ 2026-10-23 人类伙伴第三次指同一件事：「这个药丸点和安全字体还是重合了」。
+ * 前一版把 `display: inline-flex` 写在 **`.dc-clean-row-risk .dc-badge`** 里 ——
+ * 那只覆盖"列表行里的药丸"。详情框头部的药丸不在 `.dc-clean-row-risk` 下，
+ * 于是它退回行内排版：`<i class="dc-risk-dot">` 是 `inline-block` 的方盒，
+ * 与文字同处一条行内流，被基线与行高挤在一起 —— 圆点压住「安」字的左半边。
+ * 两处长得一样、规则却只覆盖一处，这就是"修了一个地方、另一个地方还在"的形状。
+ *
+ * 所以规则上移到本体：**任何地方**画这颗药丸都自带 `inline-flex` + 居中 + 间距。
+ */
+.dc-badge-risk {
+  background: transparent;
+  border: 1px solid;
+  color: var(--fg);
+  /* 「🟢 安全」被窄列拆成「安 / 全」两行是截图里看出来的，风险标签必须整体不换行 */
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  /* 行内弹性的默认 `align-items: baseline` 会让圆点去对文字的基线 ——
+     7px 的小圆点对基线就是"压低半格、贴到字上"。`center` 才是"圆点与文字一条中线"。 */
+  justify-content: center;
+  /* 纵向 padding 与圆点尺寸的关系：圆点 7px、字号 11px，两者居中对齐后药丸高度
+     由文字决定；这一条防止某些父级把它压扁（flex 容器里的子项默认会被拉伸）。 */
+  flex: none;
+}
+
+/* 扫描档位徽标（ScanHud）：MFT 直读档才亮。窄行里不许把标题挤换行。 */
+.dc-badge-mode {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--fg);
+  white-space: nowrap;
+  flex: none;
+}
+
+.dc-fineprint {
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 14px;
+}
+
+/* ---------- 右键菜单 ---------- */
+
+.dc-menu {
+  position: fixed;
+  z-index: 40;
+  min-width: 200px;
+  background: rgba(38, 38, 44, 0.97);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.dc-menu-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: var(--fg);
+  padding: 7px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dc-menu-item:hover:not(:disabled) {
+  background: rgba(150, 198, 255, 0.16);
+}
+
+.dc-menu-item:disabled {
+  color: var(--fg-disabled);
+  cursor: not-allowed;
+}
+
+.dc-menu-note {
+  font-size: 10px;
+  color: var(--fg-disabled);
+}
+
+/* ---------- 大文件 ---------- */
+
+/*
+ * 这一页与清理记录页的根容器。两条都是**这一轮补的**：
+ * `.dc-journal` 从 V0.5 起**一条规则都没有**（它和 `.dc-page` 那个坑同族 —— 类名挂在根上、
+ * 两份样式表里没人理它），所以那一页是贴着窗口边缘画的。
+ *
+ * `min-width: 0` 不是装饰：`.dc-view` 是 flex 列，而 flex 项默认 `min-width: auto` ——
+ * 一张比视口宽的表格会把**整个根**撑宽，于是横向滚动条出现在页面上而不是 `.dc-table-wrap` 里，
+ * 连带把页脚那两句散文推出右边界（真机 36-clean-history-page.png 上就是那个样子）。
+ * 表格该在自己的容器里滚，不该把页面撑开。
+ */
+.dc-journal {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  padding: var(--sp-3) var(--sp-5) var(--sp-5);
+}
+
+.dc-journal {
+  overflow: auto;
+}
+
+.dc-input-sm {
+  max-width: 200px;
+  flex: none;
+}
+
+/*
+ * 日期选择器（清理记录页那一格，`input[type=date]`）。
+ *
+ * 人类伙伴 2026-10-20 图二：点开后弹出的日历是一片**系统浅色**（白底黑字），
+ * 压在钴蓝玻璃界面上像贴了一块膏药。病灶不在我们的样式，而在 Chromium 按
+ * `color-scheme` 决定日历皮肤 —— 不给它 dark，它就按系统浅色画。
+ *
+ * `color-scheme: dark` 是这一格的**唯一正解**：它同时改掉三处 ——
+ *   ① 输入框里那截 `yyyy/mm/dd` 的文字色（否则深底深字，看着像空的）；
+ *   ② 展开后日历的底与字；
+ *   ③ 日历里「今天」那颗的高亮色（按 accent 走，而不是系统黄）。
+ *
+ * `::-webkit-calendar-picker-indicator` 是右侧那个小日历图标：默认是深色方块，
+ * 在深底上会糊成一团，用 `filter: invert()` 翻成浅色。
+ */
+.dc-journal-filter-day {
+  color-scheme: dark;
+  color: var(--fg);
+}
+
+.dc-journal-filter-day::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.75;
+  filter: invert(1);
+}
+
+.dc-journal-filter-day::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.dc-table-wrap {
+  flex: 1;
+  overflow: auto;
+}
+
+.dc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+/**
+ * §3.6 未完 #4：开发环境页是**一个生态一张 table**，而默认的自动布局会按每张表自己的内容
+ * 各算一套列宽 —— 于是「占用」那一列在 Node 组靠右、在 Java 组靠左，眼睛顺着数字扫下去
+ * 会串到别的行。这里把四列钉成固定布局 + 同一组百分比，各组共用一副格线。
+ *
+ * 只作用于 `.dc-devenv-group`：别的页面（清理、重复、记录）是单张表，
+ * 固定布局会把长路径挤成换行，那边没这个毛病就别连坐。
+ */
+/*
+ * 开发环境页是"一个生态一张表"，而 `.dc-devenv-group` 这个类名**从 V0.7 起就没有自己的
+ * 底色规则** —— 于是七个生态是七段裸在丝绒上的表格，没有分组感。给它一张次级卡，
+ * 与首页下面那三块卡同族。
+ */
+.dc-devenv-group {
+  margin-top: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3) var(--sp-3);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-card);
+  background: var(--glass-fill-quiet);
+  box-shadow: var(--glass-inner);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+
+.dc-devenv-group .dc-table {
+  table-layout: fixed;
+}
+
+.dc-devenv-group .dc-table th:nth-child(1) { width: 22%; }
+.dc-devenv-group .dc-table th:nth-child(2) { width: 14%; }
+.dc-devenv-group .dc-table th:nth-child(3) { width: 22%; }
+.dc-devenv-group .dc-table th:nth-child(4) { width: 42%; }
+
+.dc-devenv-group .dc-table td {
+  /* 固定布局下长路径不会自己缩，必须显式允许断词，否则那格会被撑出容器 */
+  overflow-wrap: anywhere;
+}
+
+/*
+ * ⚠️ 这一条是**抵上一轮自己加的规则**的，别删。
+ * 上一轮为了修「7.0 MB」被拆成两行，给 `.dc-num` 整类加了 `white-space: nowrap`。
+ * 全仓只有这一格会往 `.dc-num` 里放**整句人话**（`DevEnv.tsx:207` → `devEnvBytesText`，
+ * 最长那句是「这棵树上没有它的地盘（扫的是 D:\<路径>\Users\Kano）」），于是 nowrap 让那句
+ * 横着溢出 14% 的列宽、压在右边「动作」那列的两个按钮上面 —— 真机截图 39-devenv-page.png
+ * 上两行字叠在一起。**41 步判据一条都没红**（它读 textContent，不读几何）。
+ * 教训：给一个"数字列"上的类加排版规则之前，先 grep 有没人往它里面放散文。
+ * 这一列宽 14%（约 154 px），短数字在本列宽下本来就拆不开，所以撤掉 nowrap 不会退回去。
+ */
+.dc-devenv-group .dc-table td.dc-num {
+  white-space: normal;
+}
+
+.dc-table th {
+  position: sticky;
+  top: 0;
+  /* 吸顶行**不能是全透的**（行会从它底下滚过去，字叠字），但也不许是一块死 navy。
+     解法是半透 + `backdrop-filter`：糊住滚过去的内容，仍然透出环境色。
+     ⚠️ 别把它改成 `background: transparent` 或把 alpha 降到 .5 以下 —— 那是可读性回归。 */
+  background: rgba(12, 34, 82, 0.86);
+  backdrop-filter: blur(20px) saturate(1.4);
+  text-align: left;
+  font-weight: 600;
+  color: var(--fg-dim);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  /* 「计入预估」被窄列拆成三行是真机截图看出来的。表头一律不许折：
+     它比数据短，让它把列撑宽一点比把它自己拆碎便宜。 */
+  white-space: nowrap;
+}
+
+.dc-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dc-table tbody tr:hover {
+  /* 行悬停原来是 `--bg-2` 一块实心 navy。它压在**半透明**的表面上，于是悬停一下就把
+     身后那层丝绒糊死一块 —— 读起来像贴了一张不透明的灰条。改成光洗：只加亮，不遮。 */
+  background: rgba(150, 198, 255, 0.08);
+}
+
+.dc-num {
+  text-align: right;
+  /* 「7.0 MB」在清理页那一列被拆成两行是同一族毛病：数字带单位必须整体走 */
+  white-space: nowrap;
+}
+
+.dc-td-name {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dc-td-path {
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg-dim);
+}
+
+/**
+ * 操作列。`m5f-largefiles-filled.png` 上「打开位置」被拆成一列竖排的单字 ——
+ * 那一轮扫的是 `C:\Windows`，位置列全是 `...FileRepository\nvnhqi.inf_amd64_2b991…` 这种长串，
+ * 自动布局把没有下限的那一列挤到了极限。与 1763 行那条「计入预估」同族，只是这次是 `<td>`。
+ * 数据列该省略号就省略号（上面两条已经管了），但**按钮是自己的下限**：宁可整列宽一点。
+ */
+.dc-td-act {
+  white-space: nowrap;
+}
+
+/**
+ * 「大文件」那一张表的列宽。与 §3.6 开发环境页同一个道理：**自动布局按内容长**，
+ * 而 `max-width` 在自动布局的 `<td>` 上根本不被遵守 —— 于是 `C:\Windows\...\FileRepository\
+ * nvnhqi.inf_amd64_…` 这种长串会把位置列撑到无限宽，把右边的操作列挤出容器
+ * （`m5f-largefiles-filled.png` 第一版：「打开位置」被拆成一列竖排的单字；
+ * 第二版加了 nowrap 之后它整列被推出右边界，只剩横向滚动条能找到）。
+ *
+ * 所以这里改成**定布局 + 点名每一列**：位置列给最大的一份并让它自己省略号，
+ * 操作列拿到自己的下限。只作用于 `.dc-large`，别页的表不动（它们各自有宽度策略）。
+ */
+.dc-large .dc-table {
+  table-layout: fixed;
+}
+
+.dc-large .dc-table th:nth-child(1) { width: 4%; }  /* # */
+.dc-large .dc-table th:nth-child(2) { width: 18%; } /* 文件 */
+.dc-large .dc-table th:nth-child(3) { width: 10%; } /* 大小 */
+.dc-large .dc-table th:nth-child(4) { width: 42%; } /* 位置 */
+.dc-large .dc-table th:nth-child(5) { width: 14%; } /* 修改时间 */
+.dc-large .dc-table th:nth-child(6) { width: 12%; } /* 打开位置 */
+
+.dc-link {
+  background: transparent;
+  border: 0;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+}
+
+.dc-link:hover {
+  text-decoration: underline;
+}
+
+/*
+ * 「这份别删」这类链接按钮在检测途中是 `disabled` 的，而 `.dc-link` 原本**没有** `:disabled` 一条：
+ * 置灰的那 78 个和唯一能点的那个长得一模一样，连光标都还是 `pointer`，hover 还画下划线。
+ * 2026-10-13 真机截图（`assets/m5o-04-midrun-report-still-old.png`）看出来的 ——
+ * UIA 的 `IsEnabled` 报得完全正确，所以这条**只有肉眼抓得到**，任何按控件属性的判据都量不到它。
+ * 照 `.dc-btn:disabled` 同一族补：变淡 + 光标说不让点 + 不再画 hover 下划线。
+ */
+.dc-link:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dc-link:disabled:hover {
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * §17 清理预览 / §18 任务 / §19 验证
+ * ------------------------------------------------------------------ */
+
+.dc-page-title {
+  font-size: 15px;
+  margin: 0 0 10px;
+}
+
+/*
+ * 清理页的标题行（人类伙伴 2026-10-20）：
+ * 「清理预览」四个字放大并**用与品牌同一套的渐变字**，右侧紧跟着预计释放量。
+ *
+ * 为什么单独一条而不是直接把 `.dc-page-title` 调大：那个类还被设置页等复用，
+ * 全局调大等于顺手改了别的页。这里只放大这一页的那一个。
+ *
+ * 渐变取的就是侧栏字标 `--brand-grad`（若未定义则退回标题色），
+ * 这样"清理预览"和左上角 DeepClean 是同一族的白→青蓝，而不是自造一套色。
+ */
+.dc-clean-title {
+  font-family: var(--font-title);
+  font-size: 26px;
+  /* 衬线标题不需要 650 那么重（DM Serif Display 只有 400 一档，浏览器会伪粗体化 —— 那会让笔画糊）。
+     400 就是它本来的样子，层级靠字号与渐变撑。 */
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #cfe6ff 45%, #8fc2ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 标题 + 释放量：横向一组，基线对齐；窄窗允许换行（不然两颗会互相挤）。 */
+.dc-clean-headline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+/* 「预计释放 306.7 MB」——结论数字，给它比正文重一档的字重与更亮的色，
+   但仍比标题弱，避免与「清理预览」抢主次。 */
+.dc-clean-release {
+  font-size: 14px;
+  color: var(--fg-dim);
+}
+
+.dc-clean-release b {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--accent);
+  margin-left: 2px;
+}
+
+/*
+ * 清理页的根容器。
+ *
+ * ⚠️ **`overflow: auto` 与 `min-height: 0` 缺一不可**，2026-10-21 真机反馈「这个页面目前无法滑动」
+ * 就是这两条的缺失。三条约束串起来才是"能滚"：
+ *  1. `.dc-view` 是 `display: flex; flex-direction: column`，它是那一列里的一个 flex 项；
+ *     不给 `flex: 1` 它就只有内容那么高，`overflow` 也就无从谈起。
+ *  2. flex 项默认 `min-height: auto` ⇒ 内容比容器高时**它不肯缩**，而是把父容器顶开。
+ *     `min-height: 0` 是让"缩到只剩可视高度"这件事成立的那一条。
+ *  3. `overflow: auto` 才真的出现滚动。
+ *
+ * 上一版为什么没问题：那时这一页的表格装在 `.dc-table-wrap` 里（它自己带
+ * `flex: 1; overflow: auto`），滚动由那一格承担。版式换成卡片列表时那个容器一起删了，
+ * 而**没有谁接手这条职责** —— 于是长列表在窗口下方被直接裁掉，滚不到也看不见。
+ * 现在轮到这一页自己承担，写法与 `.dc-home` 逐条对齐（那里一直是 `flex: 1; min-height: 0; overflow: auto`）。
+ */
+.dc-clean {
+  /* 18 / 22 / 40 是三个离格值 —— 8pt 那套（`--sp-*`）只有 8/12/16/24/32 五档，
+     首页这一轮刚收完，这一页还漏着。max-width 与首页对齐成 1320。 */
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  padding: var(--sp-3) var(--sp-5) var(--sp-5);
+  max-width: 1320px;
+}
+
+/* 标题行：左边「清理预览」四个字，右边那颗一键清理。与首页主面板的 `.dc-panel-h`
+   同一形状（图标 + 标题 + 右侧控件），所以高度与内边距照它抄。 */
+.dc-clean-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin: 0 0 14px;
+}
+
+/* `.dc-cta` 是首页居中竖排的那一颗（`.dc-cta-row` 是 column）；这一页是横排标题行，
+   所以只改对齐方式，**底色/发光/圆角一律不动** —— §23 的 `ctaBlue` 判据读的是
+   `background-color` 的 B−R，任何覆写都会让它退回 0。 */
+.dc-clean-cta {
+  flex: none;
+}
+
+/* 窄窗时标题行优先保住按钮：标题换行、按钮不缩（它才是这一页的主行动）。 */
+@media (max-width: 860px) {
+  .dc-clean-head {
+    flex-wrap: wrap;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 统计带 + 卡片列表（图二那套版式，2026-10-21 重构）
+ *
+ * 三个数全部读服务端字段（`cleanupHeadline`），所以这里的样式只管排版，
+ * 没有一个规则和某个具体数值绑定。
+ * ------------------------------------------------------------------ */
+
+/*
+ * 统计带：左边环、右边三格。颜色**一律引玻璃 token**，这是"保留当前色彩"那条要求
+ * 在结构层的落点 —— 换版式不等于换色板，面板依旧是深钴蓝玻璃而不是图二那种浅色纱面。
+ */
+.dc-clean-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-3);
+  background-color: var(--glass-fill-quiet);
+  background-image: var(--glass-specular), var(--glass-sheen);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-card);
+  box-shadow: var(--glass-inner);
+  backdrop-filter: blur(24px) saturate(1.4);
+  min-width: 0;
+}
+
+.dc-clean-stats-ring {
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+/* 环心那两个数：`dc-donut-sm` 把大字收小一档（104 px 的环塞不下 30 px 的字），
+   副标题跟着收一点。**不改 `.dc-donut-*` 本体** —— 首页那一版一个像素都不能动。 */
+.dc-donut-sm .dc-donut-pct {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.dc-donut-sm .dc-donut-sub {
+  font-size: 10.5px;
+  margin-top: 1px;
+}
+
+.dc-clean-stats-cells {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sp-2);
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+/* 一格 = 图标砖 + 「标签 / 数值」两行。与图二同形，但底色透明（它压在统计带这块玻璃上）。 */
+.dc-clean-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 150px;
+  min-width: 0;
+  padding: var(--sp-2);
+  border-radius: var(--glass-radius-control);
+  border: 1px solid transparent;
+}
+
+/* 「预计可释放」那一格是这一带的结论，给它一条淡蓝边把主次说出来。 */
+.dc-clean-stat-accent {
+  border-color: var(--glass-edge-strong);
+  background: rgba(45, 130, 250, 0.16);
+}
+
+.dc-clean-stat-ic {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 9px;
+  color: var(--accent-2);
+  background: rgba(150, 195, 255, 0.12);
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+}
+
+.dc-clean-stat-label {
+  font-size: 11px;
+  color: var(--fg-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dc-clean-stat-value {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin-top: 1px;
+}
+
+/* 窄窗：统计带改成上下两段 —— 环形自己居中占一行，三格铺满下面一行。
+   **不是**简单 `flex-wrap: wrap`：那样环形会留在左侧、三格挤在右半边
+   （真机 `cleanup-layout-880.png` 第一版就是这样，环形偏在一角）。
+   判据在 `cleanup-layout-probe.mjs` 之外由人眼看 —— 它量得到"没溢出"，
+   量不到"环偏了"，而这一条是肉眼当场看出来的。 */
+@media (max-width: 900px) {
+  .dc-clean-stats {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+
+  .dc-clean-stats-cells {
+    width: 100%;
+    flex: none;
+  }
+
+  /* 三格在窄窗里竖排（一列），每格占满整行 —— 横排到 150 px 一格时
+     「可回收（报告合计）」这种标签会被省略号吃掉。 */
+  .dc-clean-stats-cells {
+    flex-direction: column;
+  }
+
+  .dc-clean-stat {
+    flex: none;
+    width: 100%;
+  }
+}
+
+/*
+ * 工具栏：勾选计数 + 全选 + 清空。放在列表卡片**上方**（列头那一行要留给五格标题，
+ * 它们必须与下面每一行的格线对齐）。`margin-left: auto` 让两颗按钮靠右。
+ */
+.dc-clean-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.dc-clean-toolbar-count {
+  font-size: 12px;
+  margin-right: auto;
+}
+
+/* 小一号的按钮：列头这一行要与表头同高，标准 `.dc-btn` 会把它撑成两倍。 */
+.dc-btn-xs {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/*
+ * 列表卡片。列宽用**一套 grid 模板**贯穿表头与每一行（`--dc-clean-grid`），
+ * 这样"占用/文件/计入预估"三列在表头与行上天然对齐，不需要 `table-layout` 那套。
+ *
+ * 五格：勾选位 / 图标砖 / 描述 / 风险 / 数字组。**数字组是一格**（`.dc-clean-row-nums`），
+ * 里面再分三小列 —— 那一格能整体换到第二行（见窄窗那两条 @media），
+ * 而"三个数字列各占一格"在 572 px 视口下会把描述列压成 0 宽（真机实测，整行只剩 6 格）。
+ */
+.dc-clean-list {
+  /* 三列数字的列宽：表头那一组与行内那一组**共用这一个变量** —— 两处各写一份就差 4px。 */
+  --dc-clean-nums: 86px 56px 88px;
+  /* 五格：勾选位 / 图标砖 / 描述 / 风险 / 数字组。
+     最后一格的宽度 = 三列数字之和 + 两道 gap（86+56+88 + 2×12 = 254）。
+     第一版只写了 244（少算了 gap），末列因此溢出 4px —— 是真机探针量出来的。
+     所以这里写成算术：三列的数字只在 `--dc-clean-nums` 里出现一次，宽度跟着算。 */
+  --dc-clean-grid: 30px 34px minmax(0, 1fr) 82px calc(86px + 56px + 88px + 2 * var(--sp-1));
+  background-color: var(--glass-fill-quiet);
+  background-image: var(--glass-specular), var(--glass-sheen);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-card);
+  box-shadow: var(--glass-inner);
+  backdrop-filter: blur(24px) saturate(1.4);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.dc-clean-list-head,
+.dc-clean-row {
+  display: grid;
+  grid-template-columns: var(--dc-clean-grid);
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 6px var(--sp-3);
+}
+
+.dc-clean-list-head {
+  border-bottom: 1px solid var(--line);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--fg-dim);
+  background: rgba(12, 34, 82, 0.46);
+}
+
+/* 三个数字标签各自贴在自己那列数字的右缘上。
+   **列宽与行内那三小列共用 `--dc-clean-nums`**，对齐方式也共用 `text-align: right` ——
+   两处各写一份就是"迟早分叉"（第一版就是这样差了 4px：表头用了 `justify-self: end`，
+   行内用 `text-align: right`，同一件事两种排法）。 */
+.dc-clean-list-head-nums {
+  display: grid;
+  grid-template-columns: var(--dc-clean-nums);
+  gap: var(--sp-1);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 表头只有五格，而每一行有七格（勾选位、图标砖、项目、风险、占用、文件、计入预估）。
+   所以前两格跳过、从第三列开始排 —— 五格与行里对应的那五格**逐列对齐**。
+   不这么写就得在表头塞两个空 span，那是为了对齐而多出来的 DOM。 */
+.dc-clean-list-head-title {
+  grid-column: 3;
+  min-width: 0;
+}
+
+.dc-clean-list-head-risk {
+  grid-column: 4;
+}
+
+.dc-clean-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /*
+   * **每一张条目卡片等高**（人类伙伴 2026-10-23：「每个选项的框大小限制为一致」）。
+   *
+   * 为什么必须在这一个容器上：`.dc-clean-rows` 里每一行（`li.dc-clean-row`）是**各自独立的**
+   * grid 容器，彼此不共享行高 —— 想让"行与行"齐高，只有把父级也变成 grid 才有一处可以声明。
+   * 纯 `1fr` 的隐式行在**自动高度**的 grid 容器里会先按 max-content 定标、再彼此拉平，
+   * 于是"内容最高的那一行"成为共同高度；写死像素做不到这件事（描述长度随规则文案变）。
+   *
+   * ⚠️ 不许改成 `align-items: stretch` 那种做法：那是"行内各格等高"，不是"行与行等高"，
+   * 而主人点名要的正是后者（现在四张卡的高低差就来自描述换行 1 行 vs 3 行）。
+   */
+  display: grid;
+  grid-auto-rows: 1fr;
+}
+
+.dc-clean-row {
+  border-bottom: 1px solid var(--line);
+  /* 纵向居中（人类伙伴 2026-10-23：「将风险、占用等信息居中放置（当前偏上）」）。
+     上一版是 `align-items: start` + 各格 `padding-top` 补位 —— 那是描出来的对齐：
+     描述一换行，右边三格就贴在最上面，读起来像"数字掉下来了"。
+     居中由 grid 一处负责，各格不许再写 `padding-top` 去微调。 */
+  align-items: center;
+  /*
+   * 行高下限（人类伙伴 2026-10-23：「卡片等高的高度再增加点」）。
+   *
+   * 为什么用 `min-height` 而不是加大 `padding`：padding 会把**文字块**也往里推，
+   * 摘要那一行会被挤成两行（它现在是 `nowrap` + 省略号，挤了就变形）；
+   * `min-height` 只在内容本来就矮时补白，内容高过它时完全不参与 —— 这正是"再加点高度"
+   * 想要的语义：矮的那些长高，长的不变。
+   *
+   * 56px 是量出来的：一行内容 = 名字行 18px + 摘要 17px + 上下各 6px padding ≈ 47px，
+   * 提到 56 之后每张卡上下各多出约 4.5px 呼吸位，同时**不改变**等高这件事
+   * （等高仍由 `.dc-clean-rows` 的 `grid-auto-rows: 1fr` 统一决定，取最高那一行）。
+   */
+  min-height: 56px;
+}
+
+.dc-clean-rows > .dc-clean-row:last-child {
+  border-bottom: 0;
+}
+
+.dc-clean-row:hover {
+  background: rgba(150, 198, 255, 0.08);
+}
+
+/* 勾上的行：与旧表格 `.dc-clean-on` 同一条纪律 —— 左端亮边 + 洗色，
+   因为「哪些条目会被删」是这一页最要紧的一件事，不能只靠 6% 的亮度差。 */
+.dc-clean-row-on {
+  background: rgba(58, 122, 224, 0.24);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* 勾选位：15×15 的框在 30 px 的列里居中。**不改尺寸** —— `--shot` 靠这一格点击与读 checked。
+   `padding-top` 那一档随行内改纵向居中一起去掉了（见 `.dc-clean-row` 那段）。 */
+.dc-clean-check {
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 图标砖：形状跟着 category 走、颜色跟着风险走（两者都由 `Cleanup.tsx` 的纯函数给）。 */
+.dc-clean-row-ic {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid;
+  background: rgba(6, 22, 56, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.dc-clean-row-main {
+  min-width: 0;
+}
+
+.dc-clean-name {
+  font-weight: 600;
+}
+
+/*
+ * 名字 + 「查看详情」同一行（人类伙伴 2026-10-23）。
+ * 用 `baseline` 而不是 `center`：名字是 600 字重的标题、链接是 12px 的弱文字，
+ * 按中线对齐会让链接看起来比名字"高半个字"。
+ */
+.dc-clean-row-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 详情链接不许换行、也不许被名字挤没：它是这一行"内容去哪了"的唯一出口。 */
+.dc-clean-more {
+  flex: none;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+/*
+ * 一句话概况（最简模式）。**单行、省略号**，两件事一起做：
+ *  · `white-space: nowrap` + `text-overflow: ellipsis` 保证"最简"真的是一行 ——
+ *    否则描述一长，卡片又会长短不一，上面那条等高就白做了；
+ *  · 完整那句话在「查看详情」的框里逐字可见，所以这里截断不丢信息。
+ */
+.dc-clean-row-desc {
+  font-size: 11.5px;
+  line-height: 1.5;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 三个数字列装在一格里，内部再分三小列（列宽与表头那一组共用 `--dc-clean-nums`）。 */
+.dc-clean-row-nums {
+  display: grid;
+  grid-template-columns: var(--dc-clean-nums);
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+/* 数字三列：右对齐 + 等宽数字。纵向由 `.dc-clean-row` 的 `align-items: center` 统一负责 ——
+   这里**不许再写 `padding-top`**：那会让数字相对同一个网格里的药丸偏下半格，
+   正是人类伙伴 2026-10-23 说的「偏上」那一族的手工描边（各格各描一次，迟早不对齐）。 */
+.dc-clean-row-num {
+  text-align: right;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 「计入预估」那一格是"这一行会被删多少"，比旁边两个数重要一档。 */
+.dc-clean-row-est {
+  font-weight: 650;
+  color: var(--fg);
+}
+
+/* 风险药丸那一格：纵向同样交给行上的 `align-items: center`（这条原来只有 `padding-top: 1px`
+   把它往下推一格，是"看起来居中"的近似做法）。 */
+.dc-clean-row-risk {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+/* 风险药丸里的小圆点：颜色由行内 style 现给（取 `RISK_COLORS` 同一张表）。
+   `flex: none` 在这里是必须的：父级已经是 flex，不给它就会按 `flex-shrink: 1` 被压成椭圆。 */
+.dc-risk-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  display: block;
+  /* 去掉行内块自带的基线偏移。上一版这里写的是 `inline-block`，在没被 flex 接管时
+     它会跟着基线走，正是"圆点压字"那件事的一半原因。 */
+  align-self: center;
+}
+
+/* 列表行里那颗药丸：flex 对齐已经由 `.dc-badge-risk` 本体提供（2026-10-23 上移），
+   这里只留一条"行内不换行"的定位说明 —— 不再重复写 display/align-items，
+   否则两处规则又开始各写一份、迟早分叉。 */
+.dc-clean-row-risk .dc-badge {
+  white-space: nowrap;
+}
+
+/* 窄窗：五格收一收，数字组跟着收。
+   ⚠️ 两条真事故写在前面，免得下一个人重走一遍：
+   ① 第一版这里只写了六格（漏掉最后一个），第 7 格没有列可落、被 grid 折到下一行左边
+      —— 真机截图 `cleanup-layout-1440.png` 上「计入预估」孤零零挂在描述底下，
+      而当时的几何探针**全绿**（七格变六格之后右缘反而更整齐）。
+   ② 第二版七格齐了，但 880 物理 / 572 CSS 视口下固定列合计仍超宽，描述列被压成 0、
+      「计入预估」被挤出右缘 32.7px。这一条是"数格子"那条新判据抓到的。
+   所以现在**五格 + 数字组**：窄窗装不下时，数字组整组换到第二行（`grid-column: 1 / -1`），
+   而不是挤到某一列看不见。 */
+@media (max-width: 980px) {
+  .dc-clean-list {
+    --dc-clean-grid: 26px 30px minmax(0, 1fr) 74px calc(78px + 48px + 78px + 2 * var(--sp-1));
+    --dc-clean-nums: 78px 48px 78px;
+  }
+}
+
+@media (max-width: 780px) {
+  .dc-clean-list {
+    /* 描述列仍然留 `minmax(0, 1fr)` 而不是固定宽：它是唯一可缩的那一格。 */
+    --dc-clean-grid: 24px 28px minmax(0, 1fr) 66px;
+    --dc-clean-nums: 72px 40px 78px;
+  }
+
+  /*
+   * 窄窗**不撤销等高**。
+   *
+   * 这一条原来写成 `grid-auto-rows: auto`，理由是"数字组换到第二行之后统一行高会留死白"。
+   * 那个理由站不住：等高的定义就是"矮的那几张下面留白"，宽窗同样如此 —— 两档各写一套
+   * 反而变成"窗口一缩，卡片就又开始参差"。等高是一条口径，不该分档。
+   *
+   * 装不下的风险也不必担心：`1fr` 在自动高度的 grid 容器里先按 max-content 定标
+   * （最高的那一行），再让其余行向它看齐，内容不会被压出格。
+   */
+
+  /* 窄窗第二行：数字组整组落到下一行、**铺满整行**（`1 / -1`）。
+     不写 `3 / -1`（从描述列开始）—— 那样它的可用宽度只有"描述列 + 风险列"，
+     572 px 视口下实测只有 214 px，装不下三列数字（溢出 13.4 px，真机探针量到的）。
+     铺满整行是 380 px 起步，一定够，读起来也像一条独立的读数带。
+     `.dc-clean-row-nums` 与表头那一组同时换，表头那一格此时隐藏
+     （第二行没有表头可用，硬留一个只在第二行的"占用/文件/计入预估"会更难读）。 */
+  .dc-clean-row-nums {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: start;
+    padding-left: 60px; /* 与描述列左缘大致对齐（勾选 24 + gap 12 + 图标 28 - 4） */
+    margin-top: 2px;
+  }
+
+  .dc-clean-list-head {
+    display: none;
+  }
+
+  /*
+   * 数字组换行之后，风险药丸留在**第一行**（`grid-row: 1`），不再跟着整行垂直居中。
+   *
+   * ⚠️ 上一版这里是 `align-self: start`，`grid-row` 没写死。它当时是对的（那一版整行
+   * `align-items: start`，药丸本来就贴顶）；但行上改成 center 之后，`align-self: start`
+   * 仍然是"贴顶"，而数字组已经落到第二行 —— 于是这一格独自贴在第一行最上面，
+   * 与描述块的中心线差出 90 px。真机探针量到的是 `y 区间交集 3.2px`（判据要求 ≥ 4）。
+   *
+   * 现在的写法：**位置**用 `grid-row: 1` 说清楚（它属于第一行），**对齐**交回行上的 center
+   * （与描述块同一水平线）。两者各管一件事，不和 `align-items` 打架。
+   */
+  .dc-clean-row-risk {
+    grid-row: 1;
+    align-self: center;
+  }
+}
+
+.dc-clean-refused {
+  color: var(--fg-dim);
+  border-left: 2px solid var(--line);
+  padding-left: 6px;
+  margin-top: 4px;
+  /* 列表里那一条拒因已经缩短成一行（detail 挪进了详情框）：超长时按省略号收，
+     不靠换行 —— 换行会让"被判灰的那一行"比别的行高出一截。 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dc-clean-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.dc-clean-ack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+/* M5-P1 T5b：🟠 项的确认前告警。边框颜色由界面按 RISK_COLORS.high 现给，
+   所以这里不写死色值 —— 写死就会和 shared/classify.ts 那张表分叉。 */
+.dc-clean-risk {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.dc-clean-risk-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.dc-clean-risk-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dc-clean-total {
+  margin-top: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--glass-fill-quiet);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-card);
+  box-shadow: var(--glass-inner);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+
+/*
+ * 总量条里那个大号读数。**它不能删、也不能挪到"标签在前"的位置**：
+ * `scripts/m5n-tile-dup-e2e.ps1` 的 `Read-Total` 认的是拼接文本里
+ * 「…10.0 MB预计释放…」这个形状（数字紧挨在「预计释放」之前）。
+ * 改成统计带那种写法，那一棒会红在"读不出预估"上，而不是红在产品缺陷上。
+ */
+.dc-clean-total-num {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.dc-clean-notes {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--fg-dim);
+}
+
+.dc-clean-details {
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.dc-clean-details summary {
+  cursor: pointer;
+  color: var(--fg-dim);
+}
+
+.dc-clean-refusal-list {
+  margin: 8px 0 0;
+  padding-left: 16px;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+/* ------------------------------------------------------------------ *
+ * 「查看详情」浮层（人类伙伴 2026-10-23）
+ *
+ * 遮罩与框体成套出现，所以放在一起；配色**一律引玻璃 token**（与这一页其余卡片同族），
+ * 不新立色板 —— 换版式不等于换色板。
+ * ------------------------------------------------------------------ */
+
+.dc-modal-mask {
+  position: fixed;
+  inset: 0;
+  /* 遮罩不靠纯黑：这扇窗背后是丝绒与夜山，纯黑压上去那层"环境光"会断掉。
+     0.58 是"底下明显退后、但仍看得见它是什么"的那一档。 */
+  background: rgba(4, 10, 26, 0.58);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  /* Portal 容器是 `z-index: 1000`（见 `Portal.tsx`），遮罩在它内部再抬一档，
+     保证浮在 `.dc-menu`（40）与所有玻璃卡之上。 */
+  z-index: 10;
+  padding: var(--sp-4);
+}
+
+.dc-modal {
+  background-color: var(--glass-fill-page);
+  background-image: var(--glass-specular), var(--glass-sheen);
+  border: 1px solid var(--glass-edge-strong);
+  border-radius: var(--glass-radius-card);
+  box-shadow: var(--glass-inner), 0 22px 54px -18px rgba(2, 10, 32, 0.7);
+  backdrop-filter: blur(var(--glass-blur-page)) saturate(var(--glass-saturate));
+  /* 上限宽是为了 1440px 窗口下不横贯整屏；`max-height` + `overflow` 是为了
+     目录多到几十条时框自己滚，而不是把 × 顶出屏幕。 */
+  width: min(680px, 100%);
+  max-height: min(78vh, 720px);
+  overflow: auto;
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  min-width: 0;
+}
+
+.dc-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* 标题**不伸缩**：它只占自己那几个字宽，剩下的空白由外层的 `.dc-clean-detail-title` 吃。
+   这样药丸紧跟在标题后面，而不是被推到行尾压住 ×。 */
+.dc-modal-title {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 风险药丸在这一行里是"结论"，不是可伸缩项：既不压扁也不被推开。 */
+.dc-clean-detail-title .dc-badge {
+  flex: none;
+}
+
+/* × 是这颗浮层唯一"永远在同一个位置"的出口：右上角、固定尺寸、不吃 flex 的伸缩。 */
+.dc-modal-x {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--fg-dim);
+  background: transparent;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-tight);
+  cursor: pointer;
+}
+
+.dc-modal-x:hover {
+  color: var(--fg);
+  border-color: var(--glass-edge-strong);
+}
+
+/*
+ * 标题行：图标砖 + 标题 + 风险药丸。**药丸不许被挤到关闭按钮上**，同时 × 必须留在框的右上角。
+ *
+ * ⚠️ 2026-10-23 人类伙伴：「这里标签出现了重合现象」。真机截图上是风险药丸
+ * 「● 安全」压在 × 按钮上，两个框叠在一起。
+ *
+ * 真因不是间距不够，而是**撑开整行的那个位置放错了**：`.dc-modal-title` 原来带 `flex: 1`，
+ * 它把药丸推到自己那块的最右端；而这一块（`.dc-clean-detail-title`）本身也是 `flex: 1`，
+ * 于是药丸被推到"× 之前"的最后一点 —— 正好压在 × 身上。
+ *
+ * 修法是把两件事分给两个元素，各管一件：
+ *  ① **整块**吃满中间（`flex: 1`）—— 这样 × 才留在右上角，而不是紧跟药丸；
+ *  ② **标题文字**不伸缩（`flex: 0 1 auto`）—— 这样药丸紧跟在标题后面，不会被推到右边。
+ *
+ * 三条配套约束：
+ *  · 标题 `min-width: 0` + 省略号：名字很长时由它让位，而不是把药丸挤出框外；
+ *  · 药丸与 × 都 `flex: none`：它们是结论与出口，不许被压扁；
+ *  · `gap` 给一条最小缝 —— 就算文案长到极限，药丸与 × 之间也留得住。
+ */
+.dc-clean-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 规则那句「删了会失去什么」：框里给完整一句，不截断（列表里才是最简模式）。 */
+.dc-clean-detail-desc {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--fg-dim);
+}
+
+/* 两列小表：标签一列、读数一列。`dc-dl` 的 `dd` 是**右对齐**的（详情面板那边好看），
+   但这一格里有「占用」「计入预估」两行长句，右对齐会让每一行的断行位置各不相同。
+   框里统一改左对齐；只覆盖这一格，不动 `.dc-dl` 本体（详情面板那边一个像素都不该动）。 */
+.dc-clean-detail-grid {
+  margin-top: 10px;
+  font-size: 12.5px;
+  gap: 6px 16px;
+}
+
+.dc-clean-detail-grid dd {
+  text-align: left;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dc-clean-detail-roots {
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.dc-clean-detail-caption {
+  color: var(--fg-dim);
+  margin-bottom: 6px;
+}
+
+.dc-clean-detail-list {
+  margin: 0;
+  padding-left: 16px;
+  line-height: 1.9;
+  /* 路径是长 token：断行规则照 `.dc-fineprint code` 那一族，不给就横向溢出一大片 */
+  overflow-wrap: anywhere;
+}
+
+.dc-clean-detail-list code {
+  font-size: 11.5px;
+}
+
+/* ── 一键清理的过程弹窗（2026-10-24）──
+ * 布局与「查看详情」共用 `.dc-modal`，但尺寸收窄：它是**过程**，读法是一条条滚，
+ * 不是一张待读的表。列表区固定高度自己滚，进度条与结论钉在底部 —— 底部两行
+ * 永远看得见，滚的只有中间那串路径。
+ *
+ * `overflow: hidden` 盖掉 `.dc-modal` 默认的 auto：滚动的责任已交给中间列表，
+ * 整框再滚会让 × 与底部结论一起滚走。 */
+.dc-clean-progress-modal {
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dc-clean-progress-list {
+  margin: 12px 0 0;
+  padding: 2px 6px 2px 14px;
+  list-style: none;
+  height: min(42vh, 320px);
+  min-height: 120px;
+  overflow-y: auto;
+  font-size: 11.5px;
+  line-height: 1.75;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-tight);
+  background: rgba(4, 14, 34, 0.35);
+  box-shadow: var(--glass-inner);
+}
+
+.dc-clean-progress-list code {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+/* 失败那行点红：成功与失败在列表里不该长得一样 —— "没删掉"必须一眼可见。 */
+.dc-clean-progress-fail {
+  color: var(--danger);
+}
+
+.dc-clean-progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+/* 进度条吃满整行，百分比在右端（人类伙伴：下方是清理进度条（百分比））。 */
+.dc-clean-progress-bar .dc-meter {
+  flex: 1 1 auto;
+}
+
+.dc-clean-progress-pct {
+  flex: none;
+  width: 3.2em;
+  text-align: right;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.dc-clean-progress-done {
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+/* ── 一键清理弹窗的**确认阶段**（2026-10-24：点确定才执行）──
+ * 确认框是弹窗里唯一的"决策"界面：结论句、数字摘要、两个按钮。
+ * 列表与进度条在确认之前**不渲染**，所以这一块自成一页。 */
+.dc-clean-confirm-stage {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dc-clean-confirm-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.dc-clean-confirm-desc strong {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* 提权/失败原因提示（2026-10-25）。比 `dc-fineprint` 稍亮一档：
+   它不是脚注，是"删不掉时你知道为什么"的那句话 —— 但也不能抢走上面那条红字的分量，
+   所以只给左侧一道细竖线，不上背景、不上边框。 */
+.dc-clean-admin-hint {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--glass-edge);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.dc-clean-confirm-summary {
+  font-size: 13px;
+  padding: 10px 12px;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-tight);
+  background: rgba(4, 14, 34, 0.35);
+  box-shadow: var(--glass-inner);
+}
+
+.dc-clean-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+
+.dc-clean-task {
+  margin-top: var(--sp-4);
+  padding: var(--sp-2);
+  background: var(--glass-fill-quiet);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-card);
+  box-shadow: var(--glass-inner);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+
+.dc-clean-verify {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.dc-estimate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--glass-fill-quiet);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-control);
+  box-shadow: var(--glass-inner);
+  backdrop-filter: blur(24px) saturate(1.4);
+  font-size: 12px;
+}
+
+.dc-estimate-num {
+  font-size: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dc-estimate .dc-btn {
+  /* 「去清理预览 →」被挤成两行是截图里看出来的 */
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.dc-clean-tiles {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.dc-clean-tiles-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.dc-clean-tiles-list {
+  margin: 8px 0 0;
+  padding-left: 16px;
+  line-height: 1.8;
+  word-break: break-all;
+}
+
+.dc-clean-tiles-list li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+/* §20 重复文件 */
+
+.dc-dup-paths {
+  margin: 6px 0 0;
+  padding-left: 16px;
+  font-size: 11px;
+  line-height: 1.7;
+  list-style: none;
+}
+
+.dc-dup-paths code {
+  word-break: break-all;
+}
+
+.dc-dup-keep b {
+  color: var(--accent);
+}
+
+.dc-dup-del {
+  color: var(--fg-dim);
+}
+
+
+/* ==================================================================
+ * 清理日志（2026-10-25 重做）。一次清理一行 + 详情折叠树。
+ *
+ * 只用既有 token（`--glass-fill-quiet` / `--fg` / `--fg-dim` / `--line-*`），
+ * 不引入新颜色 —— 这一页是"账本"，不需要自己的视觉语言。
+ * ================================================================== */
+.dc-journal-list {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.dc-journal-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--glass-fill-quiet);
+  border: 1px solid var(--line);
+  border-radius: var(--glass-radius-tight);
+}
+
+.dc-journal-row-when {
+  flex: none;
+  color: var(--fg-dim);
+  font-size: 12px;
+  /* 时间列宽度固定，让右边那张"账"的起始位置对齐 */
+  min-width: 148px;
+}
+
+.dc-journal-row-what {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.dc-journal-row-detail {
+  flex: none;
+}
+
+.dc-journal-detail-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.dc-journal-detail-title {
+  color: var(--fg-dim);
+  font-size: 13px;
+}
+
+.dc-journal-tree,
+.dc-journal-dir-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dc-journal-dir-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-1) 0;
+  background: none;
+  border: none;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.dc-journal-dir-head:hover .dc-journal-dir-name {
+  color: var(--accent);
+}
+
+.dc-journal-dir-caret {
+  flex: none;
+  width: 1em;
+  color: var(--fg-dim);
+}
+
+.dc-journal-dir-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12.5px;
+}
+
+/* 缩进按层走：每一层内嵌一次 `.dc-journal-dir-body` */
+.dc-journal-dir-body {
+  padding-left: var(--sp-4);
+  border-left: 1px solid var(--line);
+  margin-left: 4px;
+}
+
+.dc-journal-file {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: 2px 0 var(--sp-1) 1.6em;
+}
+
+.dc-journal-file-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+/* ==========================================================================
+ * 设置页（2026-10-27 重做成三块竖排卡片）
+ *
+ * 人类伙伴原话：「改为模块化卡片类型的，设置授权关于的字放大一些，分为三栏」，
+ * 随后自己修正为「上下结构」—— 这个修正从几何上讲是对的：窗口最小宽 1080、侧栏 200
+ * ⇒ 内容区最窄 880，横排三栏每栏不到 290 px，而四格滑块每格要「标签 + 滑块 + 读数」，
+ * 290 px 里滑块只剩 120 px，调 5% 的差别在像素上看不出来 —— 那等于给了四格假控件。
+ *
+ * 三块：外观（壁纸 + 毛玻璃四格）· 授权 · 关于。
+ * 授权与关于的标题字号**比常规卡标题大一档**（人类伙伴：「设置授权关于的字放大一些」）。
+ * ========================================================================== */
+
+.dc-settings {
+  /* 比 `.dc-page` 的 920 窄一点：三块卡都是"一行标签 + 一条滑轨"，
+     太宽会让读数离标签太远，眼睛要横跨半个屏幕才算得出对应关系。 */
+  max-width: 860px;
+}
+
+.dc-settings-card {
+  /**
+   * 设置卡自己的材质（2026-10-27）。
+   *
+   * 人类伙伴：「设置页面的框色彩改成和这个一样」（指开发环境页那种深、实的蓝黑板）。
+   * 配方**逐条照 `.dc-devenv-group`**：`--glass-fill-quiet` 那一档的色相
+   * `rgb(10, 28, 70)`、同一副描边与内阴影、`blur(24px) saturate(1.4)`。
+   *
+   * ## 为什么不直接写 `background: var(--glass-fill-quiet)`
+   *
+   * 那个 token 有 9 处读者（地图侧栏、日志卡、开发环境组…）。设置页的透明度滑块
+   * 要能实时改这一层，而**改共享 token 等于顺手改那九处** —— 拖一下滑块，
+   * 地图的侧栏也跟着变，而用户看不到那一页、也不知道自己动了它。
+   *
+   * 所以这里读 `--settings-card-fill`（由 `useSettings` 写到 `documentElement`），
+   * 色相固定是 quiet 那一档、alpha 由滑块给。默认值 0.36 = quiet 的原 alpha，
+   * 所以**没有设置时逐字等于开发环境页那副材质**。
+   */
+  background-color: var(--settings-card-fill, rgba(10, 28, 70, 0.36));
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius-card);
+  /*
+   * 模糊链跟 `--glass-blur-page` / `--glass-saturate` 走（滑块那两格要能调）。
+   *
+   * ⚠️ **基线与开发环境页不同，这是刻意的**：那边硬写 `blur(24px) saturate(1.4)`，
+   * 而这里读两个变量，默认值是 `30px` / `1.5`（`glass/tokens.css` 那对）。
+   * 差这一档是因为"滑块的默认读数"必须等于样式表现值 —— 否则用户第一次打开设置页，
+   * 读数显示 30 px 而卡实际是 24 px，那一格就在说一句和屏幕不符的话。
+   *
+   * 代价如实登记：设置页的卡比开发环境页**略软一点点**（30/1.5 对 24/1.4）。
+   * 要逐像素一致就得把这两格的默认值改成 24/1.4，而那会把**所有**页面的 `.dc-card`
+   * 一起改软 —— 那超出了"设置页框色彩"这句话的范围。这里选"只对齐观感（深、实、
+   * 蓝黑），不对齐数值"。
+   */
+  backdrop-filter: blur(var(--glass-blur-page)) saturate(var(--glass-saturate));
+  /*
+   * 投影与内阴影照 `.dc-card` 那条给全：`0 1px 2px` 管"确实压在底上这条缝"，
+   * 第二条带**负扩散半径**的管"它把底下的环境光挡住了一块"。负 spread 是关键 ——
+   * 不带它投影会均匀围一圈，读起来是"卡片在发光"。
+   *
+   * 为什么必须手写：2026-10-27 把 `dc-card` 这个类从设置卡上去掉了（它那条规则在
+   * `tokens.css` 里、**后加载**，会盖掉这里写的 background-color）。去掉之后
+   * 这些属性就得自己给全 —— 少给一条的表现是"设置页的卡没有影子，浮不起来"。
+   *
+   * ⚠️ 只许有**这一条** `box-shadow`：初版在上一行留了一条只有 `var(--glass-inner)`
+   * 的，两条同属性、后者生效 ⇒ 前者是死规则，而"写了但不管用"比没写更难查。
+   */
+  box-shadow: var(--glass-inner), 0 1px 2px rgba(0, 0, 0, 0.45), 0 22px 54px -18px rgba(2, 10, 32, 0.7);
+  /* 纵向节奏：`.dc-card` 那一层的 padding 比开发环境组大，两边对齐一下 */
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  margin-bottom: var(--sp-4);
+  min-width: 0;
+}
+
+.dc-settings-card-title {
+  margin: 0 0 var(--sp-3);
+  /* 比 `.dc-panel-title`（15px）大一档：人类伙伴要「字放大一些」。
+     用 `--font-title`（DM Serif Display）与大标题同一族，读起来是"这一块的标题"
+     而不是"某个字段的标签"。 */
+  font-family: var(--font-title);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--fg);
+}
+
+/* 一格设置：标签与读数同一行（两端对齐），滑轨在下一行，提示再下一行。
+   为什么读数跟标签同一行：拖动时眼睛盯着滑轨，读数必须在滑轨**正上方**才不用来回找。 */
+.dc-settings-row {
+  margin-bottom: var(--sp-3);
+}
+
+.dc-settings-row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: 6px;
+}
+
+.dc-settings-row-label {
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.dc-settings-row-value {
+  font-size: 12.5px;
+  color: var(--accent-2);
+  /* 读数用等宽 + 定宽右对齐：拖到 9px → 10px 时数字不该让整行跳一下 */
+  min-width: 62px;
+  text-align: right;
+}
+
+/* 一条分隔线，用在"壁纸"与"毛玻璃四格"之间（它们同属外观，但是两件事） */
+.dc-settings-sep {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: var(--sp-4) 0;
+}
+
+/*
+ * 滑块本体。**必须自己画**：`input[type=range]` 的默认外观在 WebView2 上是一条
+ * 浅灰轨道 + 一个圆球，在深蓝玻璃底上读起来像别的系统的控件。
+ * 三处都要写（`-webkit-` / `-moz-` / 无前缀）—— 少一处就在另一个引擎上是默认样子，
+ * 而那看起来像"这条样式没生效"，不像"少写了一个前缀"。
+ */
+.dc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dc-slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dc-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(150, 195, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.dc-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(150, 195, 255, 0.2);
+}
+
+.dc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  /* 把球从轨道中线往上顶半格：轨道 4px、球 15px，(15-4)/2 = 5.5 */
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+.dc-slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+/* 授权那一块：状态是它唯一的结论，所以放大。
+   两个类分开是因为**颜色不同**（已激活走 accent、未激活走 caution），
+   而"用颜色表达状态"这件事必须与那两个字一起出现 —— 只靠颜色对色盲用户是空的。 */
+.dc-license-state {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.dc-license-on {
+  color: var(--accent-2);
+}
+
+.dc-license-off {
+  color: var(--risk-caution);
+}
+
+/* 「校验中」那一格：环 + 文案竖排居中。 */
+.dc-license-busy {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--sp-3);
+}
+
+/* ==========================================================================
+ * 莫比乌斯环加载动画（2026-10-27）
+ *
+ * 几何在 `components/mobius-geometry.ts`（纯函数，被判据钉住"半圈一转"那一条），
+ * 这里只管怎么动与怎么上色。
+ * ========================================================================== */
+
+.dc-mobius {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dc-mobius-svg {
+  display: block;
+  overflow: visible;
+}
+
+/*
+ * 旋转套在 <g> 上，并显式声明 `transform-box: fill-box` + `transform-origin: center`。
+ *
+ * 为什么不能直接给 <svg> 加 animation：`<svg>` 的默认 `transform-origin` 在部分
+ * WebView2 版本上按 `border-box` 解析，会绕**左上角**转 —— 那看起来是环在绕屏幕
+ * 右上角飞，不像在自转。`<g>` + fill-box 是稳的那一档。
+ */
+.dc-mobius-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dc-mobius-spin 2.4s linear infinite;
+}
+
+/* 2.4 s：比常见的 1 s spinner 慢很多。莫比乌斯环的读法是"一直在绕、绕不完"，
+   转太快会变成一个闪动的圆环，那个语义就丢了。 */
+@keyframes dc-mobius-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*
+ * 带子本体（2026-10-27 第五版）。
+ *
+ * **一条闭合路径 + 一个 linearGradient**，没有任何"分片"。
+ * 前四版的失败都出在同一处：连续的明暗场被切成有限片，每片一个 opacity，
+ * 片边界必然可见（放射条纹 / 深浅扇贝）。这里的填充是渐变的，
+ * 结构上不可能有内部边界 —— 这是唯一能让"无缝合"成立的做法。
+ *
+ * `fill` 由组件的 `<defs>` 里那个渐变给（`url(#…属 id)`），CSS 只管描边与描边的粗细：
+ * 描边用 fill 同色、0.6 px，纯粹用来"撑"一点轮廓，
+ * 否则最外沿在深色底上会显得比实际细一档。
+ */
+.dc-mobius-body {
+  stroke: var(--accent-2);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+}
+
+/*
+ * 翻面那道脊（`u = π` 附近的一小片）。
+ *
+ * 为什么需要它：单一路径填充之后整条带子是一个色块，`u ≈ π` 处的**扭**看不出来 ——
+ * 读起来是一个歪掉的实心环。这道暗色薄片是那个扭的唯一视觉锚点。
+ *
+ * 用 `--bg` 的暗色而不是纯黑：纯黑在蓝底上读作"这里破了个洞"，
+ * 而带子的暗面应当是"被自己的另一半挡住了"。
+ */
+.dc-mobius-seam {
+  fill: rgba(3, 12, 34, 0.55);
+  stroke: none;
+}
+
+.dc-mobius-label {
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+
+/* ==========================================================================
+ * 文案后面那三个会动的点（2026-10-27 晚，人类伙伴：「这点点要会动」）
+ *
+ * 为什么用三个 `<span>` + 各自 animation-delay，而不是把省略号写进字符串里
+ * 靠 `setInterval` 换文本：
+ *  ① 换文本会让这一行**重新排版**（宽度在 1 点到 3 点之间跳），那看起来是字在抖；
+ *  ② 那需要一个计时器 + 一份"现在几点"的状态，而它的判据只能靠假计时器测；
+ *  ③ CSS 动画是合成器做的，不占主线程 —— 这行字在等网络时不和它抢。
+ *
+ * 每个点只有 opacity 变化（不缩放）：缩放会让整行字的基线视觉上往下沉一点。
+ * ========================================================================== */
+
+.dc-dots > span {
+  display: inline-block;
+  /* 固定宽度：1 点与 3 点的行宽一致，句子本身不动。 */
+  width: 0.34em;
+  text-align: center;
+  animation: dc-dots-pulse 1.4s ease-in-out infinite;
+}
+
+/* 三个点错开 0.18 s：读起来是"依次亮起"，而不是整排一起闪。 */
+.dc-dots > span:nth-child(1) {
+  animation-delay: 0s;
+}
+.dc-dots > span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.dc-dots > span:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes dc-dots-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/*
+ * `prefers-reduced-motion: reduce` 时**停**。
+ *
+ * 这不是锦上添花：一个持续旋转的图形对前庭敏感的人是真实的不适来源。
+ * 而"加载中"这件事用静止的一帧 + 那行文案同样说得出 —— 所以停掉动画不损失语义。
+ * ⚠️ 判据 `settings-page.test.tsx` 钉着这一条（它读 CSS 文件，不是靠人眼看）。
+ */
+@media (prefers-reduced-motion: reduce) {
+  .dc-mobius-ring {
+    animation: none;
+  }
+  /* 三个点也停，但**不置零 opacity** —— 停成一排看不见的点等于把那半句文案删了。 */
+  .dc-dots > span {
+    animation: none;
+    opacity: 1;
+  }
+}

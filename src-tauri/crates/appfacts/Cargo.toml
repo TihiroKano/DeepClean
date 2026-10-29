@@ -1,0 +1,31 @@
+[package]
+name = "deepclean-appfacts"
+version = "1.0.0"
+edition = "2021"
+description = "M5-P2：「这台机器装没装过 X」的只读取证层（三态机器事实表，弃权优先）"
+
+# P2-T1 的依赖清单**是空的**，那是判据不是省事：C3/C4/C6 三条通道全是 `std::fs` 的只读枚举
+# （计划 §1.2「为什么 MSIX 用目录痕迹而不是包 API」——零新依赖，也不 spawn PowerShell）。
+#
+# P2-T2 按计划 §4.6 加上**唯一**一个新依赖：`windows-sys` 的注册表只读（C1/C2）与
+# 工具快照（C5）feature。四个 feature 之外一个都不开 —— 开 `Win32_System_ProcessStatus`
+# 之类的面板会让「下一个加 API 的人」离写 API 更近，闸虽会红，红一次的代价本来可以避免。
+# `src-tauri/Cargo.toml` 用的是同一个 0.61，锁文件不会多出一个版本。
+#
+# serde 刻意不进：这张表的消费者是 `deepclean-rules` 的 `EvaluateOptions::app_facts`（进程内注入），
+# 线格式由 `src-tauri/src/service.rs` 那侧决定（P2-T4），这一层不该有第二个序列化口径。
+[dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_System_Registry",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_Threading",
+] }
+
+# 唯一的 dev-dependency：`tests/data/reference-shapes.json` 那份**跨语言共用**的真形状夹具
+# 需要一个两侧都能读的格式，JSON 是 TS 侧唯一不用引依赖就能读的东西。
+# 它是 test-only：发布构建的依赖树里没有它（`cargo tree` 可见），所以「不新增第三方 crate」
+# 那条约束针对的**产品依赖面**没有被撑破；另一条路（两侧各写一个迷你解析器）本身就是
+# 对账风险 —— 那才是这条判据不想要的东西。
+[dev-dependencies]
+serde_json = "1"

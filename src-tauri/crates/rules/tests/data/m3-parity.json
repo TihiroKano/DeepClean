@@ -1,0 +1,517 @@
+{
+  "_comment": [
+    "M3-A 零容差对账的共享夹具。TS 引擎（core/rules）与 Rust 引擎（deepclean-rules）",
+    "读的是这一份树的同一份字节 —— 两个引擎看同一棵树，差异才只能来自引擎本身。",
+    "size 一律由读者按『子树文件字节之和』算，夹具不自带合计（免了两份算法漂移）。",
+    "attrs 是 FILE_ATTRIBUTE_* 位掩码原值：0x4=SYSTEM、0x10=DIRECTORY、0x16=HIDDEN|SYSTEM|DIRECTORY。",
+    "USERPROFILE 故意**不给** —— 三条 %USERPROFILE% 规则要靠它产生 unresolved-env。（M5-P1 T3b-ii 起 `downloads` 那一条 case 自带 USERPROFILE：plan §5.6 那条 🟠 的地盘就是 %USERPROFILE%\\Downloads，全局与 `builtin` 那条的「不给」口径都不动，另开一条才既跑得动那条判据、又不把 unresolved-env 那格覆盖拆掉。）",
+    "nowMs 是注入的时间基准：mtimeMs=1 的文件（除 >0 天者）一律算『比 nowMs 早』。"
+  ],
+  "env": {
+    "SYSTEMDRIVE": "C:",
+    "WINDIR": "C:\\Windows",
+    "TEMP": "C:\\Temp",
+    "LOCALAPPDATA": "C:\\Local",
+    "APPDATA": "C:\\Users\\Kano\\AppData\\Roaming",
+    "PROGRAMDATA": "C:\\ProgramData",
+    "PROGRAMFILES": "C:\\Program Files",
+    "USERPROFILE": "C:\\Users\\Kano"
+  },
+  "nowMs": 1700000000000,
+  "maxListedPaths": 50,
+  "cases": [
+    {
+      "id": "builtin",
+      "_why": "M5-P1 T3a 起这条带**自己的 env**（全局那份 + 第 8 个键 PROGRAMFILES）：表尾三条是容器入口规则，围栏的 denyRoots 要点名 %PROGRAMFILES%\\*，缺这个键会被声明层 fail-closed 整条拒掉 —— 两侧一起拒虽然照样对得上，但那就不是对账十八条行为了。USERPROFILE 仍故意不给（三条 %USERPROFILE% 规则要靠它产生 unresolved-env），与全局那份同一个口径。 M5-P1 T3b-i 起树里再补三格双侧区分形状（electron\\Cache 的地盘重叠、NuGet\\v3-cache 与 ProgramData\\USOShared 这两个只属于显式模板的地盘、CrashDumps 的 *.dmp 正例与 recursive 子目录）—— T3a 变异 (a) 那一轮的教训在这里同样适用：只有一侧改了模板清单或 recursive 时，对账要能当场点名，而点名要求树里真有那个形状。",
+      "env": {
+        "SYSTEMDRIVE": "C:",
+        "WINDIR": "C:\\Windows",
+        "TEMP": "C:\\Temp",
+        "LOCALAPPDATA": "C:\\Local",
+        "APPDATA": "C:\\Users\\Kano\\AppData\\Roaming",
+        "PROGRAMDATA": "C:\\ProgramData",
+    "PROGRAMFILES": "C:\\Program Files",
+    "USERPROFILE": "C:\\Users\\Kano",
+        "PROGRAMFILES": "C:\\Program Files"
+      },
+      "rules": "builtin",
+      "root": {
+        "name": "C:", "path": "C:\\", "attrs": 16, "mtimeMs": 0,
+        "children": [
+          { "name": "Windows", "path": "C:\\Windows", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "System32", "path": "C:\\Windows\\System32", "attrs": 16, "mtimeMs": 0,
+                "files": [ { "name": "k.dll", "size": 999, "mtimeMs": 0, "attrs": 0 } ] }
+            ] },
+          { "name": "Temp", "path": "C:\\Temp", "attrs": 16, "mtimeMs": 0,
+            "files": [
+              { "name": "a.tmp", "size": 100, "mtimeMs": 0, "attrs": 0 },
+              { "name": "b.tmp", "size": 200, "mtimeMs": 0, "attrs": 0 },
+              { "name": "sys.tmp", "size": 700, "mtimeMs": 0, "attrs": 4 }
+            ] },
+          { "name": "$Recycle.Bin", "path": "C:\\$Recycle.Bin", "attrs": 22, "mtimeMs": 0,
+            "files": [ { "name": "gone.bin", "size": 500, "mtimeMs": 0, "attrs": 0 } ] },
+          { "name": "Local", "path": "C:\\Local", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "Google", "path": "C:\\Local\\Google", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Chrome", "path": "C:\\Local\\Google\\Chrome", "attrs": 16, "mtimeMs": 0,
+                    "children": [
+                      { "name": "User Data", "path": "C:\\Local\\Google\\Chrome\\User Data", "attrs": 16, "mtimeMs": 0,
+                        "children": [
+                          { "name": "Default", "path": "C:\\Local\\Google\\Chrome\\User Data\\Default", "attrs": 16, "mtimeMs": 0,
+                            "children": [
+                              { "name": "Cache", "path": "C:\\Local\\Google\\Chrome\\User Data\\Default\\Cache", "attrs": 16, "mtimeMs": 0,
+                                "files": [
+                                  { "name": "c1.bin", "size": 50, "mtimeMs": 0, "attrs": 0 },
+                                  { "name": "c2.bin", "size": 60, "mtimeMs": 0, "attrs": 0 }
+                                ] },
+                              { "name": "Code Cache", "path": "C:\\Local\\Google\\Chrome\\User Data\\Default\\Code Cache", "attrs": 16, "mtimeMs": 0 }
+                            ] },
+                          { "name": "Profile 2", "path": "C:\\Local\\Google\\Chrome\\User Data\\Profile 2", "attrs": 16, "mtimeMs": 0,
+                            "children": [
+                              { "name": "Cache", "path": "C:\\Local\\Google\\Chrome\\User Data\\Profile 2\\Cache", "attrs": 16, "mtimeMs": 0,
+                                "files": [ { "name": "c3.bin", "size": 70, "mtimeMs": 0, "attrs": 0 } ] }
+                            ] }
+                        ] }
+                    ] }
+                ] },
+              { "name": "npm-cache", "path": "C:\\Local\\npm-cache", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "_cacache", "path": "C:\\Local\\npm-cache\\_cacache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "n1.bin", "size": 800, "mtimeMs": 0, "attrs": 0 } ] }
+                ] },
+              { "name": "Microsoft", "path": "C:\\Local\\Microsoft", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Windows", "path": "C:\\Local\\Microsoft\\Windows", "attrs": 16, "mtimeMs": 0,
+                    "children": [
+                      { "name": "Explorer", "path": "C:\\Local\\Microsoft\\Windows\\Explorer", "attrs": 16, "mtimeMs": 0,
+                        "files": [
+                          { "name": "thumbcache_64.db", "size": 40, "mtimeMs": 0, "attrs": 0 },
+                          { "name": "iconcache_64.db", "size": 30, "mtimeMs": 0, "attrs": 0 },
+                          { "name": "Thumbs.db", "size": 20, "mtimeMs": 0, "attrs": 0 }
+                        ] },
+                      { "name": "WER", "path": "C:\\Local\\Microsoft\\Windows\\WER", "attrs": 16, "mtimeMs": 0,
+                        "children": [
+                          { "name": "ReportQueue", "path": "C:\\Local\\Microsoft\\Windows\\WER\\ReportQueue", "attrs": 16, "mtimeMs": 0,
+                            "files": [ { "name": "r.wer", "size": 10, "mtimeMs": 0, "attrs": 0 } ] }
+                        ] }
+                    ] }
+                ] },
+              { "name": "pnpm-store", "path": "C:\\Local\\pnpm-store", "attrs": 16, "mtimeMs": 0,
+                "files": [ { "name": "p1.bin", "size": 30, "mtimeMs": 0, "attrs": 0 } ] },
+              { "name": "pip", "path": "C:\\Local\\pip", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Cache", "path": "C:\\Local\\pip\\Cache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "w1.whl", "size": 25, "mtimeMs": 0, "attrs": 0 } ] }
+                ] },
+              { "name": "Yarn", "path": "C:\\Local\\Yarn", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Cache", "path": "C:\\Local\\Yarn\\Cache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "y1.tgz", "size": 35, "mtimeMs": 0, "attrs": 0 } ] }
+                ] },
+              { "name": "Android", "path": "C:\\Local\\Android", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Sdk", "path": "C:\\Local\\Android\\Sdk", "attrs": 16, "mtimeMs": 0,
+                    "children": [
+                      { "name": ".temp", "path": "C:\\Local\\Android\\Sdk\\.temp", "attrs": 16, "mtimeMs": 0,
+                        "files": [ { "name": "pkg.zip", "size": 20, "mtimeMs": 0, "attrs": 0 } ] }
+                    ] }
+                ] },
+              { "name": "electron", "path": "C:\\Local\\electron", "attrs": 16, "mtimeMs": 0,
+                "_why": "M5-P1 T3b-i 双侧区分形状（plan §5.4）：`electron\\Cache` 既是 dev-tool-cache 的显式模板、也是 app-cache-data 那份 leafDirs 的正命中 —— `claimed` 先声明者计账，所以那 1000 字节归第 16 条，第 19 条名下只留 claimed-by-other-rule。任何一侧把这两条的**表序**或**模板清单**改动，这一格当场分叉。",
+                "children": [
+                  { "name": "Cache", "path": "C:\\Local\\electron\\Cache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "electron-v30.zip", "size": 1000, "mtimeMs": 0, "attrs": 0 } ] }
+                ] },
+              { "name": "NuGet", "path": "C:\\Local\\NuGet", "attrs": 16, "mtimeMs": 0,
+                "_why": "dev-tool-cache **独有**的地盘（plan §5.4 的第 3 个模板）：`v3-cache` 不在任何 leaf 名单里，这 200 字节只有那条显式模板规则拿得到 —— 单侧漏掉这个模板，parity 就看得见（Hiview 那一格当初的同一个教训）。",
+                "children": [
+                  { "name": "v3-cache", "path": "C:\\Local\\NuGet\\v3-cache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "pkg.dat", "size": 200, "mtimeMs": 0, "attrs": 0 } ] }
+                ] },
+              { "name": "Programs", "path": "C:\\Local\\Programs", "attrs": 16, "mtimeMs": 0,
+                "_why": "M5-P2 P2-T5 裁定 1 的双侧对账格（plan `2026-10-13-deepclean-tauri-m5-p2.md` §5 末节）：真机上 `app-cache-data` 在 `%LOCALAPPDATA%\\Programs` 底下认领了 10 个**JavaScript 源码目录**（名字恰好叫 `cache`，全在 `node_modules` 里）。这一格把那个形状原样搬进夹具：`node_modules` 是包树 ⇒ 整棵子树不进 leaf 采集，两侧必须同时给出 `(app-cache-data, package-tree, …\\node_modules)` 那条排除。⚠️ 夹具**故意把真缓存放在包树的同一个父层**（`nodejs\\Cache` 那 60 字节）—— 少这一格，单侧把采集整段弄坏也会显得两侧一致（非真空判据，与本文件 leaf 那一族同一个纪律）。`Programs` 不在产品地板里（M5-P1 §10 第 12 条），所以这一格走的确实是包树判据、不是围栏。",
+                "children": [
+                  { "name": "nodejs", "path": "C:\\Local\\Programs\\nodejs", "attrs": 16, "mtimeMs": 0,
+                    "children": [
+                      { "name": "node_modules", "path": "C:\\Local\\Programs\\nodejs\\node_modules", "attrs": 16, "mtimeMs": 0,
+                        "children": [
+                          { "name": "undici", "path": "C:\\Local\\Programs\\nodejs\\node_modules\\undici", "attrs": 16, "mtimeMs": 0,
+                            "children": [
+                              { "name": "lib", "path": "C:\\Local\\Programs\\nodejs\\node_modules\\undici\\lib", "attrs": 16, "mtimeMs": 0,
+                                "children": [
+                                  { "name": "cache", "path": "C:\\Local\\Programs\\nodejs\\node_modules\\undici\\lib\\cache", "attrs": 16, "mtimeMs": 0,
+                                    "files": [
+                                      { "name": "store.js", "size": 500, "mtimeMs": 0, "attrs": 0 },
+                                      { "name": "cache.js", "size": 700, "mtimeMs": 0, "attrs": 0 }
+                                    ] }
+                                ] }
+                            ] }
+                        ] },
+                      { "name": "Cache", "path": "C:\\Local\\Programs\\nodejs\\Cache", "attrs": 16, "mtimeMs": 0,
+                        "_why": "包树**同一个父层**里的真缓存（非真空对照）：这条判据只管 `node_modules` 那一棵，这 60 字节两侧都必须照常认领。",
+                        "files": [ { "name": "real.bin", "size": 60, "mtimeMs": 0, "attrs": 0 } ] }
+                    ] }
+                ] },
+              { "name": "CrashDumps", "path": "C:\\Local\\CrashDumps", "attrs": 16, "mtimeMs": 0,
+                "_why": "M5-P1 T3b-i 双侧区分形状（plan §5.5）：`*.dmp` 正例两个（顶层一个、子目录一个 —— 后者验 `recursive: true`）+ 非 dmp 反例一个（验 filePatterns 真在过滤，不是把目录端走）。单侧把 recursive 改成 false、或把 `*.dmp` 改成空表，这两格都会分叉。",
+                "files": [
+                  { "name": "app.exe.1234.dmp", "size": 400, "mtimeMs": 0, "attrs": 0 },
+                  { "name": "readme.txt", "size": 7, "mtimeMs": 0, "attrs": 0 }
+                ],
+                "children": [
+                  { "name": "nested", "path": "C:\\Local\\CrashDumps\\nested", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "minidump.dmp", "size": 50, "mtimeMs": 0, "attrs": 0 } ] }
+                ] },
+              { "name": "Hiview", "path": "C:\\Local\\Hiview", "attrs": 16, "mtimeMs": 0,
+                "_why": "M5-P1 T3a 双侧区分形状：轮转件必须被 app-rotated-logs 收走，同名无后缀的在写件必须不收。只有一侧放宽 glob 时这里的 fileCount/totalBytes 当场分叉。",
+                "files": [
+                  { "name": "HiviewPlatform.3.log", "size": 400, "mtimeMs": 0, "attrs": 0 },
+                  { "name": "HiviewPlatform.log", "size": 1200, "mtimeMs": 0, "attrs": 0 }
+                ] },
+              { "name": "foo-updater", "path": "C:\\Local\\foo-updater", "attrs": 16, "mtimeMs": 0,
+                "_why": "installer-artifacts 的正例（更新目录 + 安装包形状）与反例（同目录里不是安装包的东西）。",
+                "children": [
+                  { "name": "pending", "path": "C:\\Local\\foo-updater\\pending", "attrs": 16, "mtimeMs": 0,
+                    "files": [
+                      { "name": "installer.exe", "size": 500, "mtimeMs": 0, "attrs": 0 },
+                      { "name": "notes.txt", "size": 10, "mtimeMs": 0, "attrs": 0 }
+                    ] }
+                ] },
+              { "name": "Packages", "path": "C:\\Local\\Packages", "attrs": 16, "mtimeMs": 0,
+                "_why": "plan §5 第一条排除项的对账半边：UWP 每应用状态目录。`Packages` 本身不许成为采集根，里面的 settings.zip 不许被认领 —— 两侧任何一侧把它塞进 leafDirs，这条就分叉（原先两侧的夹具谁都不点名它，于是那种单侧漂移对账看不见）。",
+                "children": [
+                  { "name": "ExampleApp_1.0_x64__abc", "path": "C:\\Local\\Packages\\ExampleApp_1.0_x64__abc", "attrs": 16, "mtimeMs": 0,
+                    "children": [
+                      { "name": "LocalCache", "path": "C:\\Local\\Packages\\ExampleApp_1.0_x64__abc\\LocalCache", "attrs": 16, "mtimeMs": 0,
+                        "children": [
+                          { "name": "Roaming", "path": "C:\\Local\\Packages\\ExampleApp_1.0_x64__abc\\LocalCache\\Roaming", "attrs": 16, "mtimeMs": 0,
+                            "files": [ { "name": "settings.zip", "size": 700, "mtimeMs": 0, "attrs": 0 } ] }
+                        ] },
+                      { "name": "Settings", "path": "C:\\Local\\Packages\\ExampleApp_1.0_x64__abc\\Settings", "attrs": 16, "mtimeMs": 0,
+                        "files": [ { "name": "roaming.lock", "size": 10, "mtimeMs": 0, "attrs": 0 } ] }
+                    ] }
+                ] }
+            ] },
+          { "name": "ProgramData", "path": "C:\\ProgramData", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "USOShared", "path": "C:\\ProgramData\\USOShared", "attrs": 16, "mtimeMs": 0,
+                "_why": "M5-P1 T3b-i 双侧区分形状（plan §5.4 里走 %PROGRAMDATA% 的那两个模板之一）：`USOShared` 不是任何 leaf 名单的名字，这 300 字节只有 dev-tool-cache 拿得到 —— 单侧少这个模板就对账可见。它同格还兼一条对账半边：这个目录在 app-cache-data 的采集面（allowRoots 含 %PROGRAMDATA%）里**被遍历但不被认领**，那是「围栏内、名单外 = 不收」的可见证据。",
+                "files": [ { "name": "u1.bin", "size": 300, "mtimeMs": 0, "attrs": 0 } ] },
+              { "name": "Microsoft", "path": "C:\\ProgramData\\Microsoft", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Windows", "path": "C:\\ProgramData\\Microsoft\\Windows", "attrs": 16, "mtimeMs": 0,
+                    "children": [
+                      { "name": "WER", "path": "C:\\ProgramData\\Microsoft\\Windows\\WER", "attrs": 16, "mtimeMs": 0,
+                        "children": [
+                          { "name": "ReportArchive", "path": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportArchive", "attrs": 16, "mtimeMs": 0,
+                            "files": [ { "name": "old.wer", "size": 15, "mtimeMs": 0, "attrs": 0 } ] }
+                        ] }
+                    ] }
+                ] }
+            ] },
+          { "name": "Users", "path": "C:\\Users", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "Kano", "path": "C:\\Users\\Kano", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "AppData", "path": "C:\\Users\\Kano\\AppData", "attrs": 16, "mtimeMs": 0,
+                    "children": [
+                      { "name": "Roaming", "path": "C:\\Users\\Kano\\AppData\\Roaming", "attrs": 16, "mtimeMs": 0,
+                        "children": [
+                          { "name": "Code", "path": "C:\\Users\\Kano\\AppData\\Roaming\\Code", "attrs": 16, "mtimeMs": 0,
+                            "children": [
+                              { "name": "Cache", "path": "C:\\Users\\Kano\\AppData\\Roaming\\Code\\Cache", "attrs": 16, "mtimeMs": 0,
+                                "files": [ { "name": "v1.bin", "size": 90, "mtimeMs": 0, "attrs": 0 } ] },
+                              { "name": "CachedData", "path": "C:\\Users\\Kano\\AppData\\Roaming\\Code\\CachedData", "attrs": 16, "mtimeMs": 0,
+                                "files": [ { "name": "v2.bin", "size": 95, "mtimeMs": 0, "attrs": 0 } ] }
+                            ] }
+                        ] }
+                    ] }
+                ] }
+            ] }
+        ]
+      }
+    },
+    {
+      "id": "downloads",
+      "_why": "M5-P1 T3b-ii（plan §5.6）那条 🟠 在参考机上 0 命中（plan §9.2），它对账的半边只能靠夹具。`builtin` 那条 case 故意**不给** USERPROFILE（三条 %USERPROFILE% 规则要靠它产 unresolved-env —— 那份覆盖是 T3a/T3b-i 逐字登记过的，不动），所以这里另开一条带 USERPROFILE 的 case，让 `recursive: false` 与十种包形状这两件事在两侧真的被跑到：顶层 setup.exe / drivers.msi 必须被认领（正例两格，顺带让 bytesByRisk.high 与 bytesByRisk.safe 同时非零，合计口径才不是空转），顶层 holiday.jpg 与 notes.txt 不许被认领（扩展名形状），2023\\ 子目录里的 .msi 与 .zip 不许被认领（不递归）。缺任何一格，单侧把 recursive 改成 true、或把 filePatterns 放宽成「全收」时，这条对账就点不出名（T3a 变异 (a) 那一轮的同一个教训：点名要求树里真有那个形状）。",
+      "env": {
+        "SYSTEMDRIVE": "C:",
+        "WINDIR": "C:\\Windows",
+        "TEMP": "C:\\Temp",
+        "LOCALAPPDATA": "C:\\Local",
+        "APPDATA": "C:\\Users\\Kano\\AppData\\Roaming",
+        "PROGRAMDATA": "C:\\ProgramData",
+    "PROGRAMFILES": "C:\\Program Files",
+    "USERPROFILE": "C:\\Users\\Kano",
+        "PROGRAMFILES": "C:\\Program Files",
+        "USERPROFILE": "C:\\Users\\Kano"
+      },
+      "rules": "builtin",
+      "root": {
+        "name": "C:", "path": "C:\\", "attrs": 16, "mtimeMs": 0,
+        "children": [
+          { "name": "Temp", "path": "C:\\Temp", "attrs": 16, "mtimeMs": 0,
+            "files": [ { "name": "a.tmp", "size": 100, "mtimeMs": 0, "attrs": 0 } ] },
+          { "name": "Users", "path": "C:\\Users", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "Kano", "path": "C:\\Users\\Kano", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Downloads", "path": "C:\\Users\\Kano\\Downloads", "attrs": 16, "mtimeMs": 0,
+                    "files": [
+                      { "name": "setup.exe", "size": 900, "mtimeMs": 0, "attrs": 0 },
+                      { "name": "drivers.msi", "size": 1200, "mtimeMs": 0, "attrs": 0 },
+                      { "name": "holiday.jpg", "size": 3000, "mtimeMs": 0, "attrs": 0 },
+                      { "name": "notes.txt", "size": 12, "mtimeMs": 0, "attrs": 0 }
+                    ],
+                    "children": [
+                      { "name": "2023", "path": "C:\\Users\\Kano\\Downloads\\2023", "attrs": 16, "mtimeMs": 0,
+                        "files": [
+                          { "name": "nested-installer.msi", "size": 5000, "mtimeMs": 0, "attrs": 0 },
+                          { "name": "archive.zip", "size": 7000, "mtimeMs": 0, "attrs": 0 }
+                        ] }
+                    ] }
+                ] }
+            ] }
+        ]
+      }
+    },
+    {
+      "id": "gates",
+      "rules": [
+        { "id": "older-than", "name": "只收旧文件", "category": "temp", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\pip\\Cache"],
+          "scanner": { "filePatterns": [], "olderThanDays": 1, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "shallow", "name": "不递归", "category": "temp", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\npm-cache"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": false },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "named", "name": "按名收", "category": "temp", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer"],
+          "scanner": { "filePatterns": ["thumbcache_*.db", "Thumbs.db"], "olderThanDays": null, "recursive": false },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "absent-tool", "name": "工具没装", "category": "dev-cache", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\Yarn\\Cache"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true,
+          "requiresDetector": "yarn" },
+        { "id": "unresolved", "name": "变量缺", "category": "dev-cache", "description": "d",
+          "paths": ["%USERPROFILE%\\.m2\\repository"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "missing-territory", "name": "没扫到", "category": "temp", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\D3DSCache"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "deep-recursive", "name": "递归收整个 temp", "category": "temp", "description": "d",
+          "paths": ["%TEMP%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true }
+      ],
+      "detectorStatus": { "yarn": false },
+      "root": {
+        "name": "C:", "path": "C:\\", "attrs": 16, "mtimeMs": 0,
+        "children": [
+          { "name": "Temp", "path": "C:\\Temp", "attrs": 16, "mtimeMs": 0,
+            "files": [
+              { "name": "old.tmp", "size": 100, "mtimeMs": 1, "attrs": 0 },
+              { "name": "new.tmp", "size": 200, "mtimeMs": 1700000000000, "attrs": 0 },
+              { "name": "sys.tmp", "size": 700, "mtimeMs": 1, "attrs": 4 }
+            ],
+            "children": [
+              { "name": "sub", "path": "C:\\Temp\\sub", "attrs": 16, "mtimeMs": 0,
+                "files": [ { "name": "deep.tmp", "size": 400, "mtimeMs": 1, "attrs": 0 } ] }
+            ] },
+          { "name": "Local", "path": "C:\\Local", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "pip", "path": "C:\\Local\\pip", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Cache", "path": "C:\\Local\\pip\\Cache", "attrs": 16, "mtimeMs": 0,
+                    "files": [
+                      { "name": "stale.whl", "size": 25, "mtimeMs": 1, "attrs": 0 },
+                      { "name": "fresh.whl", "size": 26, "mtimeMs": 1700000000000, "attrs": 0 }
+                    ] }
+                ] },
+              { "name": "npm-cache", "path": "C:\\Local\\npm-cache", "attrs": 16, "mtimeMs": 0,
+                "files": [ { "name": "top.bin", "size": 800, "mtimeMs": 0, "attrs": 0 } ],
+                "children": [
+                  { "name": "_cacache", "path": "C:\\Local\\npm-cache\\_cacache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "nested.bin", "size": 810, "mtimeMs": 0, "attrs": 0 } ] }
+                ] },
+              { "name": "Microsoft", "path": "C:\\Local\\Microsoft", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Windows", "path": "C:\\Local\\Microsoft\\Windows", "attrs": 16, "mtimeMs": 0,
+                    "children": [
+                      { "name": "Explorer", "path": "C:\\Local\\Microsoft\\Windows\\Explorer", "attrs": 16, "mtimeMs": 0,
+                        "files": [
+                          { "name": "thumbcache_64.db", "size": 40, "mtimeMs": 0, "attrs": 0 },
+                          { "name": "Thumbs.db", "size": 20, "mtimeMs": 0, "attrs": 0 },
+                          { "name": "iconcache_64.db", "size": 30, "mtimeMs": 0, "attrs": 0 }
+                        ] }
+                    ] }
+                ] },
+              { "name": "Yarn", "path": "C:\\Local\\Yarn", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "Cache", "path": "C:\\Local\\Yarn\\Cache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "y1.tgz", "size": 35, "mtimeMs": 0, "attrs": 0 } ] }
+                ] }
+            ] },
+          { "name": "$Recycle.Bin", "path": "C:\\$Recycle.Bin", "attrs": 22, "mtimeMs": 0,
+            "files": [ { "name": "gone.bin", "size": 500, "mtimeMs": 0, "attrs": 0 } ] }
+        ]
+      }
+    },
+    {
+      "id": "blocked",
+      "_why": "WINDIR 缺失 ⇒ 禁止根 %WINDIR%\\System32 解析不出来 ⇒ fail-safe：一份结论都不许给。",
+      "env": { "SYSTEMDRIVE": "C:", "TEMP": "C:\\Temp", "LOCALAPPDATA": "C:\\Local" },
+      "rules": [
+        { "id": "t", "name": "临时", "category": "temp", "description": "d",
+          "paths": ["%TEMP%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "n", "name": "npm", "category": "dev-cache", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\npm-cache"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true }
+      ],
+      "root": {
+        "name": "C:", "path": "C:\\", "attrs": 16, "mtimeMs": 0,
+        "children": [
+          { "name": "Temp", "path": "C:\\Temp", "attrs": 16, "mtimeMs": 0,
+            "files": [ { "name": "a.tmp", "size": 100, "mtimeMs": 0, "attrs": 0 } ] },
+          { "name": "Local", "path": "C:\\Local", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "npm-cache", "path": "C:\\Local\\npm-cache", "attrs": 16, "mtimeMs": 0,
+                "files": [ { "name": "n.bin", "size": 500, "mtimeMs": 0, "attrs": 0 } ] }
+            ] }
+        ]
+      }
+    },
+    {
+      "id": "fence",
+      "_why": "M5-P1 T1 声明层围栏闸的两侧对账：rejectedRules 必须点名同样三条理由 —— container-without-predicate（带围栏没 leaf 判据的容器入口）、inadequate-fence（leaf 缺围栏 / denyRoots 覆盖不足）、ambiguous-leaf-mode（leafDirs+leafFiles 混给，§10 裁定 1）。leaf-fence-ok 是正例：容器入口模式（leaf + 合法围栏）下 paths 允许停在容器上，T1 引擎按既有地盘语义评估它（任意深度 leaf 遍历是 T2）。case env 补 PROGRAMFILES（§4.1 的第 8 键），32 位根按 §4.2 写成 %SYSTEMDRIVE% 加字面括号段 —— 带括号这条根被两侧形状判定认下，就是这条用例。",
+      "env": {
+        "SYSTEMDRIVE": "C:",
+        "WINDIR": "C:\\Windows",
+        "TEMP": "C:\\Temp",
+        "LOCALAPPDATA": "C:\\Local",
+        "APPDATA": "C:\\Users\\Kano\\AppData\\Roaming",
+        "PROGRAMDATA": "C:\\ProgramData",
+    "PROGRAMFILES": "C:\\Program Files",
+    "USERPROFILE": "C:\\Users\\Kano",
+        "PROGRAMFILES": "C:\\Program Files",
+        "USERPROFILE": "C:\\Users\\Kano"
+      },
+      "rules": [
+        { "id": "leaf-fence-ok", "name": "leaf 判据配齐围栏的正例", "category": "app-transient", "description": "d",
+          "paths": ["%LOCALAPPDATA%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true,
+            "leafDirs": ["Cache"],
+            "scopeFence": { "allowRoots": ["%LOCALAPPDATA%", "%APPDATA%", "%PROGRAMDATA%"],
+              "denyRoots": ["%WINDIR%\\*", "%SYSTEMDRIVE%\\System Volume Information",
+                "%PROGRAMFILES%\\*", "%SYSTEMDRIVE%\\Program Files (x86)\\*"] } },
+          "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "leaf-no-fence", "name": "leaf 判据没带围栏", "category": "app-transient", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\appdata"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true, "leafDirs": ["Cache"] },
+          "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "fence-no-leaf", "name": "容器入口只带围栏没有 leaf 判据", "category": "app-transient", "description": "d",
+          "paths": ["%LOCALAPPDATA%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true,
+            "scopeFence": { "allowRoots": ["%LOCALAPPDATA%"],
+              "denyRoots": ["%WINDIR%\\*", "%SYSTEMDRIVE%\\System Volume Information",
+                "%PROGRAMFILES%\\*", "%SYSTEMDRIVE%\\Program Files (x86)\\*"] } },
+          "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "leaf-both-modes", "name": "leafDirs 与 leafFiles 混给", "category": "app-transient", "description": "d",
+          "paths": ["%LOCALAPPDATA%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true,
+            "leafDirs": ["Cache"], "leafFiles": ["*.?.log"],
+            "scopeFence": { "allowRoots": ["%LOCALAPPDATA%"],
+              "denyRoots": ["%WINDIR%\\*", "%SYSTEMDRIVE%\\System Volume Information",
+                "%PROGRAMFILES%\\*", "%SYSTEMDRIVE%\\Program Files (x86)\\*"] } },
+          "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "fence-thin-deny", "name": "denyRoots 覆盖不足（缺两条 Program Files）", "category": "app-transient", "description": "d",
+          "paths": ["%LOCALAPPDATA%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true,
+            "leafDirs": ["Cache"],
+            "scopeFence": { "allowRoots": ["%LOCALAPPDATA%"],
+              "denyRoots": ["%WINDIR%\\*", "%SYSTEMDRIVE%\\System Volume Information"] } },
+          "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true }
+      ],
+      "root": {
+        "name": "C:", "path": "C:\\", "attrs": 16, "mtimeMs": 0,
+        "children": [
+          { "name": "Local", "path": "C:\\Local", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "appdata", "path": "C:\\Local\\appdata", "attrs": 16, "mtimeMs": 0,
+                "files": [ { "name": "o.bin", "size": 5, "mtimeMs": 0, "attrs": 0 } ],
+                "children": [
+                  { "name": "Cache", "path": "C:\\Local\\appdata\\Cache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "c.bin", "size": 40, "mtimeMs": 0, "attrs": 0 } ] }
+                ] }
+            ] }
+        ]
+      }
+    },
+    {
+      "id": "static",
+      "rules": [
+        { "id": "ok", "name": "正常", "category": "temp", "description": "d",
+          "paths": ["%TEMP%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "bare-container", "name": "裸容器", "category": "temp", "description": "d",
+          "paths": ["%LOCALAPPDATA%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "wildcard-tail", "name": "通配收尾", "category": "temp", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\*"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "names-bin", "name": "非红规则认领回收站", "category": "temp", "description": "d",
+          "paths": ["%SYSTEMDRIVE%\\$Recycle.Bin"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "sweeps-system32", "name": "套住禁止根", "category": "temp", "description": "d",
+          "paths": ["%WINDIR%"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "relative", "name": "相对路径", "category": "temp", "description": "d",
+          "paths": ["AppData\\Local\\Temp"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "ancestor-of-other", "name": "套住别家地盘", "category": "temp", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\npm-cache"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+        { "id": "descendant", "name": "别家的叶子", "category": "temp", "description": "d",
+          "paths": ["%LOCALAPPDATA%\\npm-cache\\_cacache"],
+          "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+          "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true }
+      ],
+      "root": {
+        "name": "C:", "path": "C:\\", "attrs": 16, "mtimeMs": 0,
+        "children": [
+          { "name": "Temp", "path": "C:\\Temp", "attrs": 16, "mtimeMs": 0,
+            "files": [ { "name": "a.tmp", "size": 100, "mtimeMs": 0, "attrs": 0 } ] },
+          { "name": "Local", "path": "C:\\Local", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "npm-cache", "path": "C:\\Local\\npm-cache", "attrs": 16, "mtimeMs": 0,
+                "children": [
+                  { "name": "_cacache", "path": "C:\\Local\\npm-cache\\_cacache", "attrs": 16, "mtimeMs": 0,
+                    "files": [ { "name": "n.bin", "size": 500, "mtimeMs": 0, "attrs": 0 } ] }
+                ] }
+            ] },
+          { "name": "Windows", "path": "C:\\Windows", "attrs": 16, "mtimeMs": 0,
+            "children": [
+              { "name": "System32", "path": "C:\\Windows\\System32", "attrs": 16, "mtimeMs": 0,
+                "files": [ { "name": "k.dll", "size": 999, "mtimeMs": 0, "attrs": 0 } ] }
+            ] }
+        ]
+      }
+    }
+  ]
+}

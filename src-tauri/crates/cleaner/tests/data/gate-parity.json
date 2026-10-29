@@ -1,0 +1,221 @@
+{
+  "_comment": "M3-C-1 授权闸对账夹具。env / forbiddenPatterns / reportOnlyPatterns 与 TS 侧同口径；case 级可覆盖。",
+  "env": {
+    "SYSTEMDRIVE": "C:",
+    "WINDIR": "C:\\Windows",
+    "TEMP": "C:\\Temp"
+  },
+  "forbiddenPatterns": [
+    "%WINDIR%\\System32",
+    "%WINDIR%\\SysWOW64",
+    "%WINDIR%\\WinSxS",
+    "%WINDIR%\\Installer",
+    "%WINDIR%\\Servicing",
+    "%SYSTEMDRIVE%\\System Volume Information"
+  ],
+  "reportOnlyPatterns": ["%SYSTEMDRIVE%\\$Recycle.Bin"],
+
+  "blockerCases": [
+    {
+      "id": "root-malformed-empty",
+      "root": "   ",
+      "probe": "Directory",
+      "expected": "root-malformed"
+    },
+    {
+      "id": "root-malformed-wildcard",
+      "root": "C:\\a\\*",
+      "probe": "Directory",
+      "expected": "root-malformed"
+    },
+    {
+      "id": "root-malformed-extended-prefix",
+      "root": "\\\\?\\C:\\a",
+      "probe": "Directory",
+      "expected": "root-malformed"
+    },
+    {
+      "id": "root-not-absolute",
+      "root": "AppData\\Local\\Temp",
+      "probe": "Directory",
+      "expected": "root-not-absolute"
+    },
+    {
+      "id": "root-is-drive-root-bare",
+      "root": "C:",
+      "probe": "Directory",
+      "expected": "root-is-drive-root"
+    },
+    {
+      "id": "root-is-drive-root-slash",
+      "root": "C:\\",
+      "probe": "Directory",
+      "expected": "root-is-drive-root"
+    },
+    {
+      "id": "root-forbidden",
+      "root": "C:\\Windows\\System32\\x",
+      "probe": "Directory",
+      "expected": "root-forbidden"
+    },
+    {
+      "id": "root-report-only",
+      "root": "C:\\$Recycle.Bin\\S-1-5-21",
+      "probe": "Directory",
+      "expected": "root-report-only"
+    },
+    {
+      "id": "root-ancestor-of-forbidden",
+      "root": "C:\\Windows",
+      "probe": "Directory",
+      "expected": "root-ancestor-of-forbidden"
+    },
+    {
+      "id": "root-denied-by-caller",
+      "root": "C:\\Sandbox\\x",
+      "denyRoots": ["C:\\Sandbox"],
+      "probe": "Directory",
+      "expected": "root-denied-by-caller"
+    },
+    {
+      "id": "root-forbidden-unresolved",
+      "root": "C:\\Sandbox",
+      "forbiddenPatterns": ["%NOPE%\\System32"],
+      "probe": "Directory",
+      "expected": "root-forbidden-unresolved"
+    },
+    {
+      "id": "root-missing",
+      "root": "C:\\Sandbox",
+      "probe": "Missing",
+      "expected": "root-missing"
+    },
+    {
+      "id": "root-not-a-directory",
+      "root": "C:\\Sandbox",
+      "probe": "NotADirectory",
+      "expected": "root-not-a-directory"
+    },
+    {
+      "id": "root-is-reparse-point",
+      "root": "C:\\Sandbox",
+      "probe": "ReparsePoint",
+      "expected": "root-is-reparse-point"
+    },
+    {
+      "id": "root-unstatable",
+      "root": "C:\\Sandbox",
+      "probe": "Unstatable",
+      "expected": "root-unstatable"
+    }
+  ],
+
+  "refusalCases": [
+    {
+      "id": "refusal-malformed-path",
+      "path": "",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "malformed-path",
+      "scope": "classify"
+    },
+    {
+      "id": "refusal-parent-traversal-wildcard",
+      "path": "C:\\Sandbox\\*",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "parent-traversal",
+      "scope": "classify"
+    },
+    {
+      "id": "refusal-parent-traversal-dots",
+      "path": "C:\\Sandbox\\..\\x",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "parent-traversal",
+      "scope": "classify"
+    },
+    {
+      "id": "refusal-equals-authorized-root",
+      "path": "C:\\Sandbox",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "equals-authorized-root",
+      "scope": "classify"
+    },
+    {
+      "id": "refusal-forbidden-root-out-of-scope",
+      "path": "C:\\Windows\\System32\\k.dll",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "forbidden-root",
+      "scope": "classify"
+    },
+    {
+      "id": "refusal-report-only-root-out-of-scope",
+      "path": "C:\\$Recycle.Bin\\x",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "report-only-root",
+      "scope": "classify"
+    },
+    {
+      "id": "refusal-out-of-scope",
+      "path": "C:\\Elsewhere\\x",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "out-of-scope",
+      "scope": "classify"
+    },
+    {
+      "id": "refusal-overlaps-out-of-scope",
+      "path": "C:\\Sandbox\\x\\y",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "overlaps-out-of-scope",
+      "scope": "documented",
+      "note": "第一道闸 classify_path 不感知批次内其他路径；overlaps 在 TS 执行器第二遍处理。"
+    },
+    {
+      "id": "refusal-reparse-point",
+      "path": "C:\\Sandbox\\link",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "reparse-point",
+      "scope": "documented",
+      "note": "需要一次 lstat 才能判定，classify_path 第一道闸不处理；留在执行器第二遍。"
+    },
+    {
+      "id": "refusal-reparse-ancestor",
+      "path": "C:\\Sandbox\\junc\\file.bin",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "reparse-ancestor",
+      "scope": "documented",
+      "note": "需要逐段 lstat 才能判定中间段是否为重解析点，classify_path 不处理。"
+    },
+    {
+      "id": "refusal-not-found",
+      "path": "C:\\Sandbox\\missing.txt",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "not-found",
+      "scope": "documented",
+      "note": "需要 lstat 才能判定 ENOENT，classify_path 不处理。"
+    },
+    {
+      "id": "refusal-unstatable",
+      "path": "C:\\Sandbox\\locked.txt",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "unstatable",
+      "scope": "documented",
+      "note": "需要 lstat 失败才能判定，classify_path 不处理。"
+    },
+    {
+      "id": "refusal-not-a-deletable-entry",
+      "path": "C:\\Sandbox\\pipe",
+      "authorizedRoot": "C:\\Sandbox",
+      "expected": "not-a-deletable-entry",
+      "scope": "documented",
+      "note": "需要 lstat 判定既非文件也非目录，classify_path 不处理。"
+    },
+    {
+      "id": "refusal-forbidden-roots-unresolved",
+      "path": "C:\\Sandbox\\a.txt",
+      "authorizedRoot": "C:\\Sandbox",
+      "forbiddenPatterns": ["%NOPE%\\System32"],
+      "expected": "forbidden-roots-unresolved",
+      "scope": "documented",
+      "note": "这是 authorizedRoot 校验失败后的整批拒绝，由 guard 关产生，classify_path 不处理。"
+    }
+  ]
+}

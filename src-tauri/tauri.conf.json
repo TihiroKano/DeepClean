@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DeepClean",
+  "version": "1.0.0",
+  "identifier": "com.deepclean.app",
+  "build": {
+    "frontendDist": "dist",
+    "beforeBuildCommand": "npm run build:tauri"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "DeepClean",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 1080,
+        "minHeight": 680,
+        "decorations": false,
+        "transparent": true,
+        "shadow": true,
+        "resizable": true,
+        "url": "tauri.html",
+        "label": "main",
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "TihiroKano",
+    "copyright": "© 2026 TihiroKano",
+    "license": "PolyForm-Noncommercial-1.0.0",
+    "icon": ["icons/icon.ico"],
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },
+      "nsis": {
+        "installMode": "perMachine",
+        "installerIcon": "icons/icon.ico",
+        "installerHooks": "windows/uninstall-hooks.nsh"
+      }
+    }
+  }
+}

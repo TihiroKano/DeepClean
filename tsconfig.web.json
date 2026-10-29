@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+    "outDir": ".scan-cache/tsbuild",
+    "tsBuildInfoFile": ".scan-cache/tsbuild/web.tsbuildinfo"
+  },
+  "include": ["src/renderer/**/*.ts", "src/renderer/**/*.tsx", "tests/unit/**/*.tsx", "shared/**/*.ts", "core/analyze/squarify.ts", "core/analyze/treemap-data.ts", "core/analyze/treemap-view.ts", "core/analyze/top-rows.ts", "core/analyze/tree-nav-state.ts", "core/analyze/detail.ts", "core/analyze/top-files.ts", "core/fs/pathutil.ts", "core/rules/types.ts", "core/rules/registry.ts", "core/rules/engine.ts", "core/rules/preview.ts"]
+}

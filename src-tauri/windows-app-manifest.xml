@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  本 exe 的应用 manifest（由 build.rs 经 `WindowsAttributes::app_manifest` 嵌进去）。
+  为什么是这一份而不是 tauri 默认那份：默认那份只有 Common-Controls v6 依赖，而 MinGW 的
+  specs 会再无条件挂一份带 longPathAware 的（同为 RT_MANIFEST ID=1）—— 于是 `ld` 抱怨
+  `.rsrc merge failure`，且实测 `FindResourceW(id=1)` 取到的是**我们这份**，长路径那格等于白给。
+  摘掉任何一份都不行：摘我们这份 ⇒ 应用直接起不来（2026-10-14 实测，进程 12 s 内消失、零 stderr）；
+  摘 MinGW 那份 ⇒ 本机 binutils 没有任何 manifest 相关的 ld 选项。
+  所以把两边语义并到这一份里：无论哪份胜出，comctl v6 与 longPathAware 都在。
+
+  三条语义各自的来历，别当装饰：
+   · Common-Controls v6 —— tauri 默认那份的全部内容，摘掉它窗口起不来（实测）。
+   · longPathAware —— 一个扫整卷的程序必须能在开了 LongPathsEnabled 的机器上走进 >260 字符的
+     深层目录；丢了它是**静默少扫**，不是报错。
+   · requireAdministrator —— **2026-10-25 由 asInvoker 改来**（人类伙伴裁定）。
+     原裁定是「提权只属于那个只读枚举的助手进程（`crates/scanner/src/elevate.rs`），
+     把带删除按钮的界面提权是拿边界换便利」。推翻它的依据是一次真机清理的逐条账
+     （`auto-1792854191063-1`）：2167 条失败里 2154 条是 `WIN32_120`（`DE_ACCESSDENIEDSRC`），
+     而其中 2164/2165 个仍存在的目标对 `BUILTIN\Administrators` 有 Delete 权 —— 也就是说
+     这些失败**只**因为进程是 Medium 完整性级别。不提权，这些字节永远删不掉。
+     代价如实登记：整个带删除按钮的界面常驻管理员令牌，§16/§17/§18 那几道闸从
+     「纵深防御的一层」变成「唯一的一层」；双击即弹 UAC，拒绝则应用不起。
+     提权也删不掉的两类仍然存在（实测 14 条被在跑的进程锁、3 条只有 TrustedInstaller 能删），
+     所以界面上那条提示说的是「可能」，不是「一定」。
+  没有声明 dpiAware —— 原来两份都没有，这里不新增语义。
+-->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity
+        type="win32"
+        name="Microsoft.Windows.Common-Controls"
+        version="6.0.0.0"
+        processorArchitecture="*"
+        publicKeyToken="6595b64144ccf1df"
+        language="*"
+      />
+    </dependentAssembly>
+  </dependency>
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="requireAdministrator" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
+    </windowsSettings>
+  </application>
+</assembly>

@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "m2-default",
+  "description": "M2 需要的最小能力面。事件订阅（扫描进度推送）+ 默认核心集 + 窗控四连（decorations:false 之后最小化/最大化/关闭全由渲染端自绘，缺一条对应按钮就是死的）。逐条点名，不用通配 —— 多给一条权限就是白送一份能力。",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "core:window:allow-is-maximized"
+  ]
+}

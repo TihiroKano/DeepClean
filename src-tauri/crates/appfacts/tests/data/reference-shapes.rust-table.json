@@ -1,0 +1,15 @@
+{
+  "_generatedBy": "cargo test -p deepclean-appfacts --test parity_ts (APPFACTS_REGEN=1)",
+  "_note": "Rust 侧在 tests/data/reference-shapes.json 上算出的表投影。TS 侧 tests/unit/appfacts.test.ts 拿同一份夹具跑 core/facts/appfacts.ts，逐格比这份文件 + 比夹具里的 expect。改判据不重生成 = npm 侧红，这是刻意的漂移探测。",
+  "cases": [
+    { "name": "claude-msix", "table": {"claude": "present"} },
+    { "name": "claude-registered-on-d", "table": {"claude": "present"} },
+    { "name": "d-drive-name-mismatch", "table": {"urban-friendship-story": "present"} },
+    { "name": "kazumi-running", "table": {"flutter_webview_windows": "unknown", "kazumi": "present"} },
+    { "name": "urban-no-evidence", "table": {"urban-friendship-story": "unknown"} },
+    { "name": "acme-residual", "table": {"ab": "unknown", "acme-tool": "absent"} },
+    { "name": "registry-unavailable", "table": {"ghost": "unknown"} },
+    { "name": "install-location-unexpandable", "table": {"ghost-app": "unknown"} },
+    { "name": "processes-broke", "table": {"solo": "unknown"} }
+  ]
+}

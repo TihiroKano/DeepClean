@@ -1,0 +1,182 @@
+{
+  "_comment": [
+    "M3-B 预览层的零容差对账夹具。两侧读**同一份字节**：TS 用 core/rules 的 evaluateRules+",
+    "buildPreviewModel，Rust 用 deepclean-rules 的 evaluate_rules + deepclean-cleaner 的",
+    "build_preview_model。报告本身已由 M3-A 的对账钉住同口径，所以这里比的就是**预览层**。",
+    "USERPROFILE 故意不给（r-dev 靠它产生 unresolved-env / 0 字节 finding / 底账条目）。",
+    "Temp 里放两个**码点序与 UTF-16 码元序相反**的文件名（U+1F600 vs U+FFFD）：",
+    "前者在 UTF-8 里更大、在 UTF-16 里更小 —— digest 的路径排序只要有一侧用错口径就会红。",
+    "⚠️ `bads` 里那条非字符串路径元素挂在 **r-npm** 上而不是 r-temp：TS 基准在",
+    "「整项勾选 + 该规则名下还有非字符串路径元素」时会在 digestOf 里拿数字调 normalizeKey",
+    "**直接抛 TypeError**（见 M3-B 实施记录）。挂在没被整项勾选的规则上，两侧才都跑得起来 ——",
+    "这不是「抹平差异」，是那个输入让基准**跑不起来**、根本无可比之物。",
+    "M5-P1 T5a：`description`（规则文案）进了 digest 的**覆盖字段**，两份口径都进 ⇒ 本夹具每次现算的",
+    "digest 全部换过号（plan §9.7 那笔「历史指纹作废」的代价，这里实测兑现）。旧的七个 case 用的",
+    "是 ruleSets 里的自定义 id，在内置表之外 ⇒ 文案恒为空串；第八个 case `builtin-text` 走",
+    "rules:\"builtin\"，比的就是**各自那张表里逐字的文案**（表漂了这里红，全仓此前没有这一格）。"
+  ],
+  "nowMs": 1700000000000,
+  "maxListedPaths": 50,
+  "env": {
+    "SYSTEMDRIVE": "C:",
+    "WINDIR": "C:\\Windows",
+    "TEMP": "C:\\Temp",
+    "LOCALAPPDATA": "C:\\Local",
+    "APPDATA": "C:\\Users\\Kano\\AppData\\Roaming",
+    "PROGRAMDATA": "C:\\ProgramData"
+  },
+  "ruleSets": {
+    "main": [
+      { "id": "r-temp", "name": "临时文件", "category": "temp", "description": "d",
+        "paths": ["%TEMP%"],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+      { "id": "r-npm", "name": "npm 缓存", "category": "dev-cache", "description": "d",
+        "paths": ["%LOCALAPPDATA%\\npm-cache"],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true },
+      { "id": "r-risk", "name": "高风险项", "category": "dev-cache", "description": "d",
+        "paths": ["%LOCALAPPDATA%\\Google\\Chrome\\User Data\\*\\Cache"],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "high", "cleanStrategy": "delete-all", "recoverable": false },
+      { "id": "r-bin", "name": "回收站", "category": "recycle-bin", "description": "d",
+        "paths": ["%SYSTEMDRIVE%\\$Recycle.Bin"],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "forbidden", "cleanStrategy": "manual-only", "recoverable": true },
+      { "id": "r-dev", "name": "HF 缓存", "category": "dev-cache", "description": "d",
+        "paths": ["%USERPROFILE%\\.cache\\huggingface"],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true,
+        "requiresDetector": "huggingface", "excludedFromDefaultSelection": true }
+    ],
+    "declared-rejected": [
+      { "id": "d-temp", "name": "临时文件（这条是有效的）", "category": "temp", "description": "d",
+        "paths": ["%TEMP%"],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+      { "id": "d-rel", "name": "相对路径", "category": "temp", "description": "d",
+        "paths": ["AppData\\Local\\Temp"],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+      { "id": "d-empty", "name": "空地盘", "category": "temp", "description": "d",
+        "paths": [],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "safe", "cleanStrategy": "delete-all", "recoverable": true },
+      { "id": "d-bin", "name": "非红规则认领回收站", "category": "recycle-bin", "description": "d",
+        "paths": ["%SYSTEMDRIVE%\\$Recycle.Bin"],
+        "scanner": { "filePatterns": [], "olderThanDays": null, "recursive": true },
+        "riskLevel": "caution", "cleanStrategy": "delete-all", "recoverable": true }
+    ]
+  },
+  "trees": {
+    "main": {
+      "name": "C:", "path": "C:\\", "attrs": 16, "mtimeMs": 0,
+      "children": [
+        { "name": "Temp", "path": "C:\\Temp", "attrs": 16, "mtimeMs": 0,
+          "files": [
+            { "name": "a.tmp", "size": 100, "mtimeMs": 0, "attrs": 0 },
+            { "name": "x-\ud83d\ude00.tmp", "size": 50, "mtimeMs": 0, "attrs": 0 },
+            { "name": "x-\ufffd.tmp", "size": 30, "mtimeMs": 0, "attrs": 0 },
+            { "name": "sys.tmp", "size": 700, "mtimeMs": 0, "attrs": 4 }
+          ] },
+        { "name": "$Recycle.Bin", "path": "C:\\$Recycle.Bin", "attrs": 22, "mtimeMs": 0,
+          "files": [ { "name": "gone.bin", "size": 500, "mtimeMs": 0, "attrs": 0 } ] },
+        { "name": "Windows", "path": "C:\\Windows", "attrs": 16, "mtimeMs": 0,
+          "children": [
+            { "name": "System32", "path": "C:\\Windows\\System32", "attrs": 16, "mtimeMs": 0,
+              "files": [ { "name": "k.dll", "size": 999, "mtimeMs": 0, "attrs": 0 } ] }
+          ] },
+        { "name": "Local", "path": "C:\\Local", "attrs": 16, "mtimeMs": 0,
+          "children": [
+            { "name": "npm-cache", "path": "C:\\Local\\npm-cache", "attrs": 16, "mtimeMs": 0,
+              "children": [
+                { "name": "_cacache", "path": "C:\\Local\\npm-cache\\_cacache", "attrs": 16, "mtimeMs": 0,
+                  "files": [
+                    { "name": "n1.bin", "size": 800, "mtimeMs": 0, "attrs": 0 },
+                    { "name": "n2.bin", "size": 20, "mtimeMs": 0, "attrs": 0 }
+                  ] }
+              ] },
+            { "name": "Google", "path": "C:\\Local\\Google", "attrs": 16, "mtimeMs": 0,
+              "children": [
+                { "name": "Chrome", "path": "C:\\Local\\Google\\Chrome", "attrs": 16, "mtimeMs": 0,
+                  "children": [
+                    { "name": "User Data", "path": "C:\\Local\\Google\\Chrome\\User Data", "attrs": 16, "mtimeMs": 0,
+                      "children": [
+                        { "name": "Default", "path": "C:\\Local\\Google\\Chrome\\User Data\\Default", "attrs": 16, "mtimeMs": 0,
+                          "children": [
+                            { "name": "Cache", "path": "C:\\Local\\Google\\Chrome\\User Data\\Default\\Cache", "attrs": 16, "mtimeMs": 0,
+                              "files": [ { "name": "c1.bin", "size": 50, "mtimeMs": 0, "attrs": 0 } ] }
+                          ] },
+                        { "name": "Profile 2", "path": "C:\\Local\\Google\\Chrome\\User Data\\Profile 2", "attrs": 16, "mtimeMs": 0,
+                          "children": [
+                            { "name": "Cache", "path": "C:\\Local\\Google\\Chrome\\User Data\\Profile 2\\Cache", "attrs": 16, "mtimeMs": 0,
+                              "files": [ { "name": "c2.bin", "size": 60, "mtimeMs": 0, "attrs": 0 } ] }
+                          ] }
+                      ] }
+                  ] }
+              ] }
+          ] }
+      ]
+    }
+  },
+  "cases": [
+    { "id": "mixed", "rules": "main", "tree": "main",
+      "defaultUnselectableRuleIds": ["r-dev"],
+      "selection": { "items": [
+        { "ruleId": "r-temp" }, { "ruleId": "r-npm" }, { "ruleId": "r-risk" }, { "ruleId": "r-bin" }
+      ] } },
+
+    { "id": "paths", "rules": "main", "tree": "main",
+      "selection": { "items": [
+        { "ruleId": "r-temp", "paths": [
+          "C:\\Temp\\a.tmp", "C:\\Temp\\x-\ud83d\ude00.tmp", "C:\\Temp\\x-\ufffd.tmp",
+          "C:\\Temp\\ghost.tmp", "C:\\Temp\\a.tmp",
+          "C:\\Windows\\System32\\k.dll", "C:\\$Recycle.Bin\\gone.bin"
+        ] },
+        { "ruleId": "r-risk" }
+      ] } },
+
+    { "id": "truncated", "rules": "main", "tree": "main", "maxListedPaths": 1,
+      "collectAllPathsFor": ["r-temp"],
+      "selection": { "items": [
+        { "ruleId": "r-temp", "paths": ["C:\\Temp\\a.tmp", "C:\\Temp\\x-\ufffd.tmp"] },
+        { "ruleId": "r-npm" }
+      ] } },
+
+    { "id": "malformed", "rules": "main", "tree": "main",
+      "selection": { "items": "nope" } },
+
+    { "id": "bads", "rules": "main", "tree": "main",
+      "selection": { "items": [
+        { "paths": [] },
+        { "ruleId": "ghost" },
+        { "ruleId": "r-temp", "paths": "C:\\Temp\\a.tmp" },
+        { "ruleId": "r-npm", "paths": [123] },
+        { "ruleId": "r-dev" },
+        { "ruleId": "r-temp" },
+        { "ruleId": "r-temp" }
+      ] } },
+
+    { "id": "blocked", "rules": "main", "tree": "main",
+      "env": { "SYSTEMDRIVE": "C:", "TEMP": "C:\\Temp", "LOCALAPPDATA": "C:\\Local" },
+      "selection": { "items": [ { "ruleId": "r-temp" }, { "ruleId": "r-npm" } ] } },
+
+    { "id": "declared-rejected", "_why": "M5-L：三条在 §15 声明层就被整条拒掉的规则（invalid-shape ×2 / report-only-root）+ 一条有效的。原来六个 case 一条 item-rejected 都不产，预览那句「规则「名字」（原因）」这条分支从没被跨实现比过。",
+      "rules": "declared-rejected", "tree": "main",
+      "selection": { "items": [
+        { "ruleId": "d-temp" },
+        { "ruleId": "d-rel" },
+        { "ruleId": "d-empty" },
+        { "ruleId": "d-bin" }
+      ] } },
+
+    { "id": "builtin-text", "_why": "M5-P1 T5a：走 rules:\"builtin\" 这一支 ⇒ 每一项的 description 是从**各自那张内置表**（builtin_rules() / BUILTIN_RULES）按 rule_id 查出来的，于是 items 与 digest 里第一次真的带着规则文案跨实现对账。表两侧措辞漂了就当场点名。选的三条都是这棵树上真能落地的：windows-temp(%TEMP%)、browser-cache(%LOCALAPPDATA%\\Google\\...)、recycle-bin(🔴 —— 被拒的那一项同样必须带文案，界面要说清为什么不能删)；npm-cache 走探测器那一族，树上落不落地两侧都同解，留着它就是为了比这一点。",
+      "rules": "builtin", "tree": "main",
+      "selection": { "items": [
+        { "ruleId": "windows-temp" },
+        { "ruleId": "browser-cache" },
+        { "ruleId": "npm-cache" },
+        { "ruleId": "recycle-bin" }
+      ] } }
+  ]
+}

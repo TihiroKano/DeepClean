@@ -1,0 +1,17 @@
+[package]
+name = "deepclean-rules"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# 只有 `tree_source` 那一个适配器用得到它（把 RuleSource 接到真扫描出来的树上）。
+# 引擎核心（engine/env/matcher/validate/builtin）**一行都不碰 scanner** ——
+# 那些判据必须能在一棵合成树上跑，本轮之前的单测就是这样钉的。
+deepclean-scanner = { path = "../scanner" }
+
+[dev-dependencies]
+# 只给 `tests/engine_real.rs` 用：真盘判据要真给一个文件打上 FILE_ATTRIBUTE_SYSTEM，
+# 否则 §28 原则二那条判据在集成层永远测不到（只能靠合成夹具）。
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Storage_FileSystem"] }

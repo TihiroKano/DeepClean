@@ -1,0 +1,10 @@
+# DeepClean 授权 **测试夹具** —— 这不是那 1000 个真激活码。
+#
+# 那 1000 个真码不在本仓库（属 Electron V1.1 线），必须由用户提供；本文件只用于验证
+# 「生成脚本 tools/gen-license-codes.mjs」与「Rust code_table 的归一化 + SHA-256」逐字一致。
+# 因此下面故意混入大小写与首尾空白：归一化一旦分叉，lib.rs 的交叉对账测试就会红。
+DC-FIX-0001
+ dc-fix-0002 
+DC-fix-0003
+   DC-FIX-0004
+	DC-FIX-0005	

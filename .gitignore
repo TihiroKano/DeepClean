@@ -1,0 +1,56 @@
+node_modules/
+dist/
+out/
+.venv/
+*.log
+fixtures/
+.scan-cache/
+tmp-shots/
+# 代理的隔离工作树（工具脚手架，不是产品的一部分）。
+# 必须忽略：它们是嵌在主工作树里的**嵌套 git 工作树**，一次 `git add -A` 会把它们
+# 当成 gitlink 收进去 —— 那是本仓记过账的"宽 add"那一族事故。
+.qoder/
+tmp-treemap-preview.html
+scripts/_*.mjs
+tmp-ui-demo/
+.vitest/
+scripts/_*.cjs
+/resources/scanen.exe
+src-tauri/target/
+src-tauri/gen/schemas/
+# 上面第 2 行的 `dist/` 会连坐吞掉 `src-tauri/dist/`，而那是 Tauri 的**源**前端
+# （`tauri::generate_context!` 在编译期把它嵌进二进制）。0 个文件被跟踪 = 从克隆里
+# build 出来的 exe 没有界面。两条都要写：只放开目录，git 仍然不收目录里的文件。
+!src-tauri/dist/
+!src-tauri/dist/**
+# 明文激活码清单绝不进版本库。生成脚本的 `--codes-out` 那份走的是 `codes-<日期>-<数量>.txt`
+# 这一形制（发放给用户用的清单），只有持有真码的人需要它，一旦进仓就等于把授权公开。
+# 随应用交付的是**哈希**清单 `codes.sha256`（一行一个 SHA-256，反推不出码），那个必须进仓：
+# `license_table.rs` 靠 include_str! 在编译期把它嵌进二进制，被 .gitignore 吞掉就是全新安装
+# 激活不了。两条形制靠"横线 vs 点"分开，所以这里只挡 `codes-*`，不写 `codes*`。
+codes-*
+# `scan_one` 那个 example 跑闸时的落盘产物（`--out=D:\dc-tmpscan100k.json` 形）。
+# 它不是产品文件、也从来没人引用：M6 验收 §二 只把它当旁证引用了里面的数。
+# 不收的理由有两条：一是它只是**一台机器一次扫描**的快照（本机 476,422 文件那份口径），
+# 二是 `git status` 里长期挂着一条未跟踪项会让「工作树干不干净」这条判据失真 ——
+# 而那条判据是本仓每个 Task 收尾都要看的（m6-packaging-plan.md 的 A1 那格）。
+# 真要留证据就把结论写进验收文档（本轮已写：docs/acceptance/2026-10-17-golden-c-real.md）。
+src-tauri/dc-tmpscan*.json
+# ── 2026-10-25 补：两处长期挂在 `git status` 里、但不该进版本库的东西 ──
+#
+# ① 仓库根下的调试截图。它们是开发过程中随手 `Save-DcShot` 存下来的
+#    （`dc_*.png` / `scan_*.png` / `cleanup_*.png` / `release_*.png` 那一族，实测 47 张），
+#    拍的是本机桌面与别的应用窗口 —— 与 M6-B 历史抹除处理掉的那 66 张同类。
+#    真正的验收证据只在 `docs/acceptance/assets/` 下，且有 `shot-leak-gate` 守着宽度；
+#    根目录这些没有判据、没有出处、也没人引用。
+#    写具体形制而不是 `*.png`：`docs/acceptance/assets/*.png` 与 `src/renderer/assets/*.png`
+#    都是要进库的，一个宽 glob 会把它们一起吞掉。
+/*.png
+#
+# ② `scripts/_*.ps1`：`.mjs` / `.cjs` 两条早在上面了，唯独 `.ps1` 漏了 ——
+#    于是 16 个探针脚本既没被忽略也没被提交，长期挂在未跟踪列表里。
+#    它们与 `_*.mjs` 同一性质（一次性探针，不是产品、也不是可复跑的闸），按同一口径处理。
+scripts/_*.ps1
+#
+# ③ `.trae/`：与 `.qoder/` 同类的代理脚手架目录，理由见上面第 9-12 行。
+.trae/

@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+    "outDir": ".scan-cache/tsbuild",
+    "tsBuildInfoFile": ".scan-cache/tsbuild/node.tsbuildinfo"
+  },
+  "include": [
+    "core/**/*.ts",
+    "shared/**/*.ts",
+    "src/renderer/components/mobius-geometry.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "vitest.integration.config.ts"
+  ]
+}
