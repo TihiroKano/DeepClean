@@ -80,8 +80,22 @@ DeepClean 反过来 —— 它只做两件事：把空间去哪了**画出来**�
 从 [Releases](https://github.com/TihiroKano/DeepClean/releases/latest) 下载
 `DeepClean_1.0.0_x64-setup.exe`（约 4.6 MB），双击安装。
 
-**需要管理员权限** —— 删除系统目录里的垃圾需要它，所以 manifest 是 `requireAdministrator`，
-双击就会弹 UAC。
+**需要管理员权限** —— 删除系统目录里的垃圾需要它，所以 exe 的 manifest 是
+`requireAdministrator`，从快捷方式启动会弹 UAC。
+
+> ⚠️ **安装完成那一页请把「运行 DeepClean」的勾去掉，装完自己从桌面 / 开始菜单的
+> 快捷方式启动。**
+>
+> 原因是 Tauri 的 NSIS 模板里那个「运行」按钮走的是 `nsis_tauri_utils::RunAsUser` ——
+> 它**主动降权**成当前用户来启动，于是程序带着普通用户令牌跑起来、**不弹 UAC**。
+> 那与 manifest 声明的 `requireAdministrator` 是矛盾的：界面起来了，但清理系统目录时
+> 会失败，而且失败原因看起来像"文件被占用"。
+>
+> 从快捷方式启动就正常了 —— 那条路走的是 Windows 的 shell 执行，会按 manifest 提权。
+>
+> （这条是 2026-10-29 装机实测发现的。Tauri 2 没有提供关掉那个复选框的配置项，
+> `installerHooks` 也只能插四个 `NSIS_HOOK_*` 宏、改不了 `RunMainBinary` 函数，
+> 所以只能在这里写明。）
 
 > ⚠️ **安装包未签名**，首次运行会看到 SmartScreen 的「未知发布者」。
 > 点「更多信息」→「仍要运行」。
