@@ -32,7 +32,26 @@ import { GLASS_SLIDERS, wallpaperLabel } from ${abs('src/renderer/pages/Settings
 import { DEFAULT_SETTINGS } from ${abs('shared/settings.ts')}
 
 const status = (over) => ({ state: 'unlicensed', activatedAtMs: null, deviceId: null, problemReason: null, problem: null, ...over })
-const ready = (over, extra) => ({ kind: 'ready', status: status(over), error: null, busy: false, lastActivation: null, ...(extra || {}) })
+/**
+ * busyPhase 必须跟着 busy 一起给（2026-10-29 修）。
+ *
+ * 2026-10-27 晚加了分相文案之后，LicenseState.ready 多了一格 busyPhase：
+ * 它是 null 时 LicensePanel 按 busyPhase ?? 'network' 兜底，渲染出来是
+ * 「正在与服务器通讯中」，而不是「正在校验激活码」。
+ *
+ * 这个脚本下面的自检原来断言 busy 那一相必须含「正在校验激活码」—— 于是它红了。
+ * 红得对：脚本没跟上产品，产品没坏。修的是脚本（显式给 verify 那一相），
+ * 不是把断言改松。
+ */
+const ready = (over, extra) => ({
+  kind: 'ready',
+  status: status(over),
+  error: null,
+  busy: false,
+  busyPhase: null,
+  lastActivation: null,
+  ...(extra || {})
+})
 
 function slider(spec, v) {
   return (
@@ -83,7 +102,12 @@ export function renderSettings({ busy, licensed }) {
         <button className="dc-btn dc-btn-xs" type="button">恢复外观默认</button>
       </section>
       <LicensePanel
-        state={ready(licensed ? { state: 'licensed', activatedAtMs: 1, deviceId: 'aabbccddee' } : {}, { busy })}
+        state={ready(
+          licensed ? { state: 'licensed', activatedAtMs: 1, deviceId: 'aabbccddee' } : {},
+          // busy 时显式给 verify 那一相（不是让 busyPhase 留 null 去走兜底）——
+          // 兜底那档渲染的是「正在与服务器通讯中」，而这张图要拍的是判定那一相。
+          { busy, busyPhase: busy ? 'verify' : null }
+        )}
         code={busy ? 'DC-0123456789ABCDEF0123456789ABCDEF' : ''}
         onCode={() => {}}
         onActivate={() => {}}
