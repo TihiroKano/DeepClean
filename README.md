@@ -12,7 +12,7 @@
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0078D6?style=flat-square&logo=windows)](#)
 [![Tauri](https://img.shields.io/badge/Tauri-2-24C8DB?style=flat-square&logo=tauri)](https://tauri.app)
 [![Rust](https://img.shields.io/badge/Rust-1.98-000000?style=flat-square&logo=rust)](https://www.rust-lang.org)
-[![Tests](https://img.shields.io/badge/tests-1095%20passing-brightgreen?style=flat-square)](#)
+[![CI](https://github.com/TihiroKano/DeepClean/actions/workflows/ci.yml/badge.svg)](https://github.com/TihiroKano/DeepClean/actions/workflows/ci.yml)
 
 [下载安装包](https://github.com/TihiroKano/DeepClean/releases/latest) · [它怎么保证不乱删](#它怎么保证不乱删) · [从源码构建](#从源码构建)
 

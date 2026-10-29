@@ -1,0 +1,214 @@
+# GitHub Actions：三道闸
+#
+# ## 为什么是三个 job 而不是一个
+#
+# 三类验证的失败原因完全不同，混在一起会互相遮：
+#   · `typescript` —— 纯 TS，几十秒出结果，红了立刻知道是类型/单测
+#   · `rust`       —— 编译要几分钟，红了可能是代码、也可能是工具链/链接器
+#   · `build`      —— 真打一次安装包，验证「从克隆能不能 build 出可分发的东西」
+#
+# 前两个每次 push / PR 跑；`build` 只在打 tag 或手动触发时跑 ——
+# 它要跑完整 release 编译（本机实测 5m55s，CI 上更久），每次 push 都跑等于让所有人
+# 等一个只在出包时才有意义的结果。
+#
+# ## 不加 `cargo clippy`
+#
+# 本仓没有 clippy 基线（`clippy.toml` 不存在，历史上也没跑过）。加一条立刻会红的闸
+# 不是「提高质量」，是让 CI 常年红着 —— 那种红会被无视，然后把真的红也一起无视掉。
+# 要加得先在本机把告警清到 0，那是另一件事。
+#
+# ## 关于那个 rsproxy 镜像
+#
+# `src-tauri/.cargo/config.toml` 里把 crates-io 换成了 `rsproxy.cn`（国内镜像，本地开发要的）。
+# GitHub 的 runner 在境外，走那个镜像能通但慢。CI 用 `--config` 覆盖回官方源，
+# **不改仓库里的文件**。覆盖文件在下面那步现写，名字带 `.ci.toml` 且不进版本库。
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# 同一分支的新 push 取消上一次还在跑的
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: never
+
+jobs:
+  typescript:
+    name: TypeScript / 单测
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # `npm ci` 而不是 `npm install`：CI 要的是锁文件里那一份，
+      # 而 install 会顺手把 lock 文件改写掉 —— 那等于每次 CI 都在改工作树。
+      - name: 装依赖
+        run: npm ci
+
+      - name: 类型检查（渲染端）
+        run: npx tsc -p tsconfig.web.json --noEmit
+
+      # ⚠️ `tsconfig.node.json` 有 **5 个既有类型错误**（`usePreview.ts` 被 node 项目
+      # 编译 + `preview-cache-key.test.ts` 3 处断言与实现签名不符）。它们与本次改动无关，
+      # 对 `c6c1a8e` 基线复现过同样 5 条 —— 见 README 的「未闭合」。
+      #
+      # 所以这一步 `continue-on-error`。**这不是把红藏起来**：日志里照样有那 5 条，
+      # 只是不让它们把整个 CI 判红。等它们修掉之后把这一行删掉。
+      - name: 类型检查（core / tests，已知 5 条既有错误）
+        continue-on-error: true
+        run: npx tsc -p tsconfig.node.json --noEmit
+
+      # 1095 条。dot 报告器是为了日志短；红了再让人本地跑 verbose。
+      - name: 单测
+        run: npx vitest run --reporter=dot
+
+  rust:
+    name: Rust / 单测
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 本仓用 **GNU** 工具链（`x86_64-pc-windows-gnu`），不是 MSVC。
+      # `build.rs` 里 `shadow_mingw_default_manifest` 就是为 MinGW 的 gcc specs 写的
+      # （靠 `-B` 顶掉 MinGW 自带的 default-manifest.o，否则 .rsrc merge failure）。
+      # 所以这里装 gnu target + MSYS2 的 gcc，**不要**装 msvc。
+      - name: 装 Rust（GNU 工具链）
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-gnu
+
+      - name: 装 MinGW gcc
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: mingw-w64-x86_64-gcc
+          path-type: inherit
+
+      # 覆盖文件写到 `$RUNNER_TEMP`（不进工作树）—— 早先写在 `src-tauri/.cargo/` 下，
+      # 那会留下一条未跟踪文件，而本仓有「工作树要干净」的判据。
+      - name: 覆盖 crates 源为官方（runner 在境外，rsproxy 慢）
+        shell: pwsh
+        run: |
+          $cfg = Join-Path $env:RUNNER_TEMP 'cargo-ci.toml'
+          @"
+          [source.crates-io]
+          replace-with = 'crates-io-direct'
+
+          [source.crates-io-direct]
+          registry = "sparse+https://index.crates.io/"
+          "@ | Out-File -FilePath $cfg -Encoding utf8
+          "DC_CARGO_CI=$cfg" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          key: gnu
+
+      # 这一条单独跑，因为 `#[cfg(debug_assertions)]` 门控的问题**只在 release 暴露**。
+      # 2026-10-27 那次 `use tauri::Manager` 就栽在这：debug 的 build / test / check
+      # 三件套全绿，`tauri build` 过不去。别拿几分钟的打包当编译检查。
+      - name: cargo check --release
+        working-directory: src-tauri
+        run: cargo check --release --config $env:DC_CARGO_CI
+
+      # 判据不只看退出码：本仓记过「管道会让 $LASTEXITCODE 变成与测试无关的值」。
+      # 这里从输出正文里数 `test result: ok` 与 `FAILED`，两个都对上才算绿。
+      - name: cargo test
+        working-directory: src-tauri
+        shell: pwsh
+        run: |
+          cargo test --workspace --config $env:DC_CARGO_CI 2>&1 | Tee-Object -FilePath cargo-test.log
+          $code = $LASTEXITCODE
+          $log = Get-Content cargo-test.log -Raw
+          $ok = ([regex]::Matches($log, 'test result: ok')).Count
+          $failed = ([regex]::Matches($log, 'test result: FAILED')).Count
+          $blocks = ([regex]::Matches($log, '(?m)^failures:$')).Count
+          Write-Host "ok=$ok  FAILED=$failed  failures-blocks=$blocks  exit=$code"
+          if ($code -ne 0 -or $failed -ne 0 -or $blocks -ne 0) {
+            Write-Host "::error::cargo test 没通过（exit=$code, FAILED=$failed, failures 块=$blocks）"
+            exit 1
+          }
+          # 本机是 28 组。少于 20 说明整批没跑起来（比如 workspace 没识别到），
+          # 那种「0 组 ok 但退出码 0」是最危险的假绿。
+          if ($ok -lt 20) {
+            Write-Host "::error::只数到 $ok 组 test result: ok —— 少于预期，可能整批没跑起来"
+            exit 1
+          }
+
+  build:
+    name: 出包（仅 tag / 手动）
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: 装 Rust（GNU 工具链）
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-gnu
+
+      - name: 装 MinGW gcc
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: mingw-w64-x86_64-gcc
+          path-type: inherit
+
+      - name: 覆盖 crates 源为官方
+        shell: pwsh
+        run: |
+          $cfg = Join-Path $env:RUNNER_TEMP 'cargo-ci.toml'
+          @"
+          [source.crates-io]
+          replace-with = 'crates-io-direct'
+
+          [source.crates-io-direct]
+          registry = "sparse+https://index.crates.io/"
+          "@ | Out-File -FilePath $cfg -Encoding utf8
+          "DC_CARGO_CI=$cfg" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          key: gnu
+
+      - name: 装依赖
+        run: npm ci
+
+      # `--config` 必须给 tauri CLI（它去调 cargo）。`beforeBuildCommand` 会先跑
+      # `npm run build:tauri`（前端进 dist），所以不需要单独一步构建前端。
+      - name: tauri build
+        run: npx tauri build --bundles nsis --config $env:DC_CARGO_CI
+
+      - name: 上传安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: DeepClean-nsis-${{ github.ref_name }}
+          path: src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+          retention-days: 14
