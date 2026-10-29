@@ -2,7 +2,7 @@
 // 桌面里邻居家的窗口、别的会话开的文件管理器、聊天窗口都会随截图进仓 —— 图一旦提交，
 // 撤回要重写 git 历史，而本仓的证据链到处互指哈希，抹历史等于换坐标系。所以拦在写入口之后、
 // 提交之前这一格。
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -52,15 +52,42 @@ export function repoRoot() {
   return join(fileURLToPath(import.meta.url), '../..')
 }
 
+/**
+ * 这道闸守的目录在不在。
+ *
+ * ## 2026-10-29：目录可能**不存在**，那不是"通过"，是"没东西可查"
+ *
+ * 公开仓库只放程序相关的文件，`docs/acceptance/assets/`（93 张验收截图，97.83 MB）
+ * 整个不在版本库里。于是这个目录在 CI 上不存在 —— 而原来 `walk()` 直接 `readdirSync`
+ * 一个不存在的路径，抛 ENOENT，把整条 `npm test` 判红。
+ *
+ * **红得没道理**：这条闸要防的是"把整屏桌面截图提交进版本库"，而公开仓库里一张图都没有，
+ * 它根本没有可防的对象。
+ *
+ * ⚠️ 这与"把断言改松"不是一回事：在**有**图的环境里（本地全量工作区）行为逐字不变，
+ * `把阈值压到 100 时必须红` 那条判据仍然钉着闸真的会红。
+ */
+export function shotsDirExists() {
+  return existsSync(join(repoRoot(), 'docs', 'acceptance'))
+}
+
 export function offenders(limit = MAX_SHOT_WIDTH) {
   const root = repoRoot()
-  return scanShots(join(root, 'docs', 'acceptance'), limit, root).filter((x) => !(x.name in ALLOW_LIST))
+  const dir = join(root, 'docs', 'acceptance')
+  // 目录不在 ⇒ 没有可查的东西（见上面那段注释）
+  if (!existsSync(dir)) return []
+  return scanShots(dir, limit, root).filter((x) => !(x.name in ALLOW_LIST))
 }
 
 // 被直接调用时才走 CLI（被测试 import 时不许碰 process.exit）
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   const i = process.argv.indexOf('--limit')
   const limit = i > -1 ? Number(process.argv[i + 1]) : MAX_SHOT_WIDTH
+  if (!shotsDirExists()) {
+    // 明写「跳过」而不是冒充 OK —— 一个把"没东西可查"印成"查过且干净"的闸是假闸
+    console.log(`SHOT_LEAK_SKIPPED docs/acceptance 不在本仓（公开仓只放程序相关文件）`)
+    process.exit(0)
+  }
   const bad = offenders(limit)
   for (const o of bad) console.log(`LEAK ${o.name} ${o.w}x${o.h}`)
   if (bad.length > 0) {

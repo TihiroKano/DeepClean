@@ -101,20 +101,22 @@ jobs:
           install: mingw-w64-x86_64-gcc
           path-type: inherit
 
-      # 覆盖文件写到 `$RUNNER_TEMP`（不进工作树）—— 早先写在 `src-tauri/.cargo/` 下，
-      # 那会留下一条未跟踪文件，而本仓有「工作树要干净」的判据。
-      - name: 覆盖 crates 源为官方（runner 在境外，rsproxy 慢）
+      # `src-tauri/.cargo/config.toml` 把 crates-io 换成了 `rsproxy.cn`（本地开发要的）。
+      # runner 在境外，走那个镜像能通但慢。
+      #
+      # 试过两种"覆盖"写法，都不行：
+      #   · `replace-with = 'crates-io-direct'` + `registry = "sparse+https://index.crates.io/"`
+      #     ⇒ cargo 报 `source 'crates-io-direct' defines source registry 'crates-io',
+      #        but that source is already defined by 'crates-io'` —— 它认得出这是同一个源，
+      #        拒绝自替换（CI 上实测报的正是这条）；
+      #   · `replace-with = 'crates-io'`（自引用）⇒ 本机能跑，但那是因为本机有 rsproxy 缓存，
+      #        换台机器就不可靠。
+      #
+      # 所以直接**移走那个文件**。CI 的 checkout 是一次性的，删掉不写回仓库；
+      # 删掉之后 cargo 走官方源（本机验过：不带 config.toml 时 `cargo metadata` 正常）。
+      - name: 移走 rsproxy 镜像配置（runner 在境外）
         shell: pwsh
-        run: |
-          $cfg = Join-Path $env:RUNNER_TEMP 'cargo-ci.toml'
-          @"
-          [source.crates-io]
-          replace-with = 'crates-io-direct'
-
-          [source.crates-io-direct]
-          registry = "sparse+https://index.crates.io/"
-          "@ | Out-File -FilePath $cfg -Encoding utf8
-          "DC_CARGO_CI=$cfg" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        run: Remove-Item src-tauri/.cargo/config.toml -Force
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -126,7 +128,7 @@ jobs:
       # 三件套全绿，`tauri build` 过不去。别拿几分钟的打包当编译检查。
       - name: cargo check --release
         working-directory: src-tauri
-        run: cargo check --release --config $env:DC_CARGO_CI
+        run: cargo check --release
 
       # 判据不只看退出码：本仓记过「管道会让 $LASTEXITCODE 变成与测试无关的值」。
       # 这里从输出正文里数 `test result: ok` 与 `FAILED`，两个都对上才算绿。
@@ -134,7 +136,7 @@ jobs:
         working-directory: src-tauri
         shell: pwsh
         run: |
-          cargo test --workspace --config $env:DC_CARGO_CI 2>&1 | Tee-Object -FilePath cargo-test.log
+          cargo test --workspace 2>&1 | Tee-Object -FilePath cargo-test.log
           $code = $LASTEXITCODE
           $log = Get-Content cargo-test.log -Raw
           $ok = ([regex]::Matches($log, 'test result: ok')).Count
@@ -179,18 +181,9 @@ jobs:
           install: mingw-w64-x86_64-gcc
           path-type: inherit
 
-      - name: 覆盖 crates 源为官方
+      - name: 移走 rsproxy 镜像配置（runner 在境外）
         shell: pwsh
-        run: |
-          $cfg = Join-Path $env:RUNNER_TEMP 'cargo-ci.toml'
-          @"
-          [source.crates-io]
-          replace-with = 'crates-io-direct'
-
-          [source.crates-io-direct]
-          registry = "sparse+https://index.crates.io/"
-          "@ | Out-File -FilePath $cfg -Encoding utf8
-          "DC_CARGO_CI=$cfg" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        run: Remove-Item src-tauri/.cargo/config.toml -Force
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -200,10 +193,10 @@ jobs:
       - name: 装依赖
         run: npm ci
 
-      # `--config` 必须给 tauri CLI（它去调 cargo）。`beforeBuildCommand` 会先跑
-      # `npm run build:tauri`（前端进 dist），所以不需要单独一步构建前端。
+      # `beforeBuildCommand` 会先跑 `npm run build:tauri`（前端进 dist），
+      # 所以不需要单独一步构建前端。
       - name: tauri build
-        run: npx tauri build --bundles nsis --config $env:DC_CARGO_CI
+        run: npx tauri build --bundles nsis
 
       - name: 上传安装包
         uses: actions/upload-artifact@v4
