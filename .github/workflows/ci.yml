@@ -118,6 +118,25 @@ jobs:
         shell: pwsh
         run: Remove-Item src-tauri/.cargo/config.toml -Force
 
+      # ⚠️ **Rust job 也要 node + node_modules**（2026-10-29 补）。
+      #
+      # 有四条 Rust 对账用例要现起 `node` + `esbuild` 去跑 TS 那一侧，拿两边逐字段比：
+      #   · crates/cleaner/tests/gate_parity.rs      —— 授权闸零容差对账
+      #   · crates/cleaner/tests/preview_parity.rs   —— 预览对账
+      #   · crates/rules/tests/parity_with_ts.rs     —— 规则引擎对账
+      #   · crates/devenv/tests/parity_devenv_ts.mjs —— 开发环境对账
+      #
+      # 缺 `node_modules` 时 `gate_parity` 会**大声失败**（`找不到 …/esbuild —— 对账需要
+      # 本仓 node_modules。先 npm i。`），不静默跳过 —— 那是刻意的设计，所以 CI 必须备齐。
+      # 第一次跑没备，红在这里。
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: 装依赖（Rust 侧的对账用例要 node + esbuild）
+        run: npm ci
+
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
