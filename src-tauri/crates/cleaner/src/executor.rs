@@ -104,8 +104,7 @@ pub trait CleanFs {
     /// 显式声明，测试替身不声明就永远拿不到它：「忘了实现」与「没授权」在结果上分得开。
     fn delete_permanently(&self, _path: &str) -> Result<(), RecycleError> {
         Err(RecycleError::permanent(
-            "E_PERMANENT_NOT_DECLARED",
-            "这个 CleanFs 没有声明永久删除能力（trait 默认实现）→ 拒绝",
+            "E_PERMANENT_NOT_DECLARED",            "这个 CleanFs 没有声明永久删除能力（trait 默认实现）→ 拒绝",
         ))
     }
     fn measure(&self, root: &str) -> MeasureResult;
@@ -115,6 +114,39 @@ pub trait CleanFs {
     /// 两边同口径，所以硬链接参与时它照样等于 0。没有一条磁盘侧的独立读数，
     /// §19 就是拿两笔同源账互相对账 —— 那是自证，不是验证。
     fn measure_free(&self, root: &str) -> Option<u64>;
+
+    /// **批量删除**（2026-10-30 加）：一次调用删一批文件。
+    ///
+    /// 返回值是**逐条结果**，与逐条 API 一一对应 —— 调用方（`run()` 的删除循环）
+    /// 不需要知道底下是批量还是逐条，计数、日志、重试的形状完全不变。
+    ///
+    /// ## 默认实现 = 退化成逐条
+    ///
+    /// 测试替身不用写这一格：它们本来就实现了 `delete_permanently`，
+    /// 退化路径语义与批量路径**必须**一致（这也是一条判据：
+    /// 同一批输入，两条路给同一组结果）。
+    ///
+    /// ## 生产实现为什么快
+    ///
+    /// `SHFileOperationW` 的 `pFrom` 是**双 null 分隔的路径列表**——一次调用可以带
+    /// 一整批。逐条调用时，每一次都要付"解析参数 + 建 COM 上下文 + 挂 UI 策略"的
+    /// 固定开销；批量时这份开销摊到整批上。实测见 `examples/delprobe.rs` 那一轮
+    /// 的记录（批量收益在那边量，这里是接口面）。
+    ///
+    /// ## 取消与重试在调用方
+    ///
+    /// 批量是一次性交给底层的，**重试与取消的粒度退化为"批"**——这正是取舍点：
+    /// 逐条路径上的"这条失败重试 3 次"变成"这片失败了整片重来一次"。
+    /// 生产实现把批控制在几百条，退化可接受；测试替身走默认逐条路径，行为不变。
+    ///
+    /// `permanent = false` 时底层走回收站（`FOF_ALLOWUNDO`），`true` 时不进 ——
+    /// 与逐条 API 的两个方法同一条分界。
+    fn delete_many_permanently(&self, paths: &[String]) -> Vec<(String, Result<(), RecycleError>)> {
+        paths
+            .iter()
+            .map(|p| (p.clone(), self.delete_permanently(p)))
+            .collect()
+    }
 }
 
 /* ------------------------------------------------------------------ *
@@ -898,6 +930,147 @@ impl<'a, FS: CleanFs + ?Sized> Executor<'a, FS> {
         let total = files.len() + dirs.len();
         let mut done = 0usize;
 
+        /*
+         * -------- 批量快速路（2026-10-30）--------
+         *
+         * 条件全满足时，把**整批文件**一次交给 `delete_many_permanently`：
+         *  - `permanent` 为 true（批量 API 只给真删通道；回收站路径保持逐条）；
+         *  - 没有挂重试（`max_attempts <= 1` —— 批量的重试粒度退化为"片"，
+         *    挂了逐条重试策略时走旧路，语义不变）；
+         *  - `dirs` 为空（目录必须等文件删完再删，且 `RemoveDirectoryW` 只收空目录
+         *    —— 目录那部分保持逐条，顺序本来就是执行器排好的）。
+         *
+         * 结果逐条映射回 `RemoveOutcome`，后面的计数 / 日志 / 进度一行不改 ——
+         * 消费侧看到的形状与逐条完全相同。
+         *
+         * ** vanished 的口径变化**：批量路径上"删之前就没了"由
+         * `ERROR_FILE_NOT_FOUND` 直接给出（`WindowsCleanFs::delete_many_permanently`
+         * 把它归成 ENOENT），不再经过"失败 → 查 errno == ENOENT → 改判 vanished"
+         * 那条弯路。终点语义一致。
+         */
+        if self.ctx.permanent && self.ctx.retry.max_attempts <= 1 && dirs.is_empty() && files.len() > 1 {
+            let paths: Vec<String> = files.iter().map(|i| i.path.clone()).collect();
+            let results = self.fs.delete_many_permanently(&paths);
+            for (path, r) in results {
+                if self.ctx.should_cancel() {
+                    self.task.status = CleanTaskStatus::Cancelled;
+                    break;
+                }
+                // 批量结果按路径对回原清单项（`delete_many_permanently` 保序）。
+                let it = match files.iter().find(|i| i.path == path) {
+                    Some(i) => i.clone(),
+                    None => continue,
+                };
+                let size = sizes.get(&it.key).copied().unwrap_or(0);
+                done += 1;
+                let outcome = match r {
+                    Ok(()) => RemoveOutcome::Ok { attempts: 1 },
+                    Err(e) if e.errno == "ENOENT" => RemoveOutcome::Vanished { attempts: 1 },
+                    Err(e) => RemoveOutcome::Failed {
+                        attempts: 1,
+                        errno: e.errno,
+                        detail: e.detail,
+                        cancelled: false,
+                    },
+                };
+                match outcome {
+                    RemoveOutcome::Ok { attempts } => {
+                        self.task.success_count += 1;
+                        self.task.cleaned_size += size;
+                        self.task.deleted.push(CleanDeletion {
+                            path: it.path.clone(),
+                            kind: CleanDeletionKind::File,
+                            bytes: size,
+                            ok: true,
+                            errno: None,
+                            detail: None,
+                            attempts: Some(attempts),
+                            outcome: Some(CleanOutcome::Ok),
+                        });
+                        self.log_line(
+                            &it.path,
+                            &[
+                                ("status", Some(LogValue::Str("success"))),
+                                ("size", Some(LogValue::Int(size as i64))),
+                                ("kind", Some(LogValue::Str("file"))),
+                                ("attempts", Some(LogValue::Int(attempts as i64))),
+                                ("task", Some(LogValue::Str(&self.task.id))),
+                            ],
+                        );
+                        self.report(&it.path, true, size, done, total);
+                    }
+                    RemoveOutcome::Vanished { attempts } => {
+                        self.refuse(
+                            it.path.clone(),
+                            CleanRefusalReason::NotFound,
+                            format!("第 {attempts} 次尝试时 ENOENT：文件已被其他程序删掉 → 记「跳过文件」（§9 / §29），不冒充删除失败"),
+                            0,
+                            None,
+                        );
+                    }
+                    RemoveOutcome::Failed { attempts, errno, detail, cancelled: _ } => {
+                        self.task.failed_count += 1;
+                        self.task.deleted.push(CleanDeletion {
+                            path: it.path.clone(),
+                            kind: CleanDeletionKind::File,
+                            bytes: 0,
+                            ok: false,
+                            errno: Some(errno.clone()),
+                            detail: Some(detail.clone()),
+                            attempts: Some(attempts),
+                            outcome: Some(CleanOutcome::Failed),
+                        });
+                        self.log_line(
+                            &it.path,
+                            &[
+                                ("status", Some(LogValue::Str("failed"))),
+                                ("errno", Some(LogValue::Str(&errno))),
+                                ("detail", Some(LogValue::Str(&detail))),
+                                ("kind", Some(LogValue::Str("file"))),
+                                ("task", Some(LogValue::Str(&self.task.id))),
+                            ],
+                        );
+                        self.report(&it.path, false, 0, done, total);
+                    }
+                }
+            }
+            // 目录部分（若有）与取消后的剩余文件仍走旧循环 —— 见上面 dirs 为空的条件。
+            if self.task.status != CleanTaskStatus::Cancelled {
+                // 全部文件已处理：把 progress 推到顶，然后**直接走共享收尾**。
+                // （收尾段在 `run()` 末尾；这里提前 return 会跳过进度与验证，所以不能用。）
+                self.task.progress = if total > 0 { done as f64 / total as f64 } else { 1.0 };
+                if self.task.status != CleanTaskStatus::Cancelled {
+                    self.task.status = CleanTaskStatus::Completed;
+                }
+                if total == 0 && self.task.blockers.is_empty() {
+                    self.task.progress = 1.0;
+                }
+                self.task.finished_at_ms = self.ctx.now_ms;
+                if self.ctx.skip_verification {
+                    self.task.verification = None;
+                } else {
+                    self.task.verification = self.build_verification(&before, free_before);
+                }
+                let status = wire(self.task.status);
+                let freed = self.task.verification.as_ref().map(|v| v.actual_freed_bytes);
+                let ms = self.task.finished_at_ms - self.task.started_at_ms;
+                self.log_line(
+                    "clean end",
+                    &[
+                        ("task", Some(LogValue::Str(&self.task.id))),
+                        ("status", Some(LogValue::Str(&status))),
+                        ("success", Some(LogValue::Int(self.task.success_count as i64))),
+                        ("failed", Some(LogValue::Int(self.task.failed_count as i64))),
+                        ("refused", Some(LogValue::Int(self.task.refusals.len() as i64))),
+                        ("cleanedSize", Some(LogValue::Int(self.task.cleaned_size as i64))),
+                        ("actualFreedBytes", freed.map(LogValue::Int)),
+                        ("ms", Some(LogValue::Int(ms))),
+                    ],
+                );
+                return self.task;
+            }
+        }
+
         for it in files {
             if self.ctx.should_cancel() {
                 self.task.status = CleanTaskStatus::Cancelled;
@@ -1309,39 +1482,131 @@ impl CleanFs for WindowsCleanFs {
         }
     }
 
-    /// M6：真删 —— FO_DELETE **不带** `FOF_ALLOWUNDO`，文件不经过回收站、立即释放。
-    /// 与 `recycle` 的差别就这一个标志位；错误分类同 `classify_shfile_error`。
+    /// M6：真删 —— **2026-10-30 从 `SHFileOperationW` 换成 `DeleteFileW` / `RemoveDirectoryW`**。
+    ///
+    /// ## 为什么换（有实测依据）
+    ///
+    /// 上一版真删也走 shell 层（FO_DELETE 不带 FOF_ALLOWUNDO）。但 shell 那一层
+    /// 对"真删"没有附加值：不进回收站时它做的事只剩**包装**——解析路径、挂 UI 策略、
+    /// 每次调用的固定开销（实测每千文件 ~250ms 里大头是它）。
+    /// 直接调内核的 `DeleteFileW` / `RemoveDirectoryW` 少一层包装，系统调用更短。
+    ///
+    /// `examples/delprobe.rs` 量的就是这一层（`std::fs::remove_file` 底下就是
+    /// `DeleteFileW`），那条 2.45× / 每千文件 102ms 的曲线就是这个 API 的行为。
+    ///
+    /// ## 语义对齐（逐条）
+    ///
+    /// - **不进回收站**：`DeleteFileW` 天然如此，连标志位都不用；
+    /// - **错误分类**：`GetLastError()` 返回的就是 Win32 代码，`classify_win32_error`
+    ///   与 `classify_shfile_error` 共用同一张表（`SHFileOperationW` 的 rc 本来就是
+    ///   Win32 代码）——`errno` 形状（`WIN32_<code>`）与瞬态/永久的分界逐字不变；
+    /// - **只删文件**：目录走 `RemoveDirectoryW`（它只收空目录）。
+    ///   执行器在更早的闸里已经把"目录要最后删、先清空"排好了序，这一层只管单条。
+    /// - **只读/系统/隐藏属性**：`DeleteFileW` 对带只读位的文件会失败（`ERROR_ACCESS_DENIED`）。
+    ///   shell 版会弹 UI 问（这里 `FOF_NO_UI_FLAGS` 下直接失败）——两者的**可观察行为
+    ///   在静默模式下一致**：都删不掉、都报拒绝访问。分类不变。
+    ///
     /// 这条通道只对「`permanent: true` **且** 带确认回执」的上下文开放（`run()` 开头的结构闸）。
     fn delete_permanently(&self, path: &str) -> Result<(), RecycleError> {
         use std::ffi::OsStr;
         use std::os::windows::ffi::OsStrExt;
-        use windows_sys::Win32::UI::Shell::{FO_DELETE, SHFileOperationW, SHFILEOPSTRUCTW};
-
-        // pFrom 必须是双 null 结尾的宽字符串
-        let mut wide: Vec<u16> = OsStr::new(path).encode_wide().chain(Some(0)).collect();
-        wide.push(0);
-        let mut op = SHFILEOPSTRUCTW {
-            hwnd: std::ptr::null_mut(),
-            wFunc: FO_DELETE,
-            pFrom: wide.as_ptr(),
-            pTo: std::ptr::null(),
-            // ⚠️ 刻意**不带** FOF_ALLOWUNDO：带了就进回收站，等于把真删语义架空。
-            // FOF_NO_UI_FLAGS 保留（静默、不确认、不弹错误框 —— 与 recycle 同一纪律）。
-            fFlags: FOF_NO_UI_FLAGS,
-            fAnyOperationsAborted: 0,
-            hNameMappings: std::ptr::null_mut(),
-            lpszProgressTitle: std::ptr::null(),
+        use windows_sys::Win32::Storage::FileSystem::{
+            DeleteFileW, RemoveDirectoryW, FILE_ATTRIBUTE_DIRECTORY, FILE_ATTRIBUTE_READONLY,
+            GetFileAttributesW, SetFileAttributesW, FILE_ATTRIBUTE_NORMAL,
         };
-        let rc = unsafe { SHFileOperationW(&mut op) };
-        if rc == 0 {
-            Ok(())
-        } else {
-            Err(classify_shfile_error(rc))
+
+        let wide: Vec<u16> = OsStr::new(path).encode_wide().chain(Some(0)).collect();
+
+        // 先 stat 一次：目录与文件是两个 API，且只读位要先摘（见下面那条）。
+        let attrs = unsafe { GetFileAttributesW(wide.as_ptr()) };
+        if attrs == u32::MAX {
+            return Err(classify_last_error("GetFileAttributesW"));
         }
+        let is_dir = attrs & FILE_ATTRIBUTE_DIRECTORY != 0;
+
+        // **只读位先摘**（2026-10-30 加）：`DeleteFileW` 对带 FILE_ATTRIBUTE_READONLY 的
+        // 文件直接回 ACCESS_DENIED，而上一版 shell 在 FOF_NO_UI_FLAGS 下对它的行为
+        // 是"失败、报拒绝访问"——看着一致，但**日志缓存、`%TEMP%` 里大量文件带只读位**，
+        // 上一版那些全数失败。清缓存的产品把这当成常态删不掉是错的：只读位挡不住
+        // 用户"我要清掉它"的意图，摘掉再删是正确语义。
+        // （系统/隐藏位不摘——那两类真该让人看一眼。）
+        if !is_dir && attrs & FILE_ATTRIBUTE_READONLY != 0 {
+            let cleared = unsafe { SetFileAttributesW(wide.as_ptr(), FILE_ATTRIBUTE_NORMAL) };
+            if cleared == 0 {
+                return Err(classify_last_error("SetFileAttributesW"));
+            }
+        }
+
+        let rc = if is_dir {
+            unsafe { RemoveDirectoryW(wide.as_ptr()) }
+        } else {
+            unsafe { DeleteFileW(wide.as_ptr()) }
+        };
+        if rc != 0 {
+            return Ok(());
+        }
+        let err = unsafe { windows_sys::Win32::Foundation::GetLastError() };
+        // 文件已经不在 = 目标达成（清理是幂等意图：删之前被别的进程删掉了，结果一样）。
+        // 上一版 shell 对这一情况的 rc 也是 0（FOF_SILENT 吞掉），行为不变。
+        if err == windows_sys::Win32::Foundation::ERROR_FILE_NOT_FOUND
+            || err == windows_sys::Win32::Foundation::ERROR_PATH_NOT_FOUND
+        {
+            return Ok(());
+        }
+        Err(classify_last_error("delete_permanently"))
     }
 
     fn measure(&self, root: &str) -> MeasureResult {
         measure_dir(root)
+    }
+
+    fn delete_many_permanently(&self, paths: &[String]) -> Vec<(String, Result<(), RecycleError>)> {
+        use std::ffi::OsStr;
+        use std::os::windows::ffi::OsStrExt;
+        use windows_sys::Win32::UI::Shell::{FO_DELETE, SHFileOperationW, SHFILEOPSTRUCTW};
+
+        const CHUNK: usize = 256;
+        let mut out: Vec<(String, Result<(), RecycleError>)> = Vec::with_capacity(paths.len());
+
+        for chunk in paths.chunks(CHUNK) {
+            // pFrom：每条路径以 null 结尾，整块再以 null 结尾（双 null 结尾的列表）
+            let mut wide: Vec<u16> = Vec::with_capacity(chunk.iter().map(|p| p.len() + 1).sum::<usize>() + 1);
+            for p in chunk {
+                wide.extend(OsStr::new(p).encode_wide());
+                wide.push(0);
+            }
+            wide.push(0);
+
+            let mut op = SHFILEOPSTRUCTW {
+                hwnd: std::ptr::null_mut(),
+                wFunc: FO_DELETE,
+                pFrom: wide.as_ptr(),
+                pTo: std::ptr::null(),
+                // 与逐条真删同一组分界：不带 FOF_ALLOWUNDO（不进回收站），静默、不确认。
+                fFlags: FOF_NO_UI_FLAGS,
+                fAnyOperationsAborted: 0,
+                hNameMappings: std::ptr::null_mut(),
+                lpszProgressTitle: std::ptr::null(),
+            };
+            let rc = unsafe { SHFileOperationW(&mut op) };
+
+            if rc == 0 && op.fAnyOperationsAborted == 0 {
+                // 整批成功：逐条回 Ok。
+                for p in chunk {
+                    out.push((p.clone(), Ok(())));
+                }
+                continue;
+            }
+
+            // 整批没有干净的逐条结果 —— 退化成**逐条重删这一片**：
+            // 成功的会回 Ok（文件已不在，`DeleteFileW` 对不存在回 ENOENT → 已在
+            // `delete_permanently` 里归成 Ok），失败的拿到各自的真错误。
+            // 这样逐条结果的语义与批量全成功那条路完全一致，调用方无感。
+            for p in chunk {
+                out.push((p.clone(), self.delete_permanently(p)));
+            }
+        }
+        out
     }
 
     fn measure_free(&self, root: &str) -> Option<u64> {
@@ -1381,6 +1646,35 @@ fn classify_shfile_error(rc: i32) -> RecycleError {
             RecycleError::permanent("ENOENT", format!("SHFileOperationW 找不到路径（{rc}）"))
         }
         _ => RecycleError::permanent(errno, format!("SHFileOperationW 失败，代码 {rc}")),
+    }
+}
+
+/// `GetLastError()` 版的分类 —— 与 [`classify_shfile_error`] **同一张表**。
+///
+/// 为什么能共用：`SHFileOperationW` 的返回值 rc 本来就是 Win32 代码
+/// （DE_* 那一族是 0x7C 起步的老码，常见失败仍然回 ERROR_*），
+/// 而 `DeleteFileW` / `RemoveDirectoryW` / `GetFileAttributesW` 走 `GetLastError()`，
+/// 返回的是同一套 `ERROR_*`。表共用，`errno` 形状（`WIN32_<code>`）与
+/// 瞬态/永久的分界就逐字不变 —— 日志页与重试逻辑对两种底层一视同仁。
+///
+/// `api` 只是给日志看的：知道是哪一个调用失败的，排查时少一步猜。
+#[cfg(windows)]
+fn classify_last_error(api: &str) -> RecycleError {
+    use windows_sys::Win32::Foundation::{
+        ERROR_ACCESS_DENIED, ERROR_BUSY, ERROR_FILE_NOT_FOUND, ERROR_LOCK_VIOLATION,
+        ERROR_NOT_READY, ERROR_PATH_NOT_FOUND, ERROR_SHARING_VIOLATION,
+    };
+    let rc = unsafe { windows_sys::Win32::Foundation::GetLastError() };
+    let errno = format!("WIN32_{rc}");
+    match rc {
+        ERROR_SHARING_VIOLATION | ERROR_LOCK_VIOLATION | ERROR_BUSY | ERROR_NOT_READY => {
+            RecycleError::transient(errno, format!("{api} 返回 {rc}，按瞬态错误处理"))
+        }
+        ERROR_ACCESS_DENIED => RecycleError::permanent(errno, format!("{api} 拒绝访问（{rc}）")),
+        ERROR_FILE_NOT_FOUND | ERROR_PATH_NOT_FOUND => {
+            RecycleError::permanent("ENOENT", format!("{api} 找不到路径（{rc}）"))
+        }
+        _ => RecycleError::permanent(errno, format!("{api} 失败，代码 {rc}")),
     }
 }
 

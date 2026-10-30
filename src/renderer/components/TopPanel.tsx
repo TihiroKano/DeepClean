@@ -1,4 +1,5 @@
 import { formatBytes } from '../../../shared/format'
+import { useT } from '../i18n'
 import type { TopRow } from '../../../core/analyze/top-rows'
 
 /** §10：当前层的空间榜。刻意只做「本层」—— 规格书的例子（Users / Program Files / Windows）
@@ -12,10 +13,11 @@ export function TopPanel({
   total: number
   onLocate: (row: TopRow) => void
 }): JSX.Element {
+  const t = useT()
   return (
     <section className="dc-top">
-      <h3 className="dc-panel-title">空间占用 Top</h3>
-      {rows.length === 0 && <p className="dc-muted">本层没有可绘制的内容。</p>}
+      <h3 className="dc-panel-title">{t('空间占用 Top')}</h3>
+      {rows.length === 0 && <p className="dc-muted">{t('本层没有可绘制的内容。')}</p>}
       <ol className="dc-top-list">
         {rows.map((r, i) => (
           <li key={r.key}>

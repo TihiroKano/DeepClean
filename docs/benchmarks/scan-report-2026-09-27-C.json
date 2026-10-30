@@ -1,0 +1,3219 @@
+{
+  "schema": "deepclean.scan-report/1",
+  "generatedAtMs": 1790445292900,
+  "app": {
+    "name": "DeepClean",
+    "version": "0.1.0-smoke"
+  },
+  "scan": {
+    "scanId": "muiosufm-nragmg",
+    "root": "C:\\",
+    "status": "completed",
+    "elapsedMs": 164873,
+    "truncated": false,
+    "counters": {
+      "files": 377141,
+      "dirs": 75457,
+      "totalBytes": 69379209066
+    },
+    "errors": {
+      "denied": 106,
+      "missing": 0,
+      "busy": 0,
+      "otherErrors": 0,
+      "skipped": 106
+    },
+    "speed": {
+      "filesPerSec": 2287.46,
+      "bytesPerSec": 420803946,
+      "dirsPerSec": 457.67
+    },
+    "peakRssBytes": 777658368
+  },
+  "topFiles": [
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Roaming\\com.example\\kazumi\\downloads\\515594_xfdm\\24\\video.mp4",
+      "name": "video.mp4",
+      "size": 658575732,
+      "mtimeMs": 1790416936329.9653
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\@genieworkbuddy-desktop-updater\\installer.exe",
+      "name": "installer.exe",
+      "size": 485401144,
+      "mtimeMs": 1789623369169.9722
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\Temp\\trae-cn-user-x64\\TraeSetup-stable-2.3.87416.exe",
+      "name": "TraeSetup-stable-2.3.87416.exe",
+      "size": 444314184,
+      "mtimeMs": 1789965940569.4521
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\Temp\\solo-cn-user-x64\\TRAE SOLOSetup-stable-2.3.86563.exe",
+      "name": "TRAE SOLOSetup-stable-2.3.86563.exe",
+      "size": 438317656,
+      "mtimeMs": 1789909278337.5356
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\webcast_mate-updater\\installer.exe",
+      "name": "installer.exe",
+      "size": 392230784,
+      "mtimeMs": 1720062892054.645
+    },
+    {
+      "path": "C:\\ProgramData\\Comms\\PCManager\\DriverUpgrade\\Update\\Downloaded\\0_14.0.7.200(C233)\\PCManager_Setup_14.0.7.200(C233)_x64.exe",
+      "name": "PCManager_Setup_14.0.7.200(C233)_x64.exe",
+      "size": 389052744,
+      "mtimeMs": 1758699026000
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\154.0.4258.37\\msedge.dll",
+      "name": "msedge.dll",
+      "size": 349660488,
+      "mtimeMs": 1790238408687.34
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Microsoft\\EdgeCore\\154.0.4258.37\\msedge.dll",
+      "name": "msedge.dll",
+      "size": 349660488,
+      "mtimeMs": 1790238408687.34
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Microsoft\\EdgeCore\\Optimized\\msedge.dll",
+      "name": "msedge.dll",
+      "size": 349660488,
+      "mtimeMs": 1790238408687.34
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\153.0.4234.48\\msedge.dll",
+      "name": "msedge.dll",
+      "size": 348273480,
+      "mtimeMs": 1789715117419.7117
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Microsoft\\EdgeCore\\153.0.4234.48\\msedge.dll",
+      "name": "msedge.dll",
+      "size": 348273480,
+      "mtimeMs": 1789715117419.7117
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\TeamoRouter\\agent\\codex-runtime\\openai-codex\\0.142.5\\win32-x64\\package\\vendor\\x86_64-pc-windows-msvc\\bin\\codex.exe",
+      "name": "codex.exe",
+      "size": 323143472,
+      "mtimeMs": 1789048127208.2349
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\@deepseek-aidsh-desktop-updater\\installer.exe",
+      "name": "installer.exe",
+      "size": 322049488,
+      "mtimeMs": 1790341793266.7883
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\QuarkCloudDrive\\User Data\\updates\\b2b97fea74584b89a465f6538b870124.exe",
+      "name": "b2b97fea74584b89a465f6538b870124.exe",
+      "size": 320684896,
+      "mtimeMs": 1788351119795.6758
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\OpenAI\\Codex\\bin\\247581e40ee272fb\\codex.exe",
+      "name": "codex.exe",
+      "size": 316853040,
+      "mtimeMs": 1789747430820.6343
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\.codex\\plugins\\.plugin-appserver\\codex.exe",
+      "name": "codex.exe",
+      "size": 316853040,
+      "mtimeMs": 1789747430820.6343
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Roaming\\Claude\\claude-code\\2.1.229\\claude.exe",
+      "name": "claude.exe",
+      "size": 307186848,
+      "mtimeMs": 1786722632529.885
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\quark-cloud-drive-updater\\pending\\QuarkCloudDrivePC_V6.5.1.711_windows_pf7010_(zh-cn)_release_999_(Build260410170455).exe",
+      "name": "QuarkCloudDrivePC_V6.5.1.711_windows_pf7010_(zh-cn)_release_999_(Build260410170455).exe",
+      "size": 305925056,
+      "mtimeMs": 1788347505281.7104
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\@deepseek-aidsh-desktop-updater\\pending\\temp-deepseek-harness-0.1.7-rc.2-win-x64.exe",
+      "name": "temp-deepseek-harness-0.1.7-rc.2-win-x64.exe",
+      "size": 288245480,
+      "mtimeMs": 1790342459878.095
+    },
+    {
+      "path": "C:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.22621.5331_none_72e198de064992b9\\msedge.dll",
+      "name": "msedge.dll",
+      "size": 284252752,
+      "mtimeMs": 1747719479213.127
+    },
+    {
+      "path": "C:\\Windows\\System32\\Microsoft-Edge-WebView\\msedge.dll",
+      "name": "msedge.dll",
+      "size": 284252752,
+      "mtimeMs": 1747719479213.127
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Roaming\\Spotify\\libcef.dll",
+      "name": "libcef.dll",
+      "size": 249619328,
+      "mtimeMs": 1767881467159.3486
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\Desktop\\whale\\packaging\\out\\win-unpacked\\whale-desktop.exe",
+      "name": "whale-desktop.exe",
+      "size": 246272512,
+      "mtimeMs": 1790082037227.1018
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\Programs\\whale-desktop\\whale-desktop.exe",
+      "name": "whale-desktop.exe",
+      "size": 246272512,
+      "mtimeMs": 1790082580000
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\Desktop\\whale\\whale-desktop\\node_modules\\electron\\dist\\electron.exe",
+      "name": "electron.exe",
+      "size": 246201856,
+      "mtimeMs": 315504000000
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\LocalLow\\空荧酒馆\\Map\\DLC\\res",
+      "name": "res",
+      "size": 242822982,
+      "mtimeMs": 1697002756642.3076
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Roaming\\Tencent\\xwechat\\XPlugin\\Plugins\\RadiumWMPF\\25560\\extracted\\runtime\\flue.dll",
+      "name": "flue.dll",
+      "size": 236554288,
+      "mtimeMs": 1789537783721.4668
+    },
+    {
+      "path": "C:\\Windows\\System32\\MRT.exe",
+      "name": "MRT.exe",
+      "size": 223939376,
+      "mtimeMs": 1756542773104.1062
+    },
+    {
+      "path": "C:\\Program Files\\NVIDIA Corporation\\NVIDIA app\\CEF\\libcef.dll",
+      "name": "libcef.dll",
+      "size": 222899312,
+      "mtimeMs": 1760566957243.8862
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\qoder-cn-updater\\pending\\Qoder-CN-win-x64-user.exe",
+      "name": "Qoder-CN-win-x64-user.exe",
+      "size": 218241336,
+      "mtimeMs": 1790433672461.1853
+    },
+    {
+      "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvhqi.inf_amd64_2b9914299b291c62\\nvdxdlkernels.dll",
+      "name": "nvdxdlkernels.dll",
+      "size": 217113256,
+      "mtimeMs": 1740618506000
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\qoder-cn-updater\\installer.exe",
+      "name": "installer.exe",
+      "size": 208523768,
+      "mtimeMs": 1789295730942.3867
+    },
+    {
+      "path": "C:\\ProgramData\\Thunder Network\\XLLiveUD\\Download\\57860EDC34B5D44D167F9C21787CACD2\\Xunlei12to25.exe",
+      "name": "Xunlei12to25.exe",
+      "size": 205281632,
+      "mtimeMs": 1788331907060.9277
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\Desktop\\whale\\packaging\\out\\whale-desktopV1.0.1-setup.exe",
+      "name": "whale-desktopV1.0.1-setup.exe",
+      "size": 188942107,
+      "mtimeMs": 1790082589894.8787
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\Desktop\\whale\\whale-desktopV1.0.1-setup.exe",
+      "name": "whale-desktopV1.0.1-setup.exe",
+      "size": 188942107,
+      "mtimeMs": 1790082674964.2449
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\Microsoft\\Edge\\User Data\\ProvenanceData\\2025.10.7.5\\vti-b-p32-visual.quant.ort",
+      "name": "vti-b-p32-visual.quant.ort",
+      "size": 176781560,
+      "mtimeMs": 1759880114000
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\@zcodedesktop-updater\\pending\\ZCode-3.12.3-win-x64.exe",
+      "name": "ZCode-3.12.3-win-x64.exe",
+      "size": 163508288,
+      "mtimeMs": 1789738594668.9766
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\@zcodedesktop-updater\\installer.exe",
+      "name": "installer.exe",
+      "size": 163508288,
+      "mtimeMs": 1789738594668.9766
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\Microsoft\\Edge\\User Data\\component_crx_cache\\f081de18a604e95a175eaf4dd91b35b7f17ad4de24ee2f20eeb034c979bbcccb",
+      "name": "f081de18a604e95a175eaf4dd91b35b7f17ad4de24ee2f20eeb034c979bbcccb",
+      "size": 163024286,
+      "mtimeMs": 1759882353000
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\electron\\Cache\\electron-v44.2.0-win32-x64.zip",
+      "name": "electron-v44.2.0-win32-x64.zip",
+      "size": 158199548,
+      "mtimeMs": 1789317429256.3594
+    },
+    {
+      "path": "C:\\Windows\\System32\\lxss\\lib\\libnvdxdlkernels.so",
+      "name": "libnvdxdlkernels.so",
+      "size": 153719232,
+      "mtimeMs": 1739653163000
+    },
+    {
+      "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvhqi.inf_amd64_2b9914299b291c62\\libnvdxdlkernels.so",
+      "name": "libnvdxdlkernels.so",
+      "size": 153719232,
+      "mtimeMs": 1740476603000
+    },
+    {
+      "path": "C:\\ProgramData\\Microsoft\\Windows Defender\\Definition Updates\\{9693ADA8-947F-4881-B730-A6AABB77E848}\\mpasbase.vdm",
+      "name": "mpasbase.vdm",
+      "size": 141843400,
+      "mtimeMs": 1788409476906.3982
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Roaming\\Tencent\\TxGameAssistant\\radium\\XPlugin\\Plugins\\WMPFSDK\\10406\\extracted\\runtime\\WeChatAppEx.exe",
+      "name": "WeChatAppEx.exe",
+      "size": 122195848,
+      "mtimeMs": 1684957962000
+    },
+    {
+      "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvhqi.inf_amd64_2b9914299b291c62\\nvrtum64.dll",
+      "name": "nvrtum64.dll",
+      "size": 106254488,
+      "mtimeMs": 1740618726000
+    },
+    {
+      "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvhqi.inf_amd64_2b9914299b291c62\\nvoptix.dll",
+      "name": "nvoptix.dll",
+      "size": 103804568,
+      "mtimeMs": 1740618666000
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\VideoFlow\\bin\\ffmpeg.exe",
+      "name": "ffmpeg.exe",
+      "size": 102856192,
+      "mtimeMs": 1786508872000
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\VideoFlow\\bin\\ffprobe.exe",
+      "name": "ffprobe.exe",
+      "size": 102652416,
+      "mtimeMs": 1786508872000
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\whale-balance-desktop-updater\\installer.exe",
+      "name": "installer.exe",
+      "size": 102579767,
+      "mtimeMs": 1789206366651.6252
+    },
+    {
+      "path": "C:\\Users\\楠楠想睡觉了\\AppData\\Local\\BcutBilibili\\Qt5WebEngineCore.dll",
+      "name": "Qt5WebEngineCore.dll",
+      "size": 102012848,
+      "mtimeMs": 1774255982000
+    }
+  ],
+  "tree": {
+    "path": "C:\\",
+    "size": 69379209066,
+    "files": 0,
+    "dirs": 15,
+    "foldedDirs": 3,
+    "foldedBytes": 0,
+    "children": [
+      {
+        "path": "C:\\Users",
+        "size": 27330350976,
+        "files": 1,
+        "dirs": 5,
+        "foldedDirs": 0,
+        "foldedBytes": 0,
+        "children": [
+          {
+            "path": "C:\\Users\\楠楠想睡觉了",
+            "size": 27320687299,
+            "files": 19,
+            "dirs": 38,
+            "foldedDirs": 26,
+            "foldedBytes": 51617158,
+            "children": [
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\AppData",
+                "size": 21142863119,
+                "files": 0,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\Desktop",
+                "size": 1495070257,
+                "files": 20,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\.cache",
+                "size": 1434330409,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\.qoder-cn",
+                "size": 1044138746,
+                "files": 6,
+                "dirs": 21,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\.codex",
+                "size": 682705925,
+                "files": 37,
+                "dirs": 19,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\Documents",
+                "size": 395350551,
+                "files": 14,
+                "dirs": 17,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\Videos",
+                "size": 357293175,
+                "files": 5,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\.trae-cn",
+                "size": 269708055,
+                "files": 4,
+                "dirs": 15,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\.zcode",
+                "size": 208760565,
+                "files": 0,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\Pictures",
+                "size": 97867748,
+                "files": 1,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\Nutstore",
+                "size": 70383844,
+                "files": 0,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\楠楠想睡觉了\\Downloads",
+                "size": 42800996,
+                "files": 10,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Users\\����˯����",
+            "size": 6369327,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Users\\����˯����\\AppData",
+                "size": 6369327,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Users\\Default",
+            "size": 2718922,
+            "files": 6,
+            "dirs": 11,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Users\\Default\\AppData",
+                "size": 1236170,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Desktop",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Documents",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Downloads",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Favorites",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Links",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Music",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\OneDrive",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Pictures",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Saved Games",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Default\\Videos",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Users\\Public",
+            "size": 539856,
+            "files": 1,
+            "dirs": 10,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Users\\Public\\AccountPictures",
+                "size": 367015,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Documents",
+                "size": 83038,
+                "files": 4,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Thunder Network",
+                "size": 79617,
+                "files": 2,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Desktop",
+                "size": 7511,
+                "files": 9,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Libraries",
+                "size": 1135,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Music",
+                "size": 380,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Pictures",
+                "size": 380,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Videos",
+                "size": 380,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Downloads",
+                "size": 174,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Users\\Public\\Win",
+                "size": 52,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Users\\GLCache",
+            "size": 35398,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Users\\GLCache\\adbf207b320700dc78530438225cca88",
+                "size": 35398,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "C:\\Windows",
+        "size": 24975825954,
+        "files": 26,
+        "dirs": 84,
+        "foldedDirs": 72,
+        "foldedBytes": 710621018,
+        "children": [
+          {
+            "path": "C:\\Windows\\System32",
+            "size": 9926024966,
+            "files": 4511,
+            "dirs": 138,
+            "foldedDirs": 126,
+            "foldedBytes": 366985298,
+            "children": [
+              {
+                "path": "C:\\Windows\\System32\\DriverStore",
+                "size": 5050575348,
+                "files": 0,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\Microsoft-Edge-WebView",
+                "size": 585587579,
+                "files": 49,
+                "dirs": 9,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\lxss",
+                "size": 305688208,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\drivers",
+                "size": 271337520,
+                "files": 468,
+                "dirs": 6,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\winevt",
+                "size": 209043456,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\Intel",
+                "size": 201866610,
+                "files": 2,
+                "dirs": 11,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\wbem",
+                "size": 149359912,
+                "files": 339,
+                "dirs": 8,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\catroot2",
+                "size": 91655414,
+                "files": 1,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\CatRoot",
+                "size": 80202948,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\cAVS",
+                "size": 51491284,
+                "files": 0,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\spool",
+                "size": 50119366,
+                "files": 0,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\System32\\migwiz",
+                "size": 48494437,
+                "files": 30,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\WinSxS",
+            "size": 9557888226,
+            "files": 2,
+            "dirs": 17523,
+            "foldedDirs": 17511,
+            "foldedBytes": 7513846275,
+            "children": [
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.22621.5331_none_72e198de064992b9",
+                "size": 792295103,
+                "files": 49,
+                "dirs": 10,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_windows-senseclient-service_31bf3856ad364e35_10.0.22621.5185_none_8832811f0aac8c3f",
+                "size": 296407557,
+                "files": 111,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_userexperience-desktop_31bf3856ad364e35_10.0.22621.5262_none_0c572441e5cb8ac2",
+                "size": 267338093,
+                "files": 0,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\Catalogs",
+                "size": 158491477,
+                "files": 2543,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_dual_helloface.inf_31bf3856ad364e35_10.0.22621.5331_none_1b316e4884368655",
+                "size": 83304754,
+                "files": 18,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_microsoft-windows-t..peech-zh-cn-onecore_31bf3856ad364e35_10.0.22621.1_none_b8889a50fa502e6c",
+                "size": 79734681,
+                "files": 48,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_winappsdk-cbs_31bf3856ad364e35_10.0.22621.5331_none_a4de52f36f8c78ed",
+                "size": 70037628,
+                "files": 63,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_winappsdk-vnext-cbs_31bf3856ad364e35_10.0.22621.5331_none_88e147db559c0ea1",
+                "size": 70006546,
+                "files": 74,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_microsoft-windows-speechrecognizer-zh-cn_31bf3856ad364e35_10.0.22621.1_none_370c1b92fca9ec9a",
+                "size": 59034732,
+                "files": 18,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_userexperience-shared_31bf3856ad364e35_10.0.22621.5262_none_f6f7c3123c4a6a25",
+                "size": 58082520,
+                "files": 237,
+                "dirs": 197,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_userexperience-core_31bf3856ad364e35_10.0.22621.5331_none_981fd28e464ed078",
+                "size": 54734907,
+                "files": 0,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\WinSxS\\amd64_microsoft-windows-dynamic-image_31bf3856ad364e35_10.0.22621.5335_none_2033fe58b0e0e88f",
+                "size": 54488848,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\SysWOW64",
+            "size": 1245367037,
+            "files": 2897,
+            "dirs": 100,
+            "foldedDirs": 88,
+            "foldedBytes": 28212948,
+            "children": [
+              {
+                "path": "C:\\Windows\\SysWOW64\\IME",
+                "size": 23332051,
+                "files": 0,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\wbem",
+                "size": 18685540,
+                "files": 145,
+                "dirs": 7,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\F12",
+                "size": 14208319,
+                "files": 19,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\WindowsPowerShell",
+                "size": 10401799,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\Speech_OneCore",
+                "size": 9221444,
+                "files": 0,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\Dism",
+                "size": 8652496,
+                "files": 27,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\en-US",
+                "size": 7646024,
+                "files": 339,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\WinMetadata",
+                "size": 6756200,
+                "files": 20,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\zh-CN",
+                "size": 6114289,
+                "files": 310,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\Keywords",
+                "size": 5412622,
+                "files": 23,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\Speech",
+                "size": 3917808,
+                "files": 0,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SysWOW64\\Nui",
+                "size": 3872256,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\assembly",
+            "size": 869169154,
+            "files": 3,
+            "dirs": 10,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Windows\\assembly\\NativeImages_v4.0.30319_64",
+                "size": 284046176,
+                "files": 0,
+                "dirs": 98,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\NativeImages_v2.0.50727_64",
+                "size": 184732160,
+                "files": 2,
+                "dirs": 31,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\NativeImages_v4.0.30319_32",
+                "size": 118686432,
+                "files": 0,
+                "dirs": 60,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\NativeImages_v2.0.50727_32",
+                "size": 113176576,
+                "files": 1,
+                "dirs": 29,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\GAC_MSIL",
+                "size": 84051412,
+                "files": 0,
+                "dirs": 287,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\GAC_64",
+                "size": 22912772,
+                "files": 0,
+                "dirs": 14,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\GAC_32",
+                "size": 22356836,
+                "files": 0,
+                "dirs": 14,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\GAC",
+                "size": 20123030,
+                "files": 0,
+                "dirs": 16,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\temp",
+                "size": 19083760,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\assembly\\tmp",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\Microsoft.NET",
+            "size": 834221892,
+            "files": 0,
+            "dirs": 5,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Windows\\Microsoft.NET\\Framework64",
+                "size": 318296271,
+                "files": 4,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\Microsoft.NET\\Framework",
+                "size": 296703969,
+                "files": 18,
+                "dirs": 7,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\Microsoft.NET\\assembly",
+                "size": 189367718,
+                "files": 0,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\Microsoft.NET\\DirectX for Managed Code",
+                "size": 29853934,
+                "files": 0,
+                "dirs": 10,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\Microsoft.NET\\authman",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\SystemApps",
+            "size": 641660200,
+            "files": 0,
+            "dirs": 43,
+            "foldedDirs": 31,
+            "foldedBytes": 47657316,
+            "children": [
+              {
+                "path": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy",
+                "size": 261436533,
+                "files": 101,
+                "dirs": 31,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.Core_cw5n1h2txyewy",
+                "size": 75082609,
+                "files": 31,
+                "dirs": 12,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\Microsoft.WindowsAppRuntime.vNext.CBS_8wekyb3d8bbwe",
+                "size": 53723531,
+                "files": 71,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\Microsoft.WindowsAppRuntime.CBS_8wekyb3d8bbwe",
+                "size": 53494473,
+                "files": 61,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\ShellExperienceHost_cw5n1h2txyewy",
+                "size": 46791170,
+                "files": 22,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\Shared",
+                "size": 42145474,
+                "files": 0,
+                "dirs": 238,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\LKG",
+                "size": 12682914,
+                "files": 0,
+                "dirs": 6,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\Microsoft.LockApp_cw5n1h2txyewy",
+                "size": 12299482,
+                "files": 7,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\Microsoft.MicrosoftEdgeDevToolsClient_8wekyb3d8bbwe",
+                "size": 11269424,
+                "files": 4,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.FileExp_cw5n1h2txyewy",
+                "size": 8948641,
+                "files": 16,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\Microsoft.UI.Xaml.CBS_8wekyb3d8bbwe",
+                "size": 8436132,
+                "files": 7,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemApps\\Microsoft.Windows.CloudExperienceHost_cw5n1h2txyewy",
+                "size": 7692501,
+                "files": 35,
+                "dirs": 15,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\Fonts",
+            "size": 622423566,
+            "files": 410,
+            "dirs": 0,
+            "foldedDirs": 0,
+            "foldedBytes": 0
+          },
+          {
+            "path": "C:\\Windows\\SystemResources",
+            "size": 190929021,
+            "files": 143,
+            "dirs": 29,
+            "foldedDirs": 17,
+            "foldedBytes": 1040988,
+            "children": [
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.UI.SettingsAppThreshold",
+                "size": 23245470,
+                "files": 1,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.UI.ShellCommon",
+                "size": 3388636,
+                "files": 1,
+                "dirs": 7,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.UI.PCShell",
+                "size": 1983520,
+                "files": 1,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.UI.SettingsHandlers-nt",
+                "size": 1021344,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.UI.SettingsAdminFlowUIThreshold",
+                "size": 798720,
+                "files": 1,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.UI.TaskManager",
+                "size": 464712,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.SystemToast.Calling",
+                "size": 406689,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.Foundation.Diagnostics.ErrorDetails",
+                "size": 309296,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.UI.Logon",
+                "size": 287232,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\Windows.UI.Cred",
+                "size": 238464,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\ShellComponents.ShellUI",
+                "size": 224944,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\SystemResources\\ShellComponents.Switcher",
+                "size": 220552,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\servicing",
+            "size": 104406989,
+            "files": 4,
+            "dirs": 10,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Windows\\servicing\\Packages",
+                "size": 49439250,
+                "files": 4054,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\Sessions",
+                "size": 46302975,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\WUFodMetadataCache",
+                "size": 3668768,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\InboxFodMetadataCache",
+                "size": 3658547,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\FodMetadata",
+                "size": 497364,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\Editions",
+                "size": 395379,
+                "files": 17,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\en-US",
+                "size": 23552,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\zh-CN",
+                "size": 19456,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\Version",
+                "size": 18,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\servicing\\SQM",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\Speech_OneCore",
+            "size": 97395051,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Windows\\Speech_OneCore\\Engines",
+                "size": 97395051,
+                "files": 0,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\InputMethod",
+            "size": 92441157,
+            "files": 0,
+            "dirs": 4,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Windows\\InputMethod\\CHS",
+                "size": 92348342,
+                "files": 62,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\InputMethod\\Dictionaries",
+                "size": 92815,
+                "files": 9,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\InputMethod\\CHT",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\InputMethod\\SHARED",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Windows\\Speech",
+            "size": 74534757,
+            "files": 0,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Windows\\Speech\\Engines",
+                "size": 74492773,
+                "files": 0,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Windows\\Speech\\Common",
+                "size": 41984,
+                "files": 1,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "C:\\Program Files",
+        "size": 7988472759,
+        "files": 1,
+        "dirs": 30,
+        "foldedDirs": 18,
+        "foldedBytes": 51925870,
+        "children": [
+          {
+            "path": "C:\\Program Files\\Microsoft Office",
+            "size": 4186031199,
+            "files": 3,
+            "dirs": 4,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\Microsoft Office\\root",
+                "size": 4168285470,
+                "files": 1,
+                "dirs": 15,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Microsoft Office\\Updates",
+                "size": 9078534,
+                "files": 0,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Microsoft Office\\PackageManifests",
+                "size": 4851990,
+                "files": 17,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Microsoft Office\\Office16",
+                "size": 580063,
+                "files": 5,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\Huawei",
+            "size": 1265397740,
+            "files": 0,
+            "dirs": 11,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\Huawei\\PCManager",
+                "size": 922032043,
+                "files": 378,
+                "dirs": 16,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\Hiview",
+                "size": 77035212,
+                "files": 71,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\HwSmartAudio",
+                "size": 76302616,
+                "files": 58,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\BasicService",
+                "size": 70771651,
+                "files": 89,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\HMS Core",
+                "size": 55889568,
+                "files": 51,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\HwLcdEnhancement",
+                "size": 30271324,
+                "files": 41,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\wucs",
+                "size": 28696635,
+                "files": 24,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\BatteryParaModify2",
+                "size": 2420575,
+                "files": 10,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\Huawei OSD",
+                "size": 1947404,
+                "files": 11,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\HwResClean",
+                "size": 30712,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Huawei\\Driver",
+                "size": 0,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\NVIDIA Corporation",
+            "size": 913438715,
+            "files": 0,
+            "dirs": 5,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\NVIDIA Corporation\\NVIDIA app",
+                "size": 586956350,
+                "files": 8,
+                "dirs": 10,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\NVIDIA Corporation\\Installer2",
+                "size": 257627417,
+                "files": 0,
+                "dirs": 21,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\NVIDIA Corporation\\FrameViewSDK",
+                "size": 54359194,
+                "files": 5,
+                "dirs": 6,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\NVIDIA Corporation\\NvTelemetry",
+                "size": 12293066,
+                "files": 2,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\NVIDIA Corporation\\NvContainer",
+                "size": 2202688,
+                "files": 1,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\Git",
+            "size": 423146279,
+            "files": 7,
+            "dirs": 7,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\Git\\mingw64",
+                "size": 219982737,
+                "files": 0,
+                "dirs": 6,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Git\\usr",
+                "size": 193871866,
+                "files": 0,
+                "dirs": 6,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Git\\etc",
+                "size": 1690997,
+                "files": 21,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Git\\cmd",
+                "size": 536870,
+                "files": 11,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Git\\bin",
+                "size": 141816,
+                "files": 3,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Git\\dev",
+                "size": 172,
+                "files": 4,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Git\\tmp",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\Nutstore",
+            "size": 303214601,
+            "files": 1,
+            "dirs": 3,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\Nutstore\\update",
+                "size": 101448346,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Nutstore\\bin-7.2.10",
+                "size": 100758275,
+                "files": 254,
+                "dirs": 6,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Nutstore\\bin-7.2.9",
+                "size": 100545036,
+                "files": 252,
+                "dirs": 6,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\dotnet",
+            "size": 234618333,
+            "files": 3,
+            "dirs": 3,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\dotnet\\shared",
+                "size": 233635040,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\dotnet\\host",
+                "size": 729400,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\dotnet\\swidtag",
+                "size": 965,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\Common Files",
+            "size": 199151599,
+            "files": 0,
+            "dirs": 5,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\Common Files\\microsoft shared",
+                "size": 147829332,
+                "files": 0,
+                "dirs": 9,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Common Files\\PUBG",
+                "size": 35501200,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Common Files\\System",
+                "size": 10707339,
+                "files": 2,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Common Files\\Wellbia.com",
+                "size": 5084200,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Common Files\\DESIGNER",
+                "size": 29528,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\ShittimLogon",
+            "size": 130974868,
+            "files": 9,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\ShittimLogon\\assets",
+                "size": 127741742,
+                "files": 43,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\AntiCheatExpert",
+            "size": 125302408,
+            "files": 10,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\AntiCheatExpert\\SGuard",
+                "size": 99616538,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\AntiCheatExpert\\InGame",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\DAUM",
+            "size": 99668172,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\DAUM\\PotPlayer",
+                "size": 99668172,
+                "files": 24,
+                "dirs": 13,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\Reference Assemblies",
+            "size": 36662953,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\Reference Assemblies\\Microsoft",
+                "size": 36662953,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files\\Windows Defender",
+            "size": 18939848,
+            "files": 33,
+            "dirs": 4,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files\\Windows Defender\\Offline",
+                "size": 778240,
+                "files": 3,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Windows Defender\\en-US",
+                "size": 249048,
+                "files": 9,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Windows Defender\\zh-CN",
+                "size": 155640,
+                "files": 9,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files\\Windows Defender\\Platform",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "C:\\Program Files (x86)",
+        "size": 4742658965,
+        "files": 1,
+        "dirs": 18,
+        "foldedDirs": 6,
+        "foldedBytes": 2422550,
+        "children": [
+          {
+            "path": "C:\\Program Files (x86)\\Microsoft",
+            "size": 4109384549,
+            "files": 0,
+            "dirs": 5,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\Microsoft\\EdgeCore",
+                "size": 2200924970,
+                "files": 1,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Microsoft\\Edge",
+                "size": 928507008,
+                "files": 3,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView",
+                "size": 903019727,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Microsoft\\EdgeUpdate",
+                "size": 76932844,
+                "files": 2,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Microsoft\\Temp",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\NVIDIA Corporation",
+            "size": 219617759,
+            "files": 0,
+            "dirs": 3,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX",
+                "size": 207938052,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\NVIDIA Corporation\\NVIDIA app",
+                "size": 8595195,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\NVIDIA Corporation\\NvTelemetry",
+                "size": 3084512,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\pvzHE",
+            "size": 217923402,
+            "files": 9,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\pvzHE\\fonts",
+                "size": 41546876,
+                "files": 6,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\Common Files",
+            "size": 116199550,
+            "files": 0,
+            "dirs": 5,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\Common Files\\BattlEye",
+                "size": 37982800,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Common Files\\Steam",
+                "size": 33204466,
+                "files": 12,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Common Files\\Microsoft Shared",
+                "size": 18453693,
+                "files": 0,
+                "dirs": 9,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Common Files\\Thunder Network",
+                "size": 16732916,
+                "files": 0,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Common Files\\System",
+                "size": 9825675,
+                "files": 2,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\Reference Assemblies",
+            "size": 38387457,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\Reference Assemblies\\Microsoft",
+                "size": 38387457,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\yxq_nethelper",
+            "size": 9779147,
+            "files": 10,
+            "dirs": 4,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\yxq_nethelper\\skin",
+                "size": 220280,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\yxq_nethelper\\history3",
+                "size": 38012,
+                "files": 16,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\yxq_nethelper\\log",
+                "size": 7009,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\yxq_nethelper\\tmp",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\Microsoft.NET",
+            "size": 8175999,
+            "files": 0,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\Microsoft.NET\\Primary Interop Assemblies",
+                "size": 8152064,
+                "files": 5,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Microsoft.NET\\RedistList",
+                "size": 23935,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\Windows NT",
+            "size": 6031192,
+            "files": 0,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\Windows NT\\Accessories",
+                "size": 3080704,
+                "files": 2,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows NT\\TableTextService",
+                "size": 2950488,
+                "files": 5,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\Windows Photo Viewer",
+            "size": 5466088,
+            "files": 5,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\Windows Photo Viewer\\en-US",
+                "size": 44032,
+                "files": 3,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows Photo Viewer\\zh-CN",
+                "size": 29696,
+                "files": 3,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\Windows Defender",
+            "size": 3625608,
+            "files": 8,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\Windows Defender\\en-US",
+                "size": 53248,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows Defender\\zh-CN",
+                "size": 24576,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\Windows Media Player",
+            "size": 3322266,
+            "files": 10,
+            "dirs": 7,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\Windows Media Player\\en-US",
+                "size": 75264,
+                "files": 7,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows Media Player\\Skins",
+                "size": 70947,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows Media Player\\Media Renderer",
+                "size": 53879,
+                "files": 8,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows Media Player\\zh-CN",
+                "size": 48640,
+                "files": 7,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows Media Player\\Icons",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows Media Player\\Network Sharing",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\Windows Media Player\\Visualizations",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\Program Files (x86)\\WindowsPowerShell",
+            "size": 2323224,
+            "files": 0,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Program Files (x86)\\WindowsPowerShell\\Modules",
+                "size": 2323224,
+                "files": 0,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\Program Files (x86)\\WindowsPowerShell\\Configuration",
+                "size": 0,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "C:\\ProgramData",
+        "size": 4340859379,
+        "files": 18,
+        "dirs": 50,
+        "foldedDirs": 38,
+        "foldedBytes": 103266605,
+        "children": [
+          {
+            "path": "C:\\ProgramData\\NVIDIA",
+            "size": 1252194365,
+            "files": 41,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\NVIDIA\\NGX",
+                "size": 1251474891,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\Comms",
+            "size": 1218653869,
+            "files": 0,
+            "dirs": 6,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\Comms\\Hiview",
+                "size": 731520988,
+                "files": 14,
+                "dirs": 8,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Comms\\PCManager",
+                "size": 402263663,
+                "files": 10,
+                "dirs": 17,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Comms\\BasicService",
+                "size": 84835281,
+                "files": 0,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Comms\\RemotePC",
+                "size": 32942,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Comms\\HwLcdEnhancement",
+                "size": 995,
+                "files": 3,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Comms\\HwOsd",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\Microsoft",
+            "size": 576698434,
+            "files": 0,
+            "dirs": 32,
+            "foldedDirs": 20,
+            "foldedBytes": 113144,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\Microsoft\\Windows Defender",
+                "size": 476799406,
+                "files": 1,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\ClickToRun",
+                "size": 76712769,
+                "files": 3,
+                "dirs": 4,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\EdgeUpdate",
+                "size": 9014066,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\Windows",
+                "size": 4915324,
+                "files": 1,
+                "dirs": 14,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\DiagnosticLogCSP",
+                "size": 3692302,
+                "files": 0,
+                "dirs": 3,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\WDF",
+                "size": 1466749,
+                "files": 6,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\Device Stage",
+                "size": 1304107,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\User Account Pictures",
+                "size": 807912,
+                "files": 10,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\Storage Health",
+                "size": 555717,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\Windows NT",
+                "size": 516424,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\Windows Security Health",
+                "size": 495616,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Microsoft\\MapData",
+                "size": 304898,
+                "files": 2,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\Razer",
+            "size": 508635592,
+            "files": 0,
+            "dirs": 8,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\Razer\\GameManager",
+                "size": 219651102,
+                "files": 3,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Razer\\Synapse3",
+                "size": 151899834,
+                "files": 0,
+                "dirs": 5,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Razer\\Razer Central",
+                "size": 113659228,
+                "files": 0,
+                "dirs": 6,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Razer\\Installer",
+                "size": 22111679,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Razer\\Chroma SDK",
+                "size": 863306,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Razer\\GMS",
+                "size": 443858,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Razer\\BigDataSDK",
+                "size": 6585,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Razer\\IoT",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\Thunder Network",
+            "size": 205300934,
+            "files": 0,
+            "dirs": 3,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\Thunder Network\\XLLiveUD",
+                "size": 205282097,
+                "files": 1,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Thunder Network\\Logs",
+                "size": 18648,
+                "files": 12,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Thunder Network\\DownloadLib",
+                "size": 189,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\Package Cache",
+            "size": 120832750,
+            "files": 0,
+            "dirs": 25,
+            "foldedDirs": 13,
+            "foldedBytes": 7210219,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{B9E46F95-AC34-4943-AFE2-B72EFD56C6C0}v48.27.42342",
+                "size": 29851648,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{D98088DE-EDA4-4E1A-BF0F-ED9A9145CC70}v64.12.10343",
+                "size": 27500544,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{00478901-CD97-4A20-8FF3-3276865A2B44}v48.27.42327",
+                "size": 27365376,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{6FA797CF-6B76-4B6D-87EE-768F92008720}v14.51.36247",
+                "size": 5861692,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{929FBD26-9020-399B-9A7A-751D61F0B942}v12.0.21005",
+                "size": 5731616,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{582BA719-E6F1-4651-A873-049E6A0DDDAF}v14.51.36247",
+                "size": 5385499,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{F8CFEB22-A2E7-3971-9EDA-4B11EDEFC185}v12.0.21005",
+                "size": 5076256,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{4551f75f-3c54-4f09-8221-8c8a061bad00}",
+                "size": 2122706,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{931A2CF0-2404-45EA-82F5-345735AE6A90}v14.51.36247",
+                "size": 1278885,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{A749D8E6-B613-3BE3-8F5F-045C84EBA29B}v12.0.21005",
+                "size": 1177866,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{13A4EE12-23EA-3371-91EE-EFB36DDFFF3E}v12.0.21005",
+                "size": 1140414,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\Package Cache\\{4BF7CE18-E151-449F-9190-6CDBED0BB4A2}v14.51.36247",
+                "size": 1130029,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\USOShared",
+            "size": 95248384,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\USOShared\\Logs",
+                "size": 95248384,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\leigod_person_7002",
+            "size": 86168659,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\leigod_person_7002\\sslproxy",
+                "size": 86168659,
+                "files": 0,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\USOPrivate",
+            "size": 55279892,
+            "files": 0,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\USOPrivate\\UpdateStore",
+                "size": 55279616,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\USOPrivate\\ExpeditedAppRegistrations",
+                "size": 276,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\NVIDIA Corporation",
+            "size": 51424411,
+            "files": 0,
+            "dirs": 15,
+            "foldedDirs": 3,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\NVIDIA app",
+                "size": 17580317,
+                "files": 4,
+                "dirs": 10,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\NvProfileUpdaterPlugin",
+                "size": 12940479,
+                "files": 35,
+                "dirs": 2,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\NVIDIA GeForce Experience",
+                "size": 12141619,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\Drs",
+                "size": 5130269,
+                "files": 6,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\nvtopps",
+                "size": 2061893,
+                "files": 2,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\ShadowPlay",
+                "size": 1417414,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\DisplayDriverRAS",
+                "size": 84392,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\FrameViewSDK",
+                "size": 47388,
+                "files": 153,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\RX",
+                "size": 18833,
+                "files": 10,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\NvVAD",
+                "size": 1185,
+                "files": 5,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\GfnRuntimeSdk",
+                "size": 622,
+                "files": 2,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\NVIDIA Corporation\\CrashDumps",
+                "size": 0,
+                "files": 0,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\PopCap Games",
+            "size": 35705185,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\PopCap Games\\PlantsVsZombies",
+                "size": 35705185,
+                "files": 0,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          },
+          {
+            "path": "C:\\ProgramData\\A-Volute",
+            "size": 31227000,
+            "files": 0,
+            "dirs": 2,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\ProgramData\\A-Volute\\A-Volute.Nahimic",
+                "size": 21582549,
+                "files": 2,
+                "dirs": 1,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              },
+              {
+                "path": "C:\\ProgramData\\A-Volute\\Archives",
+                "size": 9644451,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "C:\\tmp",
+        "size": 1023788,
+        "files": 8,
+        "dirs": 1,
+        "foldedDirs": 0,
+        "foldedBytes": 0,
+        "children": [
+          {
+            "path": "C:\\tmp\\attrprobe2",
+            "size": 21,
+            "files": 7,
+            "dirs": 0,
+            "foldedDirs": 0,
+            "foldedBytes": 0
+          }
+        ]
+      },
+      {
+        "path": "C:\\Microsoft",
+        "size": 17116,
+        "files": 0,
+        "dirs": 1,
+        "foldedDirs": 0,
+        "foldedBytes": 0,
+        "children": [
+          {
+            "path": "C:\\Microsoft\\Windows",
+            "size": 17116,
+            "files": 0,
+            "dirs": 1,
+            "foldedDirs": 0,
+            "foldedBytes": 0,
+            "children": [
+              {
+                "path": "C:\\Microsoft\\Windows\\PowerShell",
+                "size": 17116,
+                "files": 1,
+                "dirs": 0,
+                "foldedDirs": 0,
+                "foldedBytes": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "C:\\$RECYCLE.BIN",
+        "size": 129,
+        "files": 0,
+        "dirs": 2,
+        "foldedDirs": 0,
+        "foldedBytes": 0,
+        "children": [
+          {
+            "path": "C:\\$RECYCLE.BIN\\S-1-5-21-1972662565-1022812096-2887779978-1001",
+            "size": 129,
+            "files": 1,
+            "dirs": 0,
+            "foldedDirs": 0,
+            "foldedBytes": 0
+          },
+          {
+            "path": "C:\\$RECYCLE.BIN\\S-1-5-18",
+            "size": 0,
+            "files": 0,
+            "dirs": 0,
+            "foldedDirs": 0,
+            "foldedBytes": 0
+          }
+        ]
+      },
+      {
+        "path": "C:\\ESD",
+        "size": 0,
+        "files": 0,
+        "dirs": 0,
+        "foldedDirs": 0,
+        "foldedBytes": 0
+      },
+      {
+        "path": "C:\\inetpub",
+        "size": 0,
+        "files": 0,
+        "dirs": 0,
+        "foldedDirs": 0,
+        "foldedBytes": 0
+      },
+      {
+        "path": "C:\\Intel",
+        "size": 0,
+        "files": 0,
+        "dirs": 1,
+        "foldedDirs": 0,
+        "foldedBytes": 0,
+        "children": [
+          {
+            "path": "C:\\Intel\\GfxCPLBatchFiles",
+            "size": 0,
+            "files": 0,
+            "dirs": 0,
+            "foldedDirs": 0,
+            "foldedBytes": 0
+          }
+        ]
+      },
+      {
+        "path": "C:\\OneDriveTemp",
+        "size": 0,
+        "files": 0,
+        "dirs": 1,
+        "foldedDirs": 0,
+        "foldedBytes": 0,
+        "children": [
+          {
+            "path": "C:\\OneDriveTemp\\S-1-5-21-1972662565-1022812096-2887779978-1001",
+            "size": 0,
+            "files": 0,
+            "dirs": 0,
+            "foldedDirs": 0,
+            "foldedBytes": 0
+          }
+        ]
+      }
+    ]
+  },
+  "treeLimits": {
+    "maxDepth": 3,
+    "topPerLevel": 12
+  }
+}

@@ -1,4 +1,5 @@
 import { Fragment } from 'react'
+import { useT } from '../i18n'
 import { basisNoun, useSizeBasis } from '../lib/size-basis'
 import { buildDetail } from '../../../core/analyze/detail'
 import { GROUP_COLORS, RISK_COLORS, type Risk } from '../../../shared/classify'
@@ -54,8 +55,9 @@ export function DetailPanel({
   /** 取消固定。`pinned` 为 true 时必须给，否则那个标记就成了关不掉的状态。 */
   onUnpin?: () => void
 }): JSX.Element {
+  const t = useT()
   const basis = useSizeBasis()  // 口径从数据读，不写死（见 lib/size-basis.tsx）
-  if (!child) return <p className="dc-muted">单击方块看详情；双击目录进入。</p>
+  if (!child) return <p className="dc-muted">{t('单击方块看详情；双击目录进入。')}</p>
   const d = buildDetail(child, parentSize, { folded, rootSize, rootPath, truncated })
   // 面板里每一行都由模型给：null / [] = 这一项不陈述该字段。
   // 折叠块的 fileCount/dirCount/path/mtime 是合成时的 0，不是采集结果 —— 那几行整行不出现（全局口径：不许用 0 冒充没算过的数字）。
@@ -65,7 +67,7 @@ export function DetailPanel({
       <div className="dc-detail-head">
         <h3 className="dc-panel-title">{d.name}</h3>
         {pinned === true && (
-          <span className="dc-pin" title="这份详情是被「查看详情」钉住的：点画布的空白处不会把它换掉">
+          <span className="dc-pin" title={t('这份详情是被「查看详情」钉住的：点画布的空白处不会把它换掉')}>
             已固定
           </span>
         )}
@@ -80,44 +82,44 @@ export function DetailPanel({
       <dl className="dc-dl">
         {d.kind !== null && (
           <Fragment>
-            <dt>类型</dt>
+            <dt>{t('类型')}</dt>
             {/* §8：要的是「PAK 资源包」这种话，不是「文件」；kind 为 null 时（折叠块）整行不出现 */}
             <dd>{d.typeLabel}</dd>
           </Fragment>
         )}
         <dt>{basisNoun(basis)}</dt>
         <dd>{d.sizeText}</dd>
-        <dt>占当前目录</dt>
+        <dt>{t('占当前目录')}</dt>
         <dd>{d.percentOfParent}</dd>
         <dt>{d.rootShareLabel}</dt>
         <dd>{d.percentOfRoot}</dd>
         {d.fileCountText !== null && (
           <Fragment>
-            <dt>子树文件数</dt>
+            <dt>{t('子树文件数')}</dt>
             <dd>{d.fileCountText}</dd>
           </Fragment>
         )}
         {d.dirCountText !== null && (
           <Fragment>
-            <dt>子目录数</dt>
+            <dt>{t('子目录数')}</dt>
             <dd>{d.dirCountText}</dd>
           </Fragment>
         )}
         {d.modified !== null && (
           <Fragment>
-            <dt>修改时间</dt>
+            <dt>{t('修改时间')}</dt>
             <dd>{d.modified}</dd>
           </Fragment>
         )}
         {d.created !== null && (
           <Fragment>
-            <dt>创建时间</dt>
+            <dt>{t('创建时间')}</dt>
             <dd className={d.createdCollected ? undefined : 'dc-muted'}>{d.created}</dd>
           </Fragment>
         )}
         {d.attrs.map((a) => (
           <Fragment key={a.key}>
-            <dt>{a.label}属性</dt>
+            <dt>{t('{label}属性', { label: a.label })}</dt>
             <dd className={a.state === 'unknown' ? 'dc-muted' : undefined}>{a.text}</dd>
           </Fragment>
         ))}
@@ -131,11 +133,11 @@ export function DetailPanel({
       {stats && (
         <>
           <dl className="dc-dl">
-            <dt>最大文件</dt>
+            <dt>{t('最大文件')}</dt>
             <dd title={stats.largestFile?.path}>
               {stats.largestFile ? `${stats.largestFile.name} · ${formatBytes(stats.largestFile.size)}` : '—'}
             </dd>
-            <dt>最大子目录</dt>
+            <dt>{t('最大子目录')}</dt>
             <dd title={stats.largestSubDir?.path}>
               {stats.largestSubDir ? `${stats.largestSubDir.name} · ${formatBytes(stats.largestSubDir.size)}` : '—'}
             </dd>
@@ -152,9 +154,9 @@ export function DetailPanel({
         <span className="dc-badge dc-badge-risk" style={{ borderColor: RISK_COLORS[d.risk] }}>
           {RISK_NOTE[d.risk]}
         </span>
-        {d.protectedByAttrs && <span className="dc-badge dc-badge-risk">🔒 属性保护（系统文件）</span>}
+        {d.protectedByAttrs && <span className="dc-badge dc-badge-risk">{t('🔒 属性保护（系统文件）')}</span>}
       </div>
-      {d.scanning && <p className="dc-live">该目录仍在扫描中，数字是中间值。</p>}
+      {d.scanning && <p className="dc-live">{t('该目录仍在扫描中，数字是中间值。')}</p>}
       <p className="dc-muted dc-fineprint">
         {d.folded
           ? '这一格的名称、合计大小和上面两个百分比都是真的（分母来自扫描记账）；它装的是主进程没有下发给渲染端的那批子项的合计容量，磁盘上没有对应条目，所以文件数、子目录数、路径、类型、修改时间、创建时间、属性这些行整行不显示——那些数字从未为它采集过，写个 0 就是谎报。'
@@ -163,7 +165,7 @@ export function DetailPanel({
             : '目录本轮不 stat，所以属性与创建时间都是「未采集」而不是「否」或 1970-01-01（多给每个目录一次 lstat ≈ C 盘 7.3 万次额外 I/O）。文件的创建时间来自扫描时那一次 stat，没有多要 I/O。'}
       </p>
       <p className="dc-muted dc-fineprint">
-        风险等级只是这一条自身的判定。清理走「垃圾清理」页：逐项勾选 → 预估 → 确认，才有执行（§28 原则一：扫描 ≠ 删除）。
+        {t('风险等级只是这一条自身的判定。清理走「垃圾清理」页：逐项勾选 → 预估 → 确认，才有执行（§28 原则一：扫描 ≠ 删除）。')}
       </p>
     </div>
   )

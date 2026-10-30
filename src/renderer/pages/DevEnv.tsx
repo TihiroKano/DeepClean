@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useT } from '../i18n'
 import { formatBytes, formatCount } from '../../../shared/format'
 import type { DevEnvGroupWire, DevEnvRowWire, DevEnvViewWire, ScanStatus } from '../../../shared/types'
 
@@ -145,6 +146,7 @@ export function DevEnv({
   selected: string[]
   onSelectedChange(next: string[] | ((prev: string[]) => string[])): void
 }): JSX.Element {
+  const t = useT()
   const [view, setView] = useState<DevEnvViewWire | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -172,13 +174,13 @@ export function DevEnv({
 
   return (
     <div className="dc-page">
-      <h2 className="dc-page-title">开发环境</h2>
+      <h2 className="dc-page-title">{t('开发环境')}</h2>
       <div className="dc-muted">
         按生态分组。这一页只报告装没装与占了多少，勾选仍然归「垃圾清理」页那条确认链 —— 删除走的是
         §17 → §18 那一道门，这里没有第二条。
       </div>
-      {error !== null && <div className="dc-warn">读不到探测结论：{error}</div>}
-      {view === null && error === null && <div className="dc-muted">正在问这台机器装了哪些工具链…</div>}
+      {error !== null && <div className="dc-warn">{t('读不到探测结论：{err}', { err: error })}</div>}
+      {view === null && error === null && <div className="dc-muted">{t('正在问这台机器装了哪些工具链…')}</div>}
 
       {view !== null && (
         <>
@@ -190,10 +192,10 @@ export function DevEnv({
                 <table className="dc-table">
                   <thead>
                     <tr>
-                      <th>分类</th>
-                      <th>检测</th>
-                      <th className="dc-num">占用</th>
-                      <th>动作</th>
+                      <th>{t('分类')}</th>
+                      <th>{t('检测')}</th>
+                      <th className="dc-num">{t('占用')}</th>
+                      <th>{t('动作')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -224,8 +226,8 @@ export function DevEnv({
                                   {on ? '取消勾选这一项' : '勾上这一项'}
                                 </button>
                               )}
-                              {row.actions.includes('go-large-files') && <span className="dc-muted">模型本体不在这张表里 · 只报占用，不在这里删</span>}
-                              {row.actions.includes('view') && <span className="dc-muted">只读查询，DeepClean 不代它清理。</span>}
+                              {row.actions.includes('go-large-files') && <span className="dc-muted">{t('模型本体不在这张表里 · 只报占用，不在这里删')}</span>}
+                              {row.actions.includes('view') && <span className="dc-muted">{t('只读查询，DeepClean 不代它清理。')}</span>}
                               {row.pruneCommand !== undefined && (
                                 <span className="dc-muted">
                                   要释放这部分空间，请自己在终端执行：<code>{row.pruneCommand}</code>

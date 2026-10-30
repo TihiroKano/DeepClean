@@ -12,6 +12,7 @@
  * 拿不到 Tauri 全局（纯浏览器预览）时**整排不渲染**，而不是画三颗点了没反应的假按钮。
  */
 import { useEffect, useState } from 'react'
+import { useT } from '../i18n'
 import { CloseIcon, MaximizeIcon, MinimizeIcon, RestoreIcon } from './icons'
 
 interface TauriWindow {
@@ -28,6 +29,7 @@ function currentWindow(): TauriWindow | null {
 }
 
 export function WindowControls(): JSX.Element | null {
+  const t = useT()
   // 全局对象在挂载前就位（tauri-main.tsx 先装桥再渲染），读一次就够，不必每次渲染重查
   const [win] = useState<TauriWindow | null>(() => currentWindow())
   const [maximized, setMaximized] = useState(false)
@@ -68,8 +70,8 @@ export function WindowControls(): JSX.Element | null {
       <button
         type="button"
         className="dc-winctl-btn"
-        title="最小化"
-        aria-label="最小化"
+        title={t('最小化')}
+        aria-label={t('最小化')}
         onClick={() => run(win.minimize())}
       >
         <MinimizeIcon size={13} />
@@ -77,8 +79,8 @@ export function WindowControls(): JSX.Element | null {
       <button
         type="button"
         className="dc-winctl-btn"
-        title={maximized ? '还原' : '最大化'}
-        aria-label={maximized ? '还原' : '最大化'}
+        title={maximized ? t('还原') : t('最大化')}
+        aria-label={maximized ? t('还原') : t('最大化')}
         onClick={() => run(win.toggleMaximize())}
       >
         {maximized ? <RestoreIcon size={13} /> : <MaximizeIcon size={13} />}
@@ -86,8 +88,8 @@ export function WindowControls(): JSX.Element | null {
       <button
         type="button"
         className="dc-winctl-btn dc-winctl-close"
-        title="关闭"
-        aria-label="关闭"
+        title={t('关闭')}
+        aria-label={t('关闭')}
         onClick={() => run(win.close())}
       >
         <CloseIcon size={13} />

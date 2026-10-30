@@ -110,7 +110,12 @@ describe('②③ 列表给最简一句话，「查看详情」开详情框', () 
   })
 
   it('关闭出口三条都有：× 按钮、点遮罩、Esc', () => {
-    expect(CLEANUP, '× 按钮不见了').toMatch(/aria-label="关闭详情"/)
+    /**
+     * ⚠️ **2026-10-29**：`aria-label` 从字面量变成 `{t('关闭详情')}`（界面语言那一轮）。
+     * 判据问的是"那个 × 按钮有没有一个能被读屏念出来的名字"，而名字现在由词典给 ——
+     * 所以这里两种形态都认，但**必须是这两者之一**（写成别的键名就说明接错了）。
+     */
+    expect(CLEANUP, '× 按钮不见了').toMatch(/aria-label=(?:"关闭详情"|\{t\('关闭详情'\)\})/)
     expect(CLEANUP, '点遮罩关不掉').toMatch(/dc-modal-mask" onClick=\{onClose\}/)
     expect(CLEANUP, "Esc 关不掉").toMatch(/e\.key === 'Escape'\) onClose\(\)/)
   })

@@ -10,6 +10,7 @@
  * 为什么折叠在服务端：渲染层拿不到全部 files，它没法自己折叠 —— 这一点原设计写反过。
  */
 import { useCallback, useEffect, useState } from 'react'
+import { useT } from '../i18n'
 import type { JournalDirEntry, JournalDirSummary } from '../../../shared/types'
 import { formatBytes } from '../../../shared/format'
 
@@ -35,6 +36,7 @@ function DirNode({
   api: JournalDetailApi
   depth: number
 }): JSX.Element {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [kids, setKids] = useState<JournalDirEntry[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -64,8 +66,8 @@ function DirNode({
       </button>
       {open && (
         <div className="dc-journal-dir-body">
-          {error !== null && <p className="dc-warn">这一层读不到：{error}</p>}
-          {kids === null && error === null && <p className="dc-muted">正在读取…</p>}
+          {error !== null && <p className="dc-warn">{t('这一层读不到：{err}', { err: error })}</p>}
+          {kids === null && error === null && <p className="dc-muted">{t('正在读取…')}</p>}
           {kids !== null && (
             <ul className="dc-journal-dir-children">
               {kids.map((k) =>
@@ -85,7 +87,7 @@ function DirNode({
                   </li>
                 ),
               )}
-              {kids.length === 0 && <li className="dc-muted dc-fineprint">这一层没有文件。</li>}
+              {kids.length === 0 && <li className="dc-muted dc-fineprint">{t('这一层没有文件。')}</li>}
             </ul>
           )}
         </div>
@@ -106,6 +108,7 @@ export function CleanJournalDetail({
   header?: string
   api?: JournalDetailApi
 }): JSX.Element {
+  const t = useT()
   const [roots, setRoots] = useState<JournalDirSummary[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -135,10 +138,10 @@ export function CleanJournalDetail({
         {header !== undefined && <span className="dc-journal-detail-title">{header}</span>}
       </div>
 
-      {error !== null && <p className="dc-warn">读不到这次清理的详情：{error}</p>}
+      {error !== null && <p className="dc-warn">{t('读不到这次清理的详情：{err}', { err: error })}</p>}
       {roots === null && error === null && <p className="dc-muted">正在读取…</p>}
       {roots !== null && roots.length === 0 && (
-        <p className="dc-muted">这次清理没有可展开的文件记录。</p>
+        <p className="dc-muted">{t('这次清理没有可展开的文件记录。')}</p>
       )}
       {roots !== null && roots.length > 0 && (
         <ul className="dc-journal-tree">

@@ -22,7 +22,8 @@ type InvokeFn = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>
 
 // 只引类型（编译期擦除），所以这条不破坏上面那句「零新依赖」：`shared/types` 在仓内。
 import type { AppSettings } from '../../shared/settings'
-import { sanitizeWallpaper } from '../../shared/settings'
+import { sanitizeScanWorkers, sanitizeWallpaper } from '../../shared/settings'
+import { sanitizeLocale } from '../../shared/i18n'
 import type {
   CleanEvent,
   CleanProgressEvent,
@@ -191,13 +192,23 @@ function asSettings(raw: unknown): AppSettings {
   }
   // 壁纸引用过一遍**渲染端**的消毒：认不出就回默认（那张内置图），
   // 而不是把一个来路不明的串塞进 `url()`。
+  //
+  // 2026-10-29 两格新增，两条都**不抛**：
+  //  - `scanWorkers` 缺了 → 0（用推荐值）。这一格是"调优"，老服务端不回它时
+  //    用推荐值正是最安全的那一档；为它抛错会让整个设置页读不出来（连带语言、壁纸全丢）；
+  //  - `locale` 缺了 → 默认语言。同理。
+  // 这**不等于**放宽了上面那几条校验：`dupMinSizeMb` 与外观四格仍然是因为
+  // "拿到 undefined 会画出假控件"才必须抛，而这两格的缺省值是有效且安全的行为。
+  const scanWorkers = typeof o.scanWorkers === 'number' && Number.isFinite(o.scanWorkers) ? o.scanWorkers : 0
   return {
     dupMinSizeMb: o.dupMinSizeMb,
     glassBlurPx,
     glassSaturate,
     glassBrightness,
     glassOpacity,
-    wallpaper: sanitizeWallpaper(o.wallpaper)
+    wallpaper: sanitizeWallpaper(o.wallpaper),
+    scanWorkers: sanitizeScanWorkers(scanWorkers),
+    locale: sanitizeLocale(o.locale)
   }
 }
 
@@ -375,6 +386,15 @@ export function installTauriBridge(): void {
       return { ok, error, activation, status: asStatus(await invoke('dc_license_status')) }
     },
     getAppVersion: () => invoke<string>('dc_app_version'),
+    // 这台机器的并行能力（2026-10-29）。设置页「删除速率」那格的阈值 = `logicalCores`。
+    // 读不到时回一个**保守的** 1，而不是抛：那一格读不到核数不该让整页设置白屏。
+    getHardware: async () => {
+      try {
+        return await invoke<{ logicalCores: number }>('dc_hardware')
+      } catch {
+        return { logicalCores: 1 }
+      }
+    },
     cancelCleanup: async (taskId: string) => ({ ok: Boolean(await invoke('dc_cancel_cleanup', { taskId })) }),
     getCleanupTask: (taskId: string) => invoke('dc_clean_task', { taskId }),
     listCleanupTasks: () => invoke('dc_list_clean_tasks'),

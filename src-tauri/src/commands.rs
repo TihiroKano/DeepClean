@@ -187,9 +187,21 @@ pub async fn dc_preview(
 /// 读设置。**文件那一侧的失败永不报错**（第一次运行时那个文件本就不存在），
 /// 只有目录算不出来才报 —— 那件事会让整条链失效，回一份默认值等于骗界面「存好了」。
 #[tauri::command]
-pub fn dc_settings_get(app: tauri::AppHandle) -> Result<crate::settings::AppSettings, String> {
+pub fn dc_settings_get(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<crate::settings::AppSettings, String> {
     let path = crate::settings::settings_path(&app)?;
-    Ok(crate::settings::load_settings(&path).0)
+    let s = crate::settings::load_settings(&path).0;
+    /*
+     * 抄一份进 `AppState` 的缓存（2026-10-30）。
+     *
+     * 为什么读的时候也要写：`execute_plan` 里那格「删除速率」的真读者拿不到
+     * `AppHandle`，只能读缓存。而"用户从没打开过设置页"时，**只有这一条路会跑** ——
+     * 不写的话缓存里永远是产品默认值，用户在文件里手改的并发度不会生效。
+     */
+    *state.cached_settings.lock().unwrap() = s.clone();
+    Ok(s)
 }
 
 /// 写设置。回的是**存下来的那一份**（不是请求里那份）：界面拿它画那一格，
@@ -197,10 +209,14 @@ pub fn dc_settings_get(app: tauri::AppHandle) -> Result<crate::settings::AppSett
 #[tauri::command]
 pub fn dc_settings_set(
     app: tauri::AppHandle,
+    state: State<'_, AppState>,
     patch: serde_json::Value,
 ) -> Result<crate::settings::AppSettings, String> {
     let path = crate::settings::settings_path(&app)?;
-    crate::settings::save_settings(&path, &patch)
+    let saved = crate::settings::save_settings(&path, &patch)?;
+    // 回执赢的实现同一条：缓存抄的是**存下来那份**（夹过的），不是请求里那份。
+    *state.cached_settings.lock().unwrap() = saved.clone();
+    Ok(saved)
 }
 
 /// 选一张图当背景壁纸（2026-10-27）。
@@ -513,6 +529,32 @@ pub fn dc_license_status(app: tauri::AppHandle) -> Result<serde_json::Value, Str
 #[tauri::command]
 pub fn dc_app_version(app: tauri::AppHandle) -> String {
     app.package_info().version.to_string()
+}
+
+/// 这台机器的并行能力（2026-10-29，设置页「删除速率」那格滑块的真读者）。
+///
+/// ## 为什么要给渲染端
+///
+/// 那一格的保险机制是「拉到阈值之外 → 弹窗 → 自动拉回阈值」，而**阈值就是
+/// 这台设备的逻辑核数**。渲染端自己算不出来（浏览器 API `navigator.hardwareConcurrency`
+/// 给的是 WebView2 那个进程看到的数，与 Rust `available_parallelism` 不是同一个来源，
+/// 在那台开了 CPU 组的机器上会给出两个不同的答案 —— 而两个答案就是两套真相）。
+///
+/// ## 为什么只报核数，不报"推荐档位"
+///
+/// 推荐档位 = 核数，两者今天同值。**不把两者合并成一个字段**：将来若把推荐档改成
+/// "核数的一半"（那是产品决定，不是硬件事实），这个命令不用跟着变。
+/// 一个字段只装一件事。
+///
+/// ## 内核与这里的区别（别把两处混成一处）
+///
+/// 这里报的是**硬件事实**；内核 `clamp_workers` 用的是同一个 `available_parallelism`
+/// 但夹的是 `1..=核数×2`。界面这一侧拿核数当阈值是**交互决定**（再往上只是排队），
+/// 内核那一侧拿 ×2 是**安全兜底**（手改 settings.json 的入口）。
+#[tauri::command]
+pub fn dc_hardware() -> serde_json::Value {
+    let cores = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(1).max(1);
+    serde_json::json!({ "logicalCores": cores })
 }
 
 

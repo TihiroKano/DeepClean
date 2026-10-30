@@ -36,9 +36,18 @@ pub struct ScanOptions {
     /// 「最大的 N 个文件」那张表的容量（与 TS `ScannerOpts.topN ?? 100` 同值）。
     /// 0 = 什么都不记（`getTopFiles` 会回空表，不是回全表）。
     pub top_n: usize,
-    /// 要在遍历途中顺带数哪几个扩展名（§3.6「这棵树上躺着几个模型权重」的唯一数据源）。
+    /// 要在遍历途中顺带数哪几个模型权重的扩展名（§3.6）。
     /// `None` / 空 = 一个都不数。存进来时已经归一过（见 [`normalize_count_exts`]）。
     pub count_exts: Option<std::collections::HashSet<String>>,
+    /// 并行 worker 数（2026-10-29 加，设置页那格滑块的真读者）。
+    ///
+    /// `None` = 用本机逻辑核数（`available_parallelism`），也就是改之前的行为 ——
+    /// 所以**没有设置时逐字等于 1.0.0**。设置页写进来的是绝对值，不是倍率：
+    /// 倍率是给人看的口径，落进内核必须变成"这台机器上到底几条线程"，
+    /// 否则同一份设置换一台机器跑出另一种并发度，而界面上那个数不会再变。
+    ///
+    /// 由 `scan_parallel` 夹进 `1..=MAX_WORKERS`（见那边 `clamp_workers`）。
+    pub workers: Option<usize>,
 }
 
 /// 把调用方给的扩展名清单归一：**补点 + 小写**，与 TS `TreeStore` 构造函数逐字同。
@@ -66,7 +75,14 @@ impl ScanOptions {
             max_depth: DEFAULT_MAX_DEPTH,
             top_n: DEFAULT_TOP_N,
             count_exts: None,
+            workers: None,
         }
+    }
+
+    /// 注入并行 worker 数。`None` = 本机逻辑核数。
+    pub fn with_workers(mut self, workers: Option<usize>) -> Self {
+        self.workers = workers;
+        self
     }
 
     /// 注入要数的扩展名（清单为空 → 等于没注入，与 TS 的 `countExts: []` 同形）。

@@ -27,6 +27,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { LicenseCard } from '../components/LicenseCard'
 import { useSettings } from '../hooks/useSettings'
+import { useT } from '../i18n'
+import { LOCALES, LOCALE_LABELS, type Locale } from '../../../shared/i18n'
 import {
   MAX_GLASS_BLUR_PX,
   MAX_GLASS_BRIGHTNESS,
@@ -36,6 +38,7 @@ import {
   MIN_GLASS_BRIGHTNESS,
   MIN_GLASS_OPACITY,
   MIN_GLASS_SATURATE,
+  SCAN_WORKERS_AUTO,
   type AppSettings
 } from '../../../shared/settings'
 
@@ -104,6 +107,7 @@ export function wallpaperLabel(ref: string): string {
 
 export function Settings(): JSX.Element {
   const settings = useSettings()
+  const t = useT()
   const [version, setVersion] = useState<string | null>(null)
   const [versionError, setVersionError] = useState<string | null>(null)
   const [wallpaperBusy, setWallpaperBusy] = useState(false)
@@ -156,27 +160,234 @@ export function Settings(): JSX.Element {
 
   return (
     <div className="dc-page dc-settings">
-      <h2 className="dc-page-title">设置</h2>
+      <h2 className="dc-page-title">{t('设置')}</h2>
+
+      {/*
+        五块卡的顺序（2026-10-29 第二轮，人类伙伴点名）：
+        **语言 → 性能 → 外观 → 授权 → 关于**。
+
+        为什么是这个顺序而不是"最常改的在前"：语言排第一是因为它决定**后面四块怎么读** ——
+        一个看不懂中文的人打开这一页，第一个要找的就是它。其余四块按"抽象的层级"往下排：
+        性能是这台机器怎么跑、外观是它看起来什么样、授权是它归谁、关于是它是谁。
+      */}
+      <LanguageCard settings={settings} />
+
+      <PerformanceCard settings={settings} />
 
       <AppearanceCard settings={settings} wallpaperBusy={wallpaperBusy} wallpaperNote={wallpaperNote} onPick={pick} />
 
       <LicenseCard />
 
       <section className="dc-settings-card">
-        <h3 className="dc-settings-card-title">关于</h3>
+        <h3 className="dc-settings-card-title">{t('关于')}</h3>
         <p className="dc-fineprint dc-muted">
-          DeepClean 版本：
+          {t('DeepClean 版本：')}
           {version === null ? (
-            <span className="dc-warn">{versionError ?? '读不到（主进程没给出版本号）'}</span>
+            <span className="dc-warn">{versionError ?? t('读不到（主进程没给出版本号）')}</span>
           ) : (
             <code className="dc-mono">{version}</code>
           )}
         </p>
-        <p className="dc-fineprint dc-muted">扫描 ≠ 删除。这一页不改任何文件，也不清理任何东西。</p>
+        <p className="dc-fineprint dc-muted">{t('扫描 ≠ 删除。这一页不改任何文件，也不清理任何东西。')}</p>
       </section>
 
-      {settings.error !== null && <p className="dc-warn">设置没能保存：{settings.error}</p>}
+      {settings.error !== null && <p className="dc-warn">{t('设置没能保存：{err}', { err: settings.error })}</p>}
     </div>
+  )
+}
+
+/**
+ * 「语言」那块卡（2026-10-29）。
+ *
+ * 人类伙伴原话：「设置内增加语言切换功能，支持中文，繁体中文，英语，日语，韩语」。
+ *
+ * 三件必须说清的事：
+ *
+ * ① **它有一个真读者**：`App` 拿 `settings.locale` 挂 `LocaleContext.Provider`，
+ *    `useT()` 从那里取词典。切了立刻生效，不重启 —— 这是本页"每格控件背后都要有
+ *    一段真消费它的逻辑"那条规矩的兑现。
+ *
+ * ② **下拉里每种语言用自己那种写法**（`LOCALE_LABELS`）。跟着界面语言走的话，
+ *    界面已经是英文时列表里写着 `Japanese`，而用户可能正是因为看不懂才来这一页。
+ *
+ * ③ **存的是 id 不是下标**：`en` / `ja` 这种 id 换一台机器、换一个版本都还认得出；
+ *    存下标的话"给列表加一种语言"会让所有老用户的界面语言整体错位一格。
+ */
+function LanguageCard({ settings }: { settings: ReturnType<typeof useSettings> }): JSX.Element {
+  const t = useT()
+  const s = settings.value
+  return (
+    <section className="dc-settings-card">
+      <h3 className="dc-settings-card-title">{t('界面语言')}</h3>
+      <div className="dc-settings-row">
+        <div className="dc-settings-row-head">
+          <label className="dc-settings-row-label" htmlFor="dc-locale">
+            {t('界面语言')}
+          </label>
+        </div>
+        <select
+          id="dc-locale"
+          className="dc-select dc-locale-select"
+          value={s.locale}
+          disabled={settings.saving}
+          onChange={(e) => void settings.save({ locale: e.target.value as Locale })}
+        >
+          {LOCALES.map((l) => (
+            <option key={l} value={l}>
+              {LOCALE_LABELS[l]}
+            </option>
+          ))}
+        </select>
+        <p className="dc-fineprint dc-muted">{t('切换后立刻生效，不需要重启。')}</p>
+      </div>
+    </section>
+  )
+}
+
+/**
+ * 「性能」那块卡 —— 删除速率（2026-10-30 第三轮）。
+ *
+ * ## 三轮要求的累加
+ *
+ * ① 第一轮：「并行清理倍数放设置以滑块方式选择，默认为推荐值（最保守），
+ *    确保用户拉满倍率导致崩溃」。
+ * ② 第二轮：改叫「删除速率」、读数叫「默认推荐」、取消说明小字、
+ *    加"拉到阈值弹窗提示并自动拉回"。
+ * ③ **本轮（看了实测数据之后）**：滑块改成**点阵样式**（参考图：一排小方格，
+ *    已选的染色、未选的淡），换蓝色系；**档位数 = 本机逻辑核数**；
+ *    **取消上限弹窗**；**默认值 = 逻辑核数的 60%**。
+ *
+ * ## 为什么默认 60%
+ *
+ * 实测（docs/benchmarks/2026-10-30-delete-path-swap.md 与 delprobe）：
+ * 删除的加速比饱和在核数（8 核机 8 线程 2.45×，16 线程反而慢）。也就是说
+ * "拉到 100% 核数"与"拉到 60%"在速度上的差距远小于直觉 —— 文件系统的日志
+ * 把并行收益封顶了。默认给 60% 是把"这台机器跑别的活"的空间留给用户：
+ * DeepClean 清理是瞬时突发负载，默认不占满全部核，是 polite 的那一档。
+ * 用户想拉满，拉到头就是核数 —— 不会崩（实测内存不涨、不崩溃），只是别的
+ * 程序那几秒里少几个核。
+ *
+ * ## 点阵样式
+ *
+ * 参考图是一排小方格：已选的染色、当前档那格带描边。DOM 用一排 button 画格子
+ * （不是 CSS 渐变 —— 档位数是运行时的 stops，渐变画不出"恰好 N 格、选中恰好
+ * M 格"）。真正的 `<input type=range>` 仍在，只是视觉上隐藏：键盘（方向键）、
+ * 读屏、拖拽交互全部保留 —— 手绘一层格子盖在它上面，点击格子直接跳档。
+ * **可访问性不因为换皮肤而丢**。
+ */
+function PerformanceCard({ settings }: { settings: ReturnType<typeof useSettings> }): JSX.Element {
+  const t = useT()
+  const s = settings.value
+
+  /*
+   * 档位总数 = 本机逻辑核数（从主进程取，理由见 shared/types.ts 的 getHardware 注释）。
+   * 初值 8 是**占位**：IPC 回来前按 8 格画，回来后 setStops 撑开。
+   * （初值若给 1，"默认值 = 60%" 会算出 0.6 → 1，IPC 回来后跳档；
+   *   给 8 与大多数目标机器一致，跳档概率最低。）
+   */
+  const [stops, setStops] = useState(8)
+  useEffect(() => {
+    let alive = true
+    void window.deepclean.getHardware().then((h) => {
+      if (alive && Number.isFinite(h.logicalCores) && h.logicalCores > 0) setStops(Math.floor(h.logicalCores))
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  /** 默认档 = 核数的 60%（四舍五入），至少 1。内核 clamp_workers 仍夹 1..=核数。 */
+  const defaultWorkers = Math.max(1, Math.round(stops * 0.6))
+
+  /*
+   * 当前生效的档位。
+   *
+   * `scanWorkers === 0`（SCAN_WORKERS_AUTO）= "用默认" —— 显示成 defaultWorkers，
+   * 内核收到 0 时自己按核数 × 60% 算（见 service::read_scan_workers_for_delete）。
+   * 用户显式选了档位就用那个数。
+   */
+  const atAuto = s.scanWorkers === SCAN_WORKERS_AUTO
+  const current = atAuto ? defaultWorkers : Math.min(s.scanWorkers, stops)
+
+  const save = (v: number): void => {
+    void settings.save({ scanWorkers: v })
+  }
+
+  return (
+    <section className="dc-settings-card">
+      <h3 className="dc-settings-card-title">{t('性能')}</h3>
+      <div className="dc-settings-row">
+        <div className="dc-settings-row-head">
+          <label className="dc-settings-row-label" htmlFor="dc-scan-workers">
+            {t('删除速率')}
+          </label>
+          <span className="dc-settings-row-value dc-mono">
+            {current === defaultWorkers ? t('默认推荐') : `x${current}`}
+          </span>
+        </div>
+
+        {/*
+          点阵滑块。两层：
+           1. `<input type=range>`：真交互面（键盘/读屏/拖拽），视觉透明但仍可聚焦；
+           2. 点阵那排格子：纯显示 + 可点击（点了直接跳那一档）。
+          参考图两端那两行说明字（更快/更强）按人类伙伴要求撤掉 —— 读数就在右上角，
+          再标两端是第三处说同一件事。
+        */}
+        <div className="dc-rate">
+          <div className="dc-rate-track">
+            <input
+              id="dc-scan-workers"
+              className="dc-rate-range"
+              type="range"
+              min={1}
+              max={stops}
+              step={1}
+              value={current}
+              disabled={settings.saving}
+              aria-label={t('删除速率')}
+              aria-valuemin={1}
+              aria-valuemax={stops}
+              aria-valuenow={current}
+              aria-valuetext={current === defaultWorkers ? t('默认推荐') : `x${current}`}
+              onChange={(e) => save(Number(e.target.value))}
+            />
+            <div className="dc-rate-cells" aria-hidden="true">
+              {Array.from({ length: stops }, (_, i) => {
+                const v = i + 1
+                const on = v <= current
+                const isDefault = v === defaultWorkers
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    tabIndex={-1}
+                    className={
+                      'dc-rate-cell' + (on ? ' dc-rate-cell-on' : '') + (isDefault ? ' dc-rate-cell-default' : '')
+                    }
+                    style={
+                      on
+                        ? // 色阶：越靠右越实（0.35 → 1.0），与参考图"强度随档位增长"同构
+                          { background: `rgba(77, 143, 245, ${(0.35 + (0.65 * v) / stops).toFixed(2)})` }
+                        : undefined
+                    }
+                    onClick={() => save(v)}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        <button
+          className="dc-btn dc-btn-xs"
+          type="button"
+          disabled={settings.saving || current === defaultWorkers}
+          onClick={() => save(SCAN_WORKERS_AUTO)}
+        >
+          {t('恢复性能默认')}
+        </button>
+      </div>
+    </section>
   )
 }
 
@@ -196,22 +407,24 @@ function AppearanceCard({
   onPick: () => void
 }): JSX.Element {
   const s = settings.value
+  const t = useT()
   return (
     <section className="dc-settings-card">
-      <h3 className="dc-settings-card-title">外观</h3>
+      <h3 className="dc-settings-card-title">{t('外观')}</h3>
 
       <div className="dc-settings-row">
         <div className="dc-settings-row-head">
-          <span className="dc-settings-row-label">背景壁纸</span>
-          <span className="dc-settings-row-value dc-mono">{wallpaperLabel(s.wallpaper)}</span>
+          <span className="dc-settings-row-label">{t('背景壁纸')}</span>
+          <span className="dc-settings-row-value dc-mono">{t(wallpaperLabel(s.wallpaper))}</span>
         </div>
         <p className="dc-fineprint dc-muted">
-          选一张本地图片（png / jpg / jpeg / webp / bmp）。选中之后会复制进本程序的数据目录，
-          原文件删掉也不影响。
+          {t(
+            '选一张本地图片（png / jpg / jpeg / webp / bmp）。选中之后会复制进本程序的数据目录，原文件删掉也不影响。'
+          )}
         </p>
         <div className="dc-actions">
           <button className="dc-btn" type="button" disabled={wallpaperBusy} onClick={onPick}>
-            {wallpaperBusy ? '正在选择…' : '选择图片…'}
+            {wallpaperBusy ? t('正在选择…') : t('选择图片…')}
           </button>
           <button
             className="dc-btn"
@@ -219,7 +432,7 @@ function AppearanceCard({
             disabled={wallpaperBusy || s.wallpaper === 'builtin:mountain'}
             onClick={() => void settings.save({ wallpaper: 'builtin:mountain' })}
           >
-            恢复默认壁纸
+            {t('恢复默认壁纸')}
           </button>
         </div>
         {wallpaperNote !== null && <p className="dc-fineprint dc-muted">{wallpaperNote}</p>}
@@ -228,7 +441,7 @@ function AppearanceCard({
       <hr className="dc-settings-sep" />
 
       <p className="dc-muted dc-fineprint">
-        毛玻璃四格。改一下立刻生效 —— 它们直接落成 CSS 变量，不重启、不刷新。
+        {t('毛玻璃四格。改一下立刻生效 —— 它们直接落成 CSS 变量，不重启、不刷新。')}
       </p>
       {GLASS_SLIDERS.map((spec) => (
         <GlassSlider
@@ -246,7 +459,7 @@ function AppearanceCard({
         disabled={settings.saving}
         onClick={() => void settings.resetGlass()}
       >
-        恢复外观默认
+        {t('恢复外观默认')}
       </button>
     </section>
   )
@@ -270,11 +483,12 @@ function GlassSlider({
   disabled: boolean
   onChange: (v: number) => void
 }): JSX.Element {
+  const t = useT()
   return (
     <div className="dc-settings-row">
       <div className="dc-settings-row-head">
         <label className="dc-settings-row-label" htmlFor={`glass-${spec.key}`}>
-          {spec.label}
+          {t(spec.label)}
         </label>
         <span className="dc-settings-row-value dc-mono">{spec.format(value)}</span>
       </div>
@@ -289,7 +503,7 @@ function GlassSlider({
         disabled={disabled}
         onChange={(e) => onChange(Number(e.target.value))}
       />
-      <p className="dc-fineprint dc-muted">{spec.hint}</p>
+      <p className="dc-fineprint dc-muted">{t(spec.hint)}</p>
     </div>
   )
 }

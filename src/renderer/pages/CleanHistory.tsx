@@ -17,6 +17,7 @@
  * 打包器会顺着 import 把它拖进渲染端产物）。要的类型只在 `shared/types.ts` 那一层。
  */
 import { useEffect, useState } from 'react'
+import { useT } from '../i18n'
 import type { CleanRun } from '../../../shared/types'
 import { formatBytes } from '../../../shared/format'
 
@@ -89,7 +90,8 @@ export function JournalEmpty(): JSX.Element {
  * 指望它当长期记录的那位。所以抽成单独一块，挂在列表下方，两条分支共用。
  */
 export function JournalRetentionNote(): JSX.Element {
-  return <p className="dc-muted dc-fineprint dc-journal-retention">日志仅保留 30 天，过期自动删除。</p>
+  const t = useT()
+  return <p className="dc-muted dc-fineprint dc-journal-retention">{t('日志仅保留 30 天，过期自动删除。')}</p>
 }
 
 export function CleanHistory({
@@ -101,6 +103,7 @@ export function CleanHistory({
   onOpenDetail: (runId: string) => void
   load?: () => Promise<CleanRun[]>
 }): JSX.Element {
+  const t = useT()
   const [runs, setRuns] = useState<CleanRun[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -124,8 +127,8 @@ export function CleanHistory({
   if (error !== null) {
     return (
       <div className="dc-clean">
-        <h2 className="dc-page-title">清理日志</h2>
-        <p className="dc-warn">读不到清理日志：{error}</p>
+        <h2 className="dc-page-title">{t('清理日志')}</h2>
+        <p className="dc-warn">{t('读不到清理日志：{err}', { err: error })}</p>
       </div>
     )
   }
@@ -134,7 +137,7 @@ export function CleanHistory({
     return (
       <div className="dc-clean">
         <h2 className="dc-page-title">清理日志</h2>
-        <p className="dc-muted">正在读取…</p>
+        <p className="dc-muted">{t('正在读取…')}</p>
       </div>
     )
   }

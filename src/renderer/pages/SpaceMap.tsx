@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { dictFor, useT, type TranslateFn } from '../i18n'
+import { translate } from '../i18n/dict'
+import { DEFAULT_LOCALE } from '../../../shared/i18n'
 import { type ColorMode, type Tile } from '../../../core/analyze/treemap-data'
 import { navAfterExclude, type NavView } from '../../../core/analyze/tree-nav-state'
 import { FIT, type View } from '../../../core/analyze/treemap-view'
@@ -27,6 +30,7 @@ export function SpaceMap({
   truncated: boolean
   onAddToCleanup: (absPath: string) => void
 }): JSX.Element {
+  const t = useT()
   /**
    * 字节口径：**默认表观**，与 SpaceSniffer、与资源管理器「大小」列同一套数。
    *
@@ -285,8 +289,8 @@ export function SpaceMap({
   if (!scanId) {
     return (
       <div className="dc-empty">
-        <p>尚未扫描。回首页点「开始深度扫描」。</p>
-        <p className="dc-muted">扫描本身不动任何文件；要清理得走「垃圾清理」页的勾选 → 预估 → 确认。</p>
+        <p>{t('尚未扫描。回首页点「开始深度扫描」。')}</p>
+        <p className="dc-muted">{t('扫描本身不动任何文件；要清理得走「垃圾清理」页的勾选 → 预估 → 确认。')}</p>
       </div>
     )
   }
@@ -296,7 +300,7 @@ export function SpaceMap({
    * 整个 `nav` 递进去：那句读哪一份口径（本层 / 本轮累计）由 `excludedLine` 自己负责，
    * 于是"横幅读错份"这件事测得出（见那个函数的注释）。
    */
-  const excludeNote = excludedLine(nav, clearFailed)
+  const excludeNote = excludedLine(nav, clearFailed, t)
 
   return (
     // 口径 provider：本页所有字节标签（表观/占用）都从这里读，不许各组件写死。
@@ -369,7 +373,7 @@ export function SpaceMap({
             <ContextMenu
               x={menu.x}
               y={menu.y}
-              items={menuFor(menu.tile, { onAddToCleanup, onDetail: pinDetail, onExclude: (id) => void exclude(id) })}
+              items={menuFor(menu.tile, { onAddToCleanup, onDetail: pinDetail, onExclude: (id) => void exclude(id) }, t)}
               onClose={() => setMenu(null)}
             />
           )}
@@ -390,7 +394,7 @@ export function SpaceMap({
             <p className="dc-warn">
               {excludeNote}
               <button className="dc-link" onClick={() => void clearAll()}>
-                {clearFailed ? '重试清除全部排除' : '清除全部排除'}
+                {clearFailed ? t('重试清除全部排除') : t('清除全部排除')}
               </button>
             </p>
           )}
@@ -412,9 +416,9 @@ export function SpaceMap({
           {/* §15：最后是"有什么没算进来"。放在最底下不是次要 —— 它讲的是这张图的边界，
               但读的人得先看完"这一格/这一层"才会需要它；而且 total 为 0 时整块不出现，正常盘零噪声。 */}
           <SkipPanel data={skipped} />
-          {status === 'running' && <p className="dc-live">扫描中 · 当前层每 400ms 重新水合</p>}
+          {status === 'running' && <p className="dc-live">{t('扫描中 · 当前层每 400ms 重新水合')}</p>}
           {nav.foldedCount > 0 && (
-            <p className="dc-warn">本层共 {nav.totalChildren} 项{nav.excludedCount > 0 ? `（其中 ${nav.excludedCount} 项已被本轮排除）` : ''}，图中只画最大的 {nav.children.length} 项；其余 {nav.foldedCount} 项合计 {formatBytes(nav.foldedBytes)}，已单独画成一格「其它 {nav.foldedCount} 项」—— 容量没丢，但那一格不是磁盘上的某一项，进不去。</p>
+            <p className="dc-warn">{foldedLine(nav, t)}</p>
           )}
         </aside>
       </div>
@@ -444,12 +448,31 @@ export interface MenuHandlers {
 }
 
 /**
+ * 本文件里那几个**纯函数**（`foldedLine` / `excludedLine` / `menuFor`）不能调 `useT()`
+ * —— 它们不是组件，没有组件树可挂。默认值取简体那份词典，正是 `t()` 在组件里逐字回原文的那个口，
+ * 所以单测直接调用这些函数时，拿到的句子与界面上一模一样（`tests/unit/spacemap-menu.test.tsx`）。
+ *
+ * 为什么不在这些函数里 `import { dictFor }` 现查一次：那会绕开 Provider，设置页切了语言
+ * 而它们仍读默认那份 —— 调用点（组件体里）把 `t` 递进来，才和界面跟着一起换。
+ */
+const tDefault: TranslateFn = (source, vars) => translate(dictFor(DEFAULT_LOCALE), source, vars)
+
+/**
  * 「排除该目录」那一句。整句都是要传的：这一项最容易被误解成"把它从扫描/清理里去掉"，
  * 而它唯一的效果就是这一层少画一块。最后一句点的是那条哨兵用例（它真的在，见 rules-engine.test.ts）。
+ *
+ * 为什么断开成两段常量：`EXCLUDE_HINT` 是单测逐字比对的契约（`spacemap-menu.test.tsx`），
+ * 而翻译时一句话越长越容易把语气断歪 —— 两段各自登记、拼回来仍是逐字那两句，不多不少一个标点。
  */
-export const EXCLUDE_HINT =
-  '只影响这张地图：该目录本轮从这一层消失，容量按「已排除」单独点名。' +
-  '不会停止扫描、不会删除任何东西，清理预估仍按完整的树计价（有哨兵用例守着）'
+const EXCLUDE_HINT_HEAD = '只影响这张地图：该目录本轮从这一层消失，容量按「已排除」单独点名。'
+const EXCLUDE_HINT_TAIL = '不会停止扫描、不会删除任何东西，清理预估仍按完整的树计价（有哨兵用例守着）'
+
+export const EXCLUDE_HINT = EXCLUDE_HINT_HEAD + EXCLUDE_HINT_TAIL
+
+/** `EXCLUDE_HINT` 的译文版，按同一处断句拼回（两段共用上面那两个常量，改文案只改一处）。 */
+function excludeHint(t: TranslateFn): string {
+  return t(EXCLUDE_HINT_HEAD) + t(EXCLUDE_HINT_TAIL)
+}
 
 /**
  * 侧栏那一句实话（`null` = 这一轮没有被排除项，那句话**整段不出现**）。
@@ -473,57 +496,92 @@ export const EXCLUDE_HINT =
  */
 export function excludedLine(
   nav: Pick<NavView, 'excludedCount' | 'excludedBytes' | 'sessionExcludedCount' | 'sessionExcludedBytes'>,
-  clearFailed = false
+  clearFailed = false,
+  t: TranslateFn = tDefault
 ): string | null {
   if (nav.sessionExcludedCount <= 0) return null
-  const head = `已排除 ${nav.sessionExcludedCount} 个目录（本轮累计）· ${formatBytes(nav.sessionExcludedBytes)} 不计入地图`
+  const head = t('已排除 {count} 个目录（本轮累计）· {bytes} 不计入地图', {
+    count: nav.sessionExcludedCount,
+    bytes: formatBytes(nav.sessionExcludedBytes)
+  })
   if (clearFailed) {
     return (
-      `${head} —— 「清除全部排除」没有生效（主进程拒了这条，或这条 IPC 压根没送到）：` +
-        `这些目录此刻仍然被藏着，这张地图显示的容量仍然少了 ${formatBytes(nav.sessionExcludedBytes)}。` +
-        `清理预估不受影响（它一直按完整的树计价），再点一次右边那个按钮可以重试。`
+      head +
+      ' —— ' +
+      t('「清除全部排除」没有生效（主进程拒了这条，或这条 IPC 压根没送到）：') +
+      t('这些目录此刻仍然被藏着，这张地图显示的容量仍然少了 {bytes}。', {
+        bytes: formatBytes(nav.sessionExcludedBytes)
+      }) +
+      t('清理预估不受影响（它一直按完整的树计价），再点一次右边那个按钮可以重试。')
     )
   }
-  return `${head}：被排除那一层显示的目录大小仍是完整子树合计，清理预估也仍按完整的树计价。`
+  return head + t('：被排除那一层显示的目录大小仍是完整子树合计，清理预估也仍按完整的树计价。')
 }
 
-export function menuFor(t: Tile, h: MenuHandlers): MenuSpec[] {
-  const p = t.child.path
-  const isFile = t.child.kind === 'file'
-  const fold = t.folded === true
-  const foldNote = fold ? '合计块' : undefined
+/**
+ * 折叠那一句（`nav.foldedCount > 0` 才出现）：本层共几项、画了几项、其余多少项合计多少。
+ *
+ * 整句只占**一个**键，不拆成三段拼接 —— 语序在日语/韩语里与中文不同（「其余 N 项合计 X」
+ * 那半句在韩语里要整句重排），拆开之后译者就没法把它摆回去了（见 `i18n/dict.ts` 文件头）。
+ * 括号里那句「其中 N 项已被本轮排除」是**条件片段**，单独一个键由调用点决定要不要拼进去。
+ */
+function foldedLine(
+  nav: Pick<NavView, 'totalChildren' | 'excludedCount' | 'children' | 'foldedCount' | 'foldedBytes'>,
+  t: TranslateFn = tDefault
+): string {
+  const excluded =
+    nav.excludedCount > 0 ? t('（其中 {count} 项已被本轮排除）', { count: nav.excludedCount }) : ''
+  return t(
+    '本层共 {total} 项{excluded}，图中只画最大的 {shown} 项；其余 {folded} 项合计 {bytes}，已单独画成一格「其它 {folded} 项」—— 容量没丢，但那一格不是磁盘上的某一项，进不去。',
+    {
+      total: nav.totalChildren,
+      excluded,
+      shown: nav.children.length,
+      folded: nav.foldedCount,
+      bytes: formatBytes(nav.foldedBytes)
+    }
+  )
+}
+
+export function menuFor(tile: Tile, h: MenuHandlers, t: TranslateFn = tDefault): MenuSpec[] {
+  const p = tile.child.path
+  const isFile = tile.child.kind === 'file'
+  const fold = tile.folded === true
+  const foldNote = fold ? t('合计块') : undefined
   const foldHint = fold
-    ? '这一格装的是主进程没有下发给渲染端的那批子项的合计容量，磁盘上没有对应条目：没有路径可打开、可定位，也没有路径可复制'
+    ? t('这一格装的是主进程没有下发给渲染端的那批子项的合计容量，磁盘上没有对应条目：没有路径可打开、可定位，也没有路径可复制')
     : undefined
   // 排除只对"真实存在的目录"有意义：文件不是地图的一层，合计块磁盘上压根没有这一项。
-  const excludable = !fold && !isFile && t.child.dirId !== undefined
+  const excludable = !fold && !isFile && tile.child.dirId !== undefined
   return [
-    { label: '打开', disabled: fold, note: foldNote, hint: foldHint, run: () => void window.deepclean.openItem(p) },
-    { label: '打开所在位置', disabled: fold, note: foldNote, hint: foldHint, run: () => void window.deepclean.revealInExplorer(p) },
-    { label: '复制路径', disabled: fold, note: foldNote, hint: foldHint, run: () => void navigator.clipboard.writeText(p) },
+    { label: t('打开'), disabled: fold, note: foldNote, hint: foldHint, run: () => void window.deepclean.openItem(p) },
+    { label: t('打开所在位置'), disabled: fold, note: foldNote, hint: foldHint, run: () => void window.deepclean.revealInExplorer(p) },
+    { label: t('复制路径'), disabled: fold, note: foldNote, hint: foldHint, run: () => void navigator.clipboard.writeText(p) },
     {
-      label: '查看详情',
+      label: t('查看详情'),
       disabled: fold,
       note: foldNote,
-      hint: fold ? '合计块不是磁盘上的条目，没有目录统计可看：它的容量与两个百分比已经在侧栏那句「其它 N 项」里点名了' : '钉住右侧详情面板：这一格会一直显示在这里，直到你取消固定或换了一层',
-      run: () => h.onDetail(t)
+      hint: fold
+        ? t('合计块不是磁盘上的条目，没有目录统计可看：它的容量与两个百分比已经在侧栏那句「其它 N 项」里点名了')
+        : t('钉住右侧详情面板：这一格会一直显示在这里，直到你取消固定或换了一层'),
+      run: () => h.onDetail(tile)
     },
     {
-      label: '加入清理列表',
+      label: t('加入清理列表'),
       disabled: !isFile,
-      note: isFile ? undefined : '只按文件',
+      note: isFile ? undefined : t('只按文件'),
       hint: isFile
-        ? '交给规则引擎反查它属于哪条清理规则；不属于任何规则地盘的文件会被点名退回'
-        : '清理按文件计价 —— 目录请进入后对具体文件用这一项，或在「垃圾清理」页整项勾选',
+        ? t('交给规则引擎反查它属于哪条清理规则；不属于任何规则地盘的文件会被点名退回')
+        : t('清理按文件计价 —— 目录请进入后对具体文件用这一项，或在「垃圾清理」页整项勾选'),
       run: () => h.onAddToCleanup(p)
     },
     {
-      label: '排除该目录',
+      label: t('排除该目录'),
       disabled: !excludable,
-      note: fold ? foldNote : excludable ? undefined : '只按目录',
-      hint: fold ? foldHint : EXCLUDE_HINT,
+      note: fold ? foldNote : excludable ? undefined : t('只按目录'),
+      hint: fold ? foldHint : excludeHint(t),
       run: () => {
-        if (t.child.dirId !== undefined) h.onExclude(t.child.dirId)
+        if (tile.child.dirId !== undefined) h.onExclude(tile.child.dirId)
       }
     }
   ]

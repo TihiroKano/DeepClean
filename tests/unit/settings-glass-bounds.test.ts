@@ -242,7 +242,18 @@ describe('壁纸引用是闭集，不是任意 CSS 字符串', () => {
 })
 
 describe('④ 设置对象的键集是封闭的', () => {
-  it('AppSettings 恰好六个键（多一个野字段就是"看着接上了其实没有"）', () => {
+  it('AppSettings 恰好八个键（多一个野字段就是"看着接上了其实没有"）', () => {
+    /**
+     * ⚠️ **2026-10-29 从六个变八个**：加了 `scanWorkers` 与 `locale`。
+     *
+     * 这条判据红过一次，而且红得对 —— 它抓住了"键集变了，但没人重新点过名"这件事。
+     * 加键的人当时要回答的就是这一个问题：**新键有没有真读者**。
+     * 两格的答案：
+     *  - `scanWorkers` → `deepclean_scanner::scan_parallel::clamp_workers`
+     *    （`service::start_scan` 的 `with_workers` 读它）；
+     *  - `locale` → `App` 的 `LocaleContext.Provider` → `useT()` 查词典。
+     * 没有读者的键不许出现在这里 —— 那正是这条判据守的东西。
+     */
     const keys = Object.keys(DEFAULT_SETTINGS).sort()
     expect(keys).toEqual([
       'dupMinSizeMb',
@@ -250,6 +261,8 @@ describe('④ 设置对象的键集是封闭的', () => {
       'glassBrightness',
       'glassOpacity',
       'glassSaturate',
+      'locale',
+      'scanWorkers',
       'wallpaper'
     ])
   })
@@ -262,6 +275,6 @@ describe('④ 设置对象的键集是封闭的', () => {
       theme: 'midnight'
     }) as AppSettings & { autoCleanEnabled?: unknown }
     expect(s.autoCleanEnabled, '已删字段不许复活').toBeUndefined()
-    expect(Object.keys(s).length).toBe(6)
+    expect(Object.keys(s).length).toBe(8)
   })
 })

@@ -1331,9 +1331,22 @@ input[type='radio']:disabled {
 }
 
 /* 切盘药丸：标题行右侧那颗。全窗唯一的 `root` 写入点 —— 图里它画成一枚
-   带盘符与下拉箭头的胶囊。原生 `<select>` 只负责语义与交互，外观由这层壳兜住。 */
+   带盘符与下拉箭头的胶囊。
+
+   ⚠️ **2026-10-29 重做（修 bug ①「这个 Windows 无法点击」）**。
+   上一版是 `<label>` 包 `<select>`：药丸的可视面积大部分是 label 的 padding，
+   而 Chromium 对"已经包在 label 里的 select"再走一次 label 激活时会把
+   开→关当成两次切换 —— 表现就是点 padding 完全没反应、点文字偶尔能开。
+   现在是 `<button>` + 自己画的一张菜单：button 天生可聚焦、可键盘操作、
+   点哪里都算它自己的。定位容器 `.dc-drive-pick` 因此改成 `position: relative`
+   （菜单以它为参照绝对定位），不再是那颗"药丸的壳"。 */
 .dc-drive-pick {
   margin-left: auto;
+  position: relative;
+}
+
+/* 药丸本体。宽度由内容定，`max-width` 兜住长卷标（外接盘的名字可以很长）。 */
+.dc-drive-trigger {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1344,7 +1357,104 @@ input[type='radio']:disabled {
   background-image: var(--glass-sheen);
   box-shadow: var(--glass-inner);
   color: var(--fg);
+  font-size: 12.5px;
   cursor: pointer;
+  max-width: 240px;
+  /* 拖窗区由 `.dc-titlebar` / `.dc-side` / `.dc-bar` 点名的，首页不在这三处 ——
+     但这一条留着是防御性的：将来若把标题行挪进可拖区域，按钮仍然要能点。 */
+  -webkit-app-region: no-drag;
+}
+
+.dc-drive-trigger:hover:not(:disabled) {
+  background-color: rgba(150, 195, 255, 0.22);
+}
+
+.dc-drive-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.dc-drive-trigger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dc-drive-trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * 展开的盘符菜单。
+ *
+ * 三个不可省的属性：
+ *  · `position: absolute` + `right: 0` —— 贴右缘展开。贴左边的话，长卷标会把菜单
+ *    顶出内容区右边界（这颗药丸本来就靠右）；
+ *  · `z-index` —— 要压过下面那张 `.dc-card`（它有 `backdrop-filter`，会建自己的层叠上下文）；
+ *  · `color-scheme: dark` —— 少了它，Chromium 会按系统浅色给 `option` 上色
+ *    （2026-10-20 图二那片死白就是这条），这里虽然换成自绘 li 了，但保险起见留着。
+ */
+.dc-drive-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  min-width: 220px;
+  max-height: 320px;
+  overflow: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  color-scheme: dark;
+  background-color: #0a1c3c;
+  border: 1px solid var(--line);
+  border-radius: var(--glass-radius-control);
+  box-shadow: 0 12px 32px -8px rgba(2, 10, 32, 0.75), var(--glass-inner);
+}
+
+.dc-drive-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: var(--glass-radius-tight);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dc-drive-item:hover {
+  background-color: rgba(150, 195, 255, 0.16);
+}
+
+.dc-drive-item-on {
+  background-color: rgba(150, 195, 255, 0.22);
+}
+
+.dc-drive-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dc-drive-item-free {
+  flex: none;
+  font-size: 11.5px;
+  color: var(--fg-dim);
+}
+
+.dc-drive-menu-empty {
+  padding: 6px 9px;
+  font-size: 12px;
+  color: var(--fg-dim);
 }
 
 .dc-drive-select {
@@ -4173,3 +4283,190 @@ body.dc-tauri .dc-bar {
     opacity: 1;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+ * 界面语言的排版差异（2026-10-29）
+ *
+ * 五种语言的**字形与断行规则**不一样，而这不是"翻译完就没事了"：
+ *  - 日语：假名与汉字的行高比中文更需要空间（假名的上伸/下伸比汉字多一档），
+ *    同一 `line-height` 下日语会显得挤；同时日语**不做词间断行**，只能按假名断，
+ *    所以 `word-break` 不能用 `break-all`（那会把英文单词也拆开）；
+ *  - 韩语：谚文音节块本身是方的，但**助词与空格的关系**与中文不同，
+ *    `word-break: keep-all` 更接近母语排版（中文用 `normal` 就够）；
+ *  - 繁体中文与简体中文的排版规则基本一致，但**字形**不同 ——
+ *    这一条由 `--font-ui` 的字体回退链解决，不需要额外规则；
+ *  - 英文：拉丁文字按词断行，`word-break: normal` + `hyphens: auto` 那一档。
+ *
+ * **为什么挂在 `[data-dc-locale]` 而不是 `:lang()`**：
+ * `:lang()` 依赖 `lang` 属性向上继承，而本项目大量文本在 `<span>` 里，
+ * 继承本身是对的 —— 但 `:lang(ja)` 在 `lang="ja"` 下**会同时命中 `lang="ja-JP"`**，
+ * 而我们只存一个精确 id。用属性选择器是确定的判据，不依赖匹配算法的细节。
+ * 两个属性都由 `App` 的 effect 写（见 App.tsx 那段注释）。
+ * ══════════════════════════════════════════════════════════════════════ */
+
+/* 日语：行高放松一档，断行按"词语"而不是按字符（假名连写时 break-all 会把词拆断）。 */
+html[data-dc-locale='ja'] body {
+  line-height: 1.75;
+  word-break: normal;
+  line-break: strict;
+}
+
+/* 韩语：助词要跟着词走，`keep-all` 是母语排版的那一档。 */
+html[data-dc-locale='ko'] body {
+  word-break: keep-all;
+  line-break: strict;
+}
+
+/* 英文：允许连字符断词，但只在真正需要时（`hyphens: auto` 会看 `lang`）。 */
+html[data-dc-locale='en'] body {
+  word-break: normal;
+  hyphens: auto;
+}
+
+/*
+ * 拉丁/日/韩那些语言下，`.dc-fineprint` 与按钮上的字**没有中文那么宽**，
+ * 同一句话占的行数会变。这里只把它们的最小高度放开，不改字号 ——
+ * 改字号会让"切语言时整个版面跳一下"，而那是比多一行更难受的事。
+ */
+html:not([data-dc-locale='zh-CN']):not([data-dc-locale='zh-TW']) .dc-btn,
+html:not([data-dc-locale='zh-CN']):not([data-dc-locale='zh-TW']) .dc-nav {
+  letter-spacing: 0;
+}
+
+/* 语言下拉：与设置页其它行同一副材质，宽度按内容定。 */
+.dc-locale-select {
+  min-width: 200px;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--glass-radius-tight);
+  background-color: rgba(4, 20, 54, 0.55);
+  color: var(--fg);
+  font: inherit;
+  font-size: 12.5px;
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+.dc-locale-select option {
+  background-color: #0a1c3c;
+  color: #eaf2ff;
+}
+/* ══════════════════════════════════════════════════════════════════════
+ * 点阵速率滑块（2026-10-30，设置 → 性能）。
+ *
+ * 参考图：一排小方格，已选的染色、未选的淡、两端各有一行说明字。
+ * DOM 结构见 Settings.tsx 的 PerformanceCard：
+ *   .dc-rate
+ *     ├─ .dc-rate-cap        「更快」
+ *     ├─ .dc-rate-track
+ *     │    ├─ input.dc-rate-range   （真交互面，视觉透明）
+ *     │    └─ .dc-rate-cells > button.dc-rate-cell × N
+ *     └─ .dc-rate-cap        「更强」
+ *
+ * 为什么格子是 <button> 而不是 span + onClick 委托：点击目标就是它自己，
+ * `tabIndex={-1}` 让键盘走底下的 range（方向键已经在那里工作），
+ * 读屏用户听到的是 range 的 aria-valuetext 而不是 N 个"按钮"。
+ *
+ * 蓝色系：on 格用 --accent（#4d8ff5），透明度随选中位**递减** ——
+ * 参考图（红版）的色阶是"越往后越深"，蓝版照搬这个梯度，
+ * 但方向反过来：靠左（低速）淡、靠右（高速）深 —— 强度语义与图一致。
+ * ══════════════════════════════════════════════════════════════════════ */
+
+.dc-rate {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.dc-rate-cap {
+  flex: none;
+  font-size: 11.5px;
+  color: var(--fg-dim);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.dc-rate-cap-strong {
+  color: var(--accent-2);
+}
+
+.dc-rate-track {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+/* 真交互面：铺满轨道，视觉全透明。
+   键盘焦点用外框表达（focus-visible 落在格子容器上做不到 —— 焦点在 input 上）。 */
+.dc-rate-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  z-index: 2;
+}
+
+.dc-rate-range:disabled {
+  cursor: not-allowed;
+}
+
+/* 键盘焦点可见性：range 聚焦时给整条轨道一圈描边（opacity:0 的元素仍可聚焦）。 */
+.dc-rate-track:has(.dc-rate-range:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.dc-rate-cells {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  /* 指针事件只给格子；range 在上层（z-index:2）接管拖拽，
+     格子的 onClick 是"点格子精确跳档"的那条补充路径 */
+  pointer-events: none;
+}
+
+.dc-rate-cell {
+  pointer-events: auto;
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  padding: 0;
+  border: 1px solid rgba(150, 195, 255, 0.18);
+  border-radius: 3px;
+  background: rgba(150, 195, 255, 0.10);
+  cursor: pointer;
+  /* 每格收窄：8 格在 300px 宽里每格约 32px，格子之间靠 gap 分出"档"的边界 */
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.dc-rate-cell:hover {
+  border-color: rgba(150, 195, 255, 0.45);
+}
+
+/* 已选：染色。透明度按"第几格 / 总格数"由内联 style 给（见 PerformanceCard），
+   越靠右越实 —— 与参考图的色阶方向一致。 */
+.dc-rate-cell-on {
+  border-color: transparent;
+}
+
+/* 默认档那一格：一圈蓝描边常驻（不依赖 hover），提示"默认停在这里"。 */
+.dc-rate-cell-default {
+  border-color: var(--accent);
+}
+
+/* ══════════════ 点阵滑块结束 ══════════════ */

@@ -1,6 +1,6 @@
 [package]
 name = "deepclean-app"
-version = "1.0.0"
+version = "1.0.7"
 edition = "2021"
 description = "DeepClean —— Windows 磁盘空间分析与安全清理工具"
 
@@ -42,6 +42,10 @@ windows-sys = { version = "0.61", features = [
     "Win32_Graphics_Gdi",
     "Win32_System_Com",
     "Win32_System_Threading",
+    # 2026-10-30：`examples/delprobe.rs` 量峰值工作集要 `K32GetProcessMemoryInfo`。
+    # 那条探针回答的是「删除并发的最高安全值」，而"崩溃"最可能的成因是内存 ——
+    # 不量这一格就没有依据。只给 example 用，主程序不调它。
+    "Win32_System_ProcessStatus",
     "Win32_UI_Controls_Dialogs",
     "Win32_UI_Shell",
     "Win32_UI_WindowsAndMessaging",

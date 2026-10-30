@@ -1,6 +1,6 @@
 {
   "name": "deepclean",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "description": "Windows 磁盘空间分析与安全清理工具",

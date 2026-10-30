@@ -9,6 +9,7 @@ import type {
   ScanSnapshot
 } from '../../../shared/types'
 import { usePreview } from '../hooks/usePreview'
+import { useT } from '../i18n'
 import { Donut } from '../components/Donut'
 import { Portal } from '../components/Portal'
 import {
@@ -325,6 +326,7 @@ const REFUSAL_LABEL: Record<string, string> = {
  * 留在原地的话浮层会被后面某一块玻璃压住（本仓 `.dc-menu` 那段注释记的是同一件事）。
  */
 function ItemDetail({ item, onClose }: { item: PreviewItem; onClose: () => void }): JSX.Element {
+  const t = useT()
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') onClose()
@@ -362,7 +364,7 @@ function ItemDetail({ item, onClose }: { item: PreviewItem; onClose: () => void 
                 {(riskText(item.riskLevel))}
               </span>
             </div>
-            <button className="dc-modal-x" onClick={onClose} aria-label="关闭详情">
+            <button className="dc-modal-x" onClick={onClose} aria-label={t('关闭详情')}>
               ×
             </button>
           </div>
@@ -371,19 +373,19 @@ function ItemDetail({ item, onClose }: { item: PreviewItem; onClose: () => void 
           {item.description !== '' && <p className="dc-clean-detail-desc">{item.description}</p>}
 
           <dl className="dc-dl dc-clean-detail-grid">
-            <dt>占用</dt>
+            <dt>{t('占用')}</dt>
             <dd className="dc-mono">
               {formatBytes(item.findingBytes)} / {item.findingFiles} 个文件
             </dd>
-            <dt>计入预估</dt>
+            <dt>{t('计入预估')}</dt>
             <dd className="dc-mono">
               {item.included ? `${formatBytes(item.bytes)} / ${item.files} 个文件` : '未计入（未勾选或未定价）'}
             </dd>
-            <dt>是否可再生</dt>
+            <dt>{t('是否可再生')}</dt>
             <dd>{item.recoverable ? '可再生：删掉之后系统或应用会重新生成' : '不可再生：删掉不会自动长回来'}</dd>
-            <dt>清理方式</dt>
+            <dt>{t('清理方式')}</dt>
             <dd className="dc-mono">{item.cleanStrategy}</dd>
-            <dt>勾选粒度</dt>
+            <dt>{t('勾选粒度')}</dt>
             <dd>{item.scope === 'paths' ? '按已枚举路径逐条计价' : '整项计价'}</dd>
           </dl>
 
@@ -401,7 +403,7 @@ function ItemDetail({ item, onClose }: { item: PreviewItem; onClose: () => void 
                 ))}
               </ul>
             ) : (
-              <p className="dc-muted dc-fineprint">这条规则本次没有命中任何目录。</p>
+              <p className="dc-muted dc-fineprint">{t('这条规则本次没有命中任何目录。')}</p>
             )}
           </div>
 
@@ -436,13 +438,12 @@ function ItemDetail({ item, onClose }: { item: PreviewItem; onClose: () => void 
  * `cleanup-retention-wording.test.ts` 的 ② 就是钉这件事的（数它出现两次）。
  */
 export function CleanupEmptyState(): JSX.Element {
+  const t = useT()
   return (
     <div className="dc-clean">
-      <h2 className="dc-page-title">垃圾清理</h2>
-      <p className="dc-muted">暂未进行扫描，请先前往首页执行扫描。</p>
-      <p className="dc-muted dc-fineprint dc-clean-admin-hint">
-        本程序已使用管理员权限。删除后无法找回；部分被占用的文件无法删除属于正常现象。
-      </p>
+      <h2 className="dc-page-title">{t('垃圾清理')}</h2>
+      <p className="dc-muted">{t('暂未进行扫描，请先前往首页执行扫描。')}</p>
+      <p className="dc-muted dc-fineprint dc-clean-admin-hint">{t('本程序已使用管理员权限。删除后无法找回；部分被占用的文件无法删除属于正常现象。')}</p>
     </div>
   )
 }
@@ -478,6 +479,7 @@ export function Cleanup({
   /** 任务收尾时通知 App 把 nonce +1。 */
   onCleanDone: () => void
 }): JSX.Element {
+  const t = useT()
   const [task, setTask] = useState<CleanTask | null>(null)
   const [autoError, setAutoError] = useState<string | null>(null)
   /** 一键清理的**过程弹窗**开着没有（2026-10-24）。 */
@@ -641,7 +643,7 @@ export function Cleanup({
         [...tilePaths]
       )
       .then((r) => {
-        if (!r.ok) setAutoError(r.error ?? '一键清理被拒')
+        if (!r.ok) setAutoError(r.error ?? t('一键清理被拒'))
         if (r.task) setTask(r.task)
       })
       .catch((e: unknown) => setAutoError(String(e)))
@@ -670,10 +672,10 @@ export function Cleanup({
       */}
       <div className="dc-clean-head">
         <div className="dc-clean-headline">
-          <h2 className="dc-page-title dc-clean-title">清理预览</h2>
+          <h2 className="dc-page-title dc-clean-title">{t('清理预览')}</h2>
           {model && (
             <span className="dc-clean-release">
-              预计释放 <b className="dc-mono">{formatBytes(model.totalBytes)}</b>
+              {t('预计释放')} <b className="dc-mono">{formatBytes(model.totalBytes)}</b>
             </span>
           )}
         </div>
@@ -702,7 +704,7 @@ export function Cleanup({
           onClick={openDialog}
         >
           <SparkleIcon size={17} />
-          一键清理
+          {t('一键清理')}
           <ChevronRightIcon size={16} />
         </button>
       </div>
@@ -725,9 +727,7 @@ export function Cleanup({
           （实测：2167 条里 14 条被在跑的进程锁着、3 条只有 TrustedInstaller 能删），
           这两类提权也救不回来 —— 所以这句话承诺的是「逐条列出」，不是「都能删掉」。
           2026-10-27 人类伙伴改口径（与空状态那段同一句，两处必须逐字相同）。 */}
-      <p className="dc-muted dc-fineprint dc-clean-admin-hint">
-        本程序已使用管理员权限。删除后无法找回；部分被占用的文件无法删除属于正常现象。
-      </p>
+      <p className="dc-muted dc-fineprint dc-clean-admin-hint">{t('本程序已使用管理员权限。删除后无法找回；部分被占用的文件无法删除属于正常现象。')}</p>
 
       {/*
         居中大 Loading（人类伙伴 2026-10-21：「首次打开 Loading 加特效放中间放大些，用白色字体」）。
@@ -757,9 +757,7 @@ export function Cleanup({
       {model && !showCenteredLoading && (
         <>
           {blocked && (
-            <p className="dc-warn">
-              🔴 保护没有落地（禁止根解析不出来）→ 这份预估一律给 0，也不会给出任何「可以清」的结论。
-            </p>
+            <p className="dc-warn">{t('🔴 保护没有落地（禁止根解析不出来）→ 这份预估一律给 0，也不会给出任何「可以清」的结论。')}</p>
           )}
 
           {/* 统计带（图二那一条）：左边一个环，右边三格数。
@@ -781,7 +779,7 @@ export function Cleanup({
                   <LayersIcon size={16} />
                 </span>
                 <div>
-                  <div className="dc-clean-stat-label">扫描项</div>
+                  <div className="dc-clean-stat-label">{t('扫描项')}</div>
                   <div className="dc-clean-stat-value dc-mono">{headline.items} 项</div>
                 </div>
               </div>
@@ -790,7 +788,7 @@ export function Cleanup({
                   <FileIcon size={16} />
                 </span>
                 <div>
-                  <div className="dc-clean-stat-label">可回收（报告合计）</div>
+                  <div className="dc-clean-stat-label">{t('可回收（报告合计）')}</div>
                   <div className="dc-clean-stat-value dc-mono">{formatBytes(headline.reclaimBytes)}</div>
                 </div>
               </div>
@@ -799,7 +797,7 @@ export function Cleanup({
                   <SparkleIcon size={16} />
                 </span>
                 <div>
-                  <div className="dc-clean-stat-label">预计可释放</div>
+                  <div className="dc-clean-stat-label">{t('预计可释放')}</div>
                   <div className="dc-clean-stat-value dc-mono">{formatBytes(headline.plannedBytes)}</div>
                 </div>
               </div>
@@ -826,9 +824,7 @@ export function Cleanup({
                 touch()
                 onSelectedChange(selectableIds)
               }}
-            >
-              全选可清理项
-            </button>
+            >{t('全选可清理项')}</button>
             <button
               className="dc-btn dc-btn-xs"
               disabled={running || selected.length === 0}
@@ -836,25 +832,23 @@ export function Cleanup({
                 touch()
                 onSelectedChange([])
               }}
-            >
-              清空勾选
-            </button>
+            >{t('清空勾选')}</button>
           </div>
 
           {/* 条目区：一张卡片装所有行。勾选框仍然由 `.dc-clean-check` 包着、仍然是 15×15 ——
               `--shot` 有二十多步点它并读 `checked`，尺寸与命中面积都不许动。 */}
           <div className="dc-clean-list">
             <div className="dc-clean-list-head">
-              <span className="dc-clean-list-head-title">项目</span>
-              <span className="dc-clean-list-head-risk">风险</span>
+              <span className="dc-clean-list-head-title">{t('项目')}</span>
+              <span className="dc-clean-list-head-risk">{t('风险')}</span>
               {/* 三个数字列**装在一格里**（`.dc-clean-list-head-nums`）而不是三格：
                   窄窗装不下七列时，整组能一起换到第二行，而"占用/文件/计入预估"三个标签
                   仍然各自对在自己那列数字之上。三条独立格子做不到这件事 ——
                   第一版就是三条独立格子，572 px 视口下描述列被压成 0 宽，整行只剩 6 格。 */}
               <span className="dc-clean-list-head-nums">
-                <span>占用</span>
-                <span>文件</span>
-                <span>计入预估</span>
+                <span>{t('占用')}</span>
+                <span>{t('文件')}</span>
+                <span>{t('计入预估')}</span>
               </span>
             </div>
 
@@ -895,9 +889,7 @@ export function Cleanup({
                           className="dc-link dc-clean-more"
                           onClick={() => setDetailOf(i.ruleId)}
                           aria-label={`查看 ${i.name} 的详情`}
-                        >
-                          查看详情
-                        </button>
+                        >{t('查看详情')}</button>
                       </div>
                       <div className="dc-muted dc-clean-row-desc">
                         {itemSummary(i)}
@@ -943,9 +935,7 @@ export function Cleanup({
             <div className="dc-clean-tiles">
               <div className="dc-clean-tiles-head">
                 <span>从空间地图加入的 {tilePaths.length} 个文件</span>
-                <button className="dc-link" onClick={onClearTilePaths}>
-                  全部移除
-                </button>
+                <button className="dc-link" onClick={onClearTilePaths}>{t('全部移除')}</button>
               </div>
               <ul className="dc-clean-tiles-list">
                 {tilePaths.map((p) => {
@@ -955,7 +945,7 @@ export function Cleanup({
                       <code className="dc-mono">{p}</code>
                       <span className="dc-muted">{priced ? formatBytes(priced.size) : '未定价'}</span>
                       <button className="dc-link" onClick={() => onRemoveTilePath(p)}>
-                        移除
+                        {t('移除')}
                       </button>
                     </li>
                   )
@@ -979,8 +969,7 @@ export function Cleanup({
               这里不再画第二组 —— 同屏两个控件写同一份 state 是本项目定过的形状缺陷。 */}
 
           <p className="dc-muted dc-fineprint">
-            页头那颗「一键清理」清的是**当前勾选的内容**（含从空间地图加入的路径），
-            直接删除、不进回收站，过程在弹窗里逐条显示，明细看「记录」页。
+            {t('页头那颗「一键清理」清的是**当前勾选的内容**（含从空间地图加入的路径），直接删除、不进回收站，过程在弹窗里逐条显示，明细看「记录」页。')}
           </p>
           {autoError && <p className="dc-warn">{autoError}</p>}
 
@@ -1135,6 +1124,7 @@ export function CleanProgressDialog({
   plannedBytes: number
   plannedItems: number
 }): JSX.Element {
+  const t = useT()
   /** 确认阶段：false = 显示「将删除 N 项 / X」，等用户点「确定」。 */
   const [confirmed, setConfirmed] = useState(false)
   const [lines, setLines] = useState<CleanProgressEvent[]>([])
@@ -1217,7 +1207,7 @@ export function CleanProgressDialog({
           className="dc-modal dc-clean-progress-modal"
           role="dialog"
           aria-modal="true"
-          aria-label="正在清理"
+          aria-label={t('正在清理')}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="dc-modal-head">
@@ -1229,7 +1219,7 @@ export function CleanProgressDialog({
                 {!confirmed ? '确认清理' : done ? '清理完成' : '正在清理'}
               </h3>
             </div>
-            <button className="dc-modal-x" onClick={onClose} aria-label="关闭">
+            <button className="dc-modal-x" onClick={onClose} aria-label={t('关闭')}>
               ×
             </button>
           </div>
@@ -1239,20 +1229,18 @@ export function CleanProgressDialog({
                只显示"将删多少"，不订事件、不显示列表 —— 用户还没说删。 */
             <div className="dc-clean-confirm-stage">
               <p className="dc-clean-confirm-desc">
-                将按当前勾选执行清理，删除的文件<strong>不进回收站、无法恢复</strong>。
+                {t('将按当前勾选执行清理，删除的文件')}<strong>{t('不进回收站、无法恢复')}</strong>。
               </p>
               {/* 确认阶段这句**不重复页面上那条**（2026-10-25）：页面那条讲的是"本程序以管理员运行、
                   但仍有两类删不掉"这个常驻事实；这里讲的是"这一次按下去会怎样"。
                   两处说的是不同的东西，不是同一句话说两遍。 */}
-              <p className="dc-muted dc-fineprint dc-clean-admin-hint">
-                删不掉的条目会标成失败并逐条列出，它们不计入释放空间。
-              </p>
+              <p className="dc-muted dc-fineprint dc-clean-admin-hint">{t('删不掉的条目会标成失败并逐条列出，它们不计入释放空间。')}</p>
               <div className="dc-clean-confirm-summary">
-                预计删除 <b className="dc-mono">{formatBytes(plannedBytes)}</b> · {plannedItems} 项
+                {t('预计删除')} <b className="dc-mono">{formatBytes(plannedBytes)}</b> · {t('{n} 项', { n: plannedItems })}
               </div>
               <div className="dc-clean-confirm-actions">
                 <button className="dc-btn" onClick={onClose}>
-                  取消
+                  {t('取消')}
                 </button>
                 <button
                   className="dc-primary dc-clean-confirm-go"
@@ -1262,9 +1250,7 @@ export function CleanProgressDialog({
                     // 第一条进度事件不会漏（与 useLayoutEffect 那段注释同一条理由）。
                     start()
                   }}
-                >
-                  确定，开始清理
-                </button>
+                >{t('确定，开始清理')}</button>
               </div>
             </div>
           ) : (
@@ -1277,13 +1263,13 @@ export function CleanProgressDialog({
                 {lines.slice(-VISIBLE_LINES).map((l, i) => (
                   <li key={`${l.path}-${i}`} className={l.ok ? '' : 'dc-clean-progress-fail'}>
                     <code className="dc-mono">{l.path}</code>
-                    {!l.ok && <span className="dc-warn"> · 失败</span>}
+                    {!l.ok && <span className="dc-warn">{t('· 失败')}</span>}
                   </li>
                 ))}
                 {lines.length === 0 && !done && (
-                  <li className="dc-muted">正在准备清单…</li>
+                  <li className="dc-muted">{t('正在准备清单…')}</li>
                 )}
-                {done && lines.length === 0 && <li className="dc-muted">没有文件被处理。</li>}
+                {done && lines.length === 0 && <li className="dc-muted">{t('没有文件被处理。')}</li>}
               </ul>
 
               {/* 进度条 + 百分比（人类伙伴：下方是清理进度条（百分比））。 */}
@@ -1299,13 +1285,13 @@ export function CleanProgressDialog({
 
               {done ? (
                 <p className="dc-clean-progress-done">
-                  清理完成，共释放 <b className="dc-mono">{formatBytes(done.cleanedSize)}</b>
+                  {t('清理完成，共释放')} <b className="dc-mono">{formatBytes(done.cleanedSize)}</b>
                   {done.failedCount > 0 && ` · ${done.failedCount} 条失败`}
                   {done.refusals.length > 0 && ` · ${done.refusals.length} 条被拒`}
                 </p>
               ) : (
                 <p className="dc-muted dc-fineprint">
-                  已释放 <b className="dc-mono">{formatBytes(liveCleaned)}</b> · 处理中的文件会逐条出现在上面
+                  {t('已释放')} <b className="dc-mono">{formatBytes(liveCleaned)}</b> · {t('· 处理中的文件会逐条出现在上面')}
                 </p>
               )}
             </>
@@ -1321,6 +1307,7 @@ const MAX_LINES = 400
 const VISIBLE_LINES = 60
 
 export function TaskPanel({ task }: { task: CleanTask }): JSX.Element {
+  const t = useT()
   const v = task.verification
   /**
    * 卷的可用空间前后两格是不是都有数。§19 那句"磁盘上真省了多少去看可用空间"必须跟着它走 ——
@@ -1339,7 +1326,7 @@ export function TaskPanel({ task }: { task: CleanTask }): JSX.Element {
         <div className="dc-meter-fill" style={{ width: `${Math.min(100, Math.max(0, task.progress * 100)).toFixed(1)}%` }} />
       </div>
       <p className="dc-muted">
-        已释放 {formatBytes(task.cleanedSize)} / 共 {formatBytes(task.totalSize)} · 成功 {task.successCount} · 失败 {task.failedCount} · 拒绝{' '}
+        {t('已释放')} {formatBytes(task.cleanedSize)} / {t('共')} {formatBytes(task.totalSize)} · {t('成功 {n}', { n: task.successCount })} · {t('失败 {n}', { n: task.failedCount })} · {t('拒绝 {n}', { n: task.refusals.length })}
         {task.refusals.length} · 状态 {task.status}
       </p>
 
@@ -1368,17 +1355,17 @@ export function TaskPanel({ task }: { task: CleanTask }): JSX.Element {
 
       {v && (
         <div className="dc-clean-verify">
-          <h4 className="dc-panel-title">清理后验证（§19）</h4>
+          <h4 className="dc-panel-title">{t('清理后验证（§19）')}</h4>
           <dl className="dc-dl">
-            <dt>清理前</dt>
+            <dt>{t('清理前')}</dt>
             <dd className="dc-mono">{formatBytes(v.rootBytesBefore)}（{v.filesBefore} 个文件）</dd>
-            <dt>清理后</dt>
+            <dt>{t('清理后')}</dt>
             <dd className="dc-mono">{formatBytes(v.rootBytesAfter)}（{v.filesAfter} 个文件）</dd>
-            <dt>预估释放</dt>
+            <dt>{t('预估释放')}</dt>
             <dd className="dc-mono">{formatBytes(v.predictedFreedBytes)}</dd>
-            <dt>实际释放</dt>
+            <dt>{t('实际释放')}</dt>
             <dd className="dc-mono">{formatBytes(v.actualFreedBytes)}</dd>
-            <dt>差额</dt>
+            <dt>{t('差额')}</dt>
             <dd className="dc-mono">
               {formatBytes(Math.abs(v.deltaBytes))}
               {/* 旧文案在这里念「（完全吻合）」—— 可 deltaBytes 量的是两笔"逐路径表观大小之和"的差，
@@ -1386,7 +1373,7 @@ export function TaskPanel({ task }: { task: CleanTask }): JSX.Element {
                   不是"磁盘真省了这么多被核实过"。口径的盲点与磁盘那一侧的读数由下面那句加注指路。 */}
               {v.deltaBytes === 0 ? '（表观大小一致）' : ''}
             </dd>
-            <dt>可用空间</dt>
+            <dt>{t('可用空间')}</dt>
             <dd className="dc-mono">
               {v.freeBytesBefore === undefined || v.freeBytesBefore === null ? '清理前未采集' : formatBytes(v.freeBytesBefore)} →{' '}
               {v.freeBytesAfter === undefined || v.freeBytesAfter === null ? '未采集' : formatBytes(v.freeBytesAfter)}

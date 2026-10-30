@@ -54,3 +54,10 @@ scripts/_*.ps1
 #
 # ③ `.trae/`：与 `.qoder/` 同类的代理脚手架目录，理由见上面第 9-12 行。
 .trae/
+
+# 过程材料（2026-10-30）：代理工作树与项目实施书不进公开仓库。
+.superpowers/
+DeepClean_项目实施书.zip
+
+# 验收截图资产（97.8 MB）：md 文档进仓库，图不进 —— README 引用的两张已拷到 docs/ 根。
+docs/acceptance/assets/

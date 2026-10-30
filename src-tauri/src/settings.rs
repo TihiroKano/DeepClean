@@ -58,6 +58,33 @@ pub const BUILTIN_WALLPAPERS: [&str; 1] = ["mountain"];
 /// 默认壁纸。
 pub const DEFAULT_WALLPAPER: &str = "builtin:mountain";
 
+/* ---------------- 并行扫描（2026-10-29） ---------------- */
+
+/// 并行扫描的 worker 数下限。0 条 worker 会**不报错地**产出一棵空树
+/// （见 `deepclean_scanner::scan_parallel::clamp_workers`），那比崩溃更难查。
+pub const MIN_SCAN_WORKERS: usize = 1;
+/// 上限：逻辑核数的小倍数（`clamp_workers` 里算出来是 ×2，这里只是硬兜底）。
+/// 设一个绝对硬顶是为了让「文件里写了 99999」这件事有一个确定的答案，
+/// 而不是"取决于这台机器几条核" —— 后者在另一台机器上会变成另一种行为。
+pub const MAX_SCAN_WORKERS_HARD: usize = 64;
+/// `scanWorkers = 0` 是**哨兵值**，意思是「用推荐值」。
+///
+/// 为什么不用 `null` / 缺键表示"自动"：缺键与"用户从没打开过设置页"分不开，
+/// 而这一格要能分辨"用推荐值"和"用户主动选了推荐值那个数"。
+/// 0 在任何合法并发度上都不是一个真值，拿它当哨兵不会与真值撞车。
+pub const SCAN_WORKERS_AUTO: usize = 0;
+
+/* ---------------- 界面语言（2026-10-29） ---------------- */
+
+/// 界面语言的闭集。**顺序即设置页下拉的顺序**，第一项是默认值。
+///
+/// 这一份与 `shared/i18n.ts` 的 `LOCALES` 逐条同一份：渲染端那一侧是"有哪些语言"的
+/// 唯一真相，这里是服务端清洗时的白名单。两处不一致的表现是
+/// 「设置页能选日语、存下来却被服务端打回简体」—— 用户会以为那一格没生效。
+pub const LOCALES: [&str; 5] = ["zh-CN", "zh-TW", "en", "ja", "ko"];
+/// 默认语言。**简体中文是产品默认**，与 1.0.0 的行为逐字相同。
+pub const DEFAULT_LOCALE: &str = "zh-CN";
+
 const SETTINGS_FILE_NAME: &str = "settings.json";
 
 /// 设置里的**一件**真事：
@@ -88,6 +115,19 @@ pub struct AppSettings {
     pub glass_opacity: f64,
     /// 壁纸引用。收的是 `builtin:<id>` / `file:<文件名>` 两种形状之一，见 [`sanitize_wallpaper`]。
     pub wallpaper: String,
+    /// 并行扫描的 worker 数（2026-10-29）。真读者是
+    /// `deepclean_scanner::scan_parallel::scan_tree_parallel_with` 的 worker 池大小。
+    ///
+    /// **0 = 用推荐值**（[`SCAN_WORKERS_AUTO`]），落进内核时变成"这台机器的逻辑核数"。
+    /// 这一格存在的理由是人类伙伴原话：「确保用户拉满倍率导致崩溃的情况发生」——
+    /// 所以内核那一侧有硬夹紧（`clamp_workers`），不只靠界面把滑块卡住。
+    pub scan_workers: usize,
+    /// 界面语言（2026-10-29）。闭集见 [`LOCALES`]。
+    ///
+    /// 真读者是渲染端：`useLocale()` 拿它决定 `t()` 查哪一份词典。
+    /// 服务端自己**不翻译任何东西** —— 它只负责把这一格收进闭集并落盘，
+    /// 这样"服务端也开始按语言分叉文案"这件事不会发生两次。
+    pub locale: String,
 }
 
 impl AppSettings {
@@ -103,6 +143,8 @@ impl AppSettings {
             glass_brightness: DEFAULT_GLASS_BRIGHTNESS,
             glass_opacity: DEFAULT_GLASS_OPACITY,
             wallpaper: DEFAULT_WALLPAPER.to_string(),
+            scan_workers: SCAN_WORKERS_AUTO,
+            locale: DEFAULT_LOCALE.to_string(),
         }
     }
 }
@@ -175,6 +217,54 @@ pub fn sanitize_settings(raw: &serde_json::Value) -> AppSettings {
         ),
         glass_opacity: num("glassOpacity", MIN_GLASS_OPACITY, MAX_GLASS_OPACITY, DEFAULT_GLASS_OPACITY),
         wallpaper: sanitize_wallpaper(obj.get("wallpaper")),
+        // 并行度：**夹紧而不是回落默认**（与外观那几格同一条口径）。
+        // 非数字 / 缺键 / 负值 → 0（= 用推荐值），因为 0 本来就是"自动"的哨兵；
+        // 是数字但超过硬顶 → 夹到硬顶，保留"用户要更多"这个意图。
+        scan_workers: sanitize_scan_workers(obj.get("scanWorkers")),
+        locale: sanitize_locale(obj.get("locale")),
+    }
+}
+
+/// 并行度那一格：任何形状都收进一个合法值，认不出就回「用推荐值」(0)。
+///
+/// ⚠️ **负数不能一路 `as u64`**：`-1` 在 serde_json 里是 `as_i64() = -1`，
+/// 而 `as_u64()` 对它返回 `None` —— 这里两条都读，负值一律当"自动"。
+/// 硬顶 [`MAX_SCAN_WORKERS_HARD`] 是给"文件里写了 99999"一个确定的答案；
+/// 真正的安全上界（逻辑核数 ×2）在 `clamp_workers` 里，那一层知道这台机器几条核。
+pub fn sanitize_scan_workers(raw: Option<&serde_json::Value>) -> usize {
+    let Some(v) = raw else { return SCAN_WORKERS_AUTO };
+    /*
+     * **先按浮点读，再取整** —— 这一步与 TS 那边 `Math.round` 逐条同一份。
+     *
+     * 上一版写的是 `as_u64()` 优先，而 `as_u64()` 对 `4.6` 返回 `None`：
+     * 于是"文件里写了 4.6"会被当成"类型不对"→ 回自动档，而 TS 那边给 5。
+     * 那个分叉在界面上表现为「我写了 4.6，它显示成推荐值」——
+     * 而两侧消毒器对同一批输入必须给同一个答案（这条纪律写在文件头）。
+     *
+     * 负值与 0 一律当自动档：0 本来就是哨兵，负数是"我改坏了"。
+     */
+    let Some(declared) = v.as_f64().filter(|d| d.is_finite()) else {
+        return SCAN_WORKERS_AUTO;
+    };
+    if declared <= 0.0 {
+        return SCAN_WORKERS_AUTO;
+    }
+    let rounded = declared.round();
+    // 下界用常量而不是字面量 1：这一格的下界在 `shared/settings.ts` 与
+    // `clamp_workers` 里各有一份，写成裸数字会让三处漂移时没人发现。
+    let floored = rounded.max(MIN_SCAN_WORKERS as f64);
+    (floored as u64).min(MAX_SCAN_WORKERS_HARD as u64) as usize
+}
+
+/// 语言那一格：闭集之外一律回默认（**不是**回空串 —— 空串会让 `t()` 查不到词典，
+/// 界面上表现为每一个标签都显示成键名，那看起来像整页坏了）。
+pub fn sanitize_locale(raw: Option<&serde_json::Value>) -> String {
+    let Some(s) = raw.and_then(|v| v.as_str()) else {
+        return DEFAULT_LOCALE.to_string();
+    };
+    match LOCALES.iter().find(|l| **l == s.trim()) {
+        Some(l) => (*l).to_string(),
+        None => DEFAULT_LOCALE.to_string(),
     }
 }
 
@@ -317,6 +407,8 @@ pub fn save_settings(path: &Path, patch: &serde_json::Value) -> Result<AppSettin
             "glassBrightness",
             "glassOpacity",
             "wallpaper",
+            "scanWorkers",
+            "locale",
         ] {
             if let Some(v) = obj.get(key) {
                 base_obj.insert(key.to_string(), v.clone());
@@ -392,9 +484,64 @@ mod tests {
         dir
     }
 
+    /// 并行扫描那格：任何形状都收进一个合法值（2026-10-29）。
+    ///
+    /// 口径与渲染端 `sanitizeScanWorkers` 逐条同一份，**但上界不同**（这里 64、那边 16）：
+    /// 服务端要收下"手改文件写了 40"这种值，而滑块列不出 40 那一档。
+    /// 两处的**下界与哨兵口径必须一致**：0 / 负数 / 非数字 → 0（用推荐值）。
     #[test]
-    fn sanitize_covers_the_three_calibers() {
-        // ① 结构不对 → 默认值（不是"半个值"、不是抛）
+    fn scan_workers_never_yields_an_impossible_thread_count() {
+        // 0 是"用推荐值"的哨兵，原样保留
+        assert_eq!(sanitize_scan_workers(Some(&json!(0))), SCAN_WORKERS_AUTO);
+        assert_eq!(sanitize_scan_workers(None), SCAN_WORKERS_AUTO);
+        // 负值当自动 —— `as_u64()` 对 -1 返回 None，这一步要真的走到 `as_i64` 那一支
+        assert_eq!(sanitize_scan_workers(Some(&json!(-1))), SCAN_WORKERS_AUTO);
+        assert_eq!(sanitize_scan_workers(Some(&json!(-999))), SCAN_WORKERS_AUTO);
+        // 类型不对 → 自动（不是 8，也不是抛）
+        assert_eq!(sanitize_scan_workers(Some(&json!("8"))), SCAN_WORKERS_AUTO);
+        assert_eq!(sanitize_scan_workers(Some(&json!(null))), SCAN_WORKERS_AUTO);
+        // 合法整数原样收下
+        assert_eq!(sanitize_scan_workers(Some(&json!(4))), 4);
+        assert_eq!(sanitize_scan_workers(Some(&json!(16))), 16);
+        // **超过硬顶夹住**，不回落默认值（写了 99999 的人要的是"尽量多"，不是"变回推荐值"）
+        assert_eq!(sanitize_scan_workers(Some(&json!(99_999))), MAX_SCAN_WORKERS_HARD);
+        // 小数取整（滑块只有整数档）
+        assert_eq!(sanitize_scan_workers(Some(&json!(4.6))), 5);
+    }
+
+    /// 界面语言那格：闭集之外一律回默认，**绝不回空串**
+    /// （空串会让渲染端查不到词典，每一个标签都显示成键名）。
+    #[test]
+    fn locale_sanitizer_is_a_closed_set() {
+        for l in LOCALES {
+            assert_eq!(sanitize_locale(Some(&json!(l))), l, "{l} 该原样收下");
+        }
+        for bad in [
+            json!(""), json!("xx-YY"), json!("zh"), json!("ZH-CN"), json!("zh-Hans"),
+            json!(4), json!(null), json!([]),
+        ] {
+            assert_eq!(
+                sanitize_locale(Some(&bad)),
+                DEFAULT_LOCALE,
+                "{bad} 不该被接受（闭集外一律回默认，不是回空串）"
+            );
+        }
+        assert_eq!(sanitize_locale(None), DEFAULT_LOCALE, "缺键 → 默认语言");
+        // 前后空白要 trim 再判：手改文件时很容易多一个空格
+        assert_eq!(sanitize_locale(Some(&json!("  ja  "))), "ja");
+    }
+
+    /// 两格的默认值必须**与 1.0.0 逐字相同**：不碰设置页的用户，行为一个字节不变。
+    #[test]
+    fn the_two_new_keys_default_to_the_old_behavior() {
+        let d = AppSettings::default();
+        assert_eq!(d.scan_workers, SCAN_WORKERS_AUTO, "0 = 用推荐值 = 本机逻辑核数 = 1.0.0 的行为");
+        assert_eq!(d.locale, DEFAULT_LOCALE, "默认语言是简体中文");
+        assert_eq!(DEFAULT_LOCALE, "zh-CN");
+    }
+
+    #[test]
+    fn sanitize_covers_the_three_calibers() {        // ① 结构不对 → 默认值（不是"半个值"、不是抛）
         for bad in [json!(null), json!(4), json!("4"), json!([]), json!({}), json!({"dup": 8})] {
             assert_eq!(sanitize_settings(&bad), AppSettings::default(), "{bad} 该回默认值");
         }
@@ -520,13 +667,14 @@ mod tests {
         let raw = fs::read_to_string(&path).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&raw).unwrap();
         let obj = parsed.as_object().unwrap();
-        /**
-         * 2026-10-27 改口径：真键从 1 个变 6 个（外观四格 + 壁纸）。所以这条判据从
-         * "只许有一个键"改成"**恰好是这六个**、且野字段一个都不在里面"。
-         *
-         * ⚠️ 不许退回成 `obj.len() <= 6` 那种松判据：那样"加了一个野字段、
-         * 顺手删了一个真键"也会绿，而表现是设置页某一格永远显示默认值。
-         */
+         // 2026-10-27 改口径：真键从 1 个变 6 个（外观四格 + 壁纸）。所以这条判据从
+         // "只许有一个键"改成"**恰好是这六个**、且野字段一个都不在里面"。
+         //
+         // ⚠️ 2026-10-29 从六个变八个：加了 `scanWorkers` 与 `locale`。
+         // 这条判据当时红了一次，红得对 —— 它抓住了"键集变了、没人重新点过名"。
+         //
+         // ⚠️ 不许退回成 `obj.len() <= 8` 那种松判据：那样"加了一个野字段、
+         // 顺手删了一个真键"也会绿，而表现是设置页某一格永远显示默认值。
         let mut keys: Vec<&str> = obj.keys().map(|s| s.as_str()).collect();
         keys.sort_unstable();
         assert_eq!(
@@ -537,9 +685,11 @@ mod tests {
                 "glassBrightness",
                 "glassOpacity",
                 "glassSaturate",
+                "locale",
+                "scanWorkers",
                 "wallpaper"
             ],
-            "文件里的键集必须是这六个（多一个是野字段，少一个是那一格永远显示默认值）：{raw}"
+            "文件里的键集必须是这八个（多一个是野字段，少一个是那一格永远显示默认值）：{raw}"
         );
         // 点名那两个野字段**具体**不在（比"键集恰好对"更直白地指出错在哪）
         assert!(!obj.contains_key("theme"), "野字段 theme 进了文件：{raw}");
@@ -626,6 +776,9 @@ mod tests {
     /// 同日第二次改：`glassOpacity` 从 0.22 变 **0.36**。设置卡改用深色档之后，
     /// 滑块调的是 `--settings-card-fill`（quiet 那一档的色相），默认值必须等于
     /// `--glass-fill-quiet` 的 alpha —— 否则第一次打开设置页、什么都没碰，卡会跳一下。
+    ///
+    /// 2026-10-29 从六个键扩成八个（`scanWorkers` / `locale`）。两格的默认值都必须是
+    /// **1.0.0 的行为**：不碰设置页的用户，并发与语言一个字都不变。
     #[test]
     fn the_wire_shape_is_what_the_settings_page_reads() {
         let body = serde_json::to_value(AppSettings::default()).unwrap();
@@ -638,6 +791,9 @@ mod tests {
                 "glassBrightness": 1.05,
                 "glassOpacity": 0.36,
                 "wallpaper": "builtin:mountain",
+                // 0 = 用推荐值 = 本机逻辑核数（= 1.0.0 那一行 `available_parallelism`）
+                "scanWorkers": 0,
+                "locale": "zh-CN",
             }),
             "键名漂一个字母，那一格永远显示默认值"
         );

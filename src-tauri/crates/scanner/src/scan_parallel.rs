@@ -118,6 +118,40 @@ struct Shared<F> {
     progress: Arc<F>,
 }
 
+/// 把设置里那格并行度夹进安全区间（2026-10-29，**2026-10-30 按实测改上界**）。
+///
+/// `None` → 本机逻辑核数（等于改之前那一行原样）。
+///
+/// ## 上界从「核数 ×2」改成「核数」—— 这一条有实测依据
+///
+/// 上一版的上界是 `核数 × 2`，写的时候是猜的。后来用
+/// `src-tauri/examples/delprobe.rs`（真系统线程、32000 个文件、8 核机）量了：
+///
+/// | 并发 | 墙钟 | 相对 1x | 峰值 RSS |
+/// | 1 | 7993ms | 1.00x | 4.6MB |
+/// | 2 | 5246ms | 1.52x | 4.6MB |
+/// | 4 | 3862ms | 2.07x | 4.7MB |
+/// | 8 | 3256ms | **2.45x** | 4.8MB |
+/// | 16 | 3323ms | 2.40x | 5.1MB |
+///
+/// 三个结论：
+///  - **饱和在核数**（8）：16 比 8 慢 2%，那是唯一负收益的一档，而旧上界恰好放它过去；
+///  - **内存不是约束**：16 倍并发只多 0.5 MB，所以"拉高会崩"不是 OOM；
+///  - 加速比封顶 2.45×（不是 8×）⇒ 这项工作大部分串行，瓶颈在文件系统
+///    （`SHFileOperationW` 每次调用的固定开销 + NTFS 日志），不在 CPU。
+///
+/// 所以上界 = 核数。超过它只会让人白等。
+///
+/// 下界仍是 1：0 条 worker 会让 `join` 立刻返回一棵空树（见
+/// `scan_parallel` 的调用点），界面上表现为"这块盘什么都没占"，比崩溃更难查。
+pub fn clamp_workers(declared: Option<usize>, cores: usize) -> usize {
+    let cores = cores.max(1);
+    match declared {
+        None => cores,
+        Some(n) => n.clamp(1, cores),
+    }
+}
+
 pub fn scan_tree_parallel(
     opts: &ScanOptions,
     volume: &VolumeInfo,
@@ -169,7 +203,14 @@ pub fn scan_tree_parallel_with(
         st.pending += 1;
     }
 
-    let workers = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(2).max(1);
+    // 并行度：设置页那格滑块（2026-10-29）。`None` = 本机逻辑核数，与改之前逐字相同。
+    // **夹紧住 1..=逻辑核数×2**（`clamp_workers` 的注释写了理由）：`settings.json`
+    // 是外面能手改的文件，`usize::MAX` 条线程会当场把进程打死 —— 这一格存在的理由
+    // 正是「拉满倍率导致崩溃」，所以上界必须在内核这一侧，不能只靠界面。
+    let workers = clamp_workers(
+        opts.workers,
+        std::thread::available_parallelism().map(|n| n.get()).unwrap_or(2),
+    );
     let handles: Vec<_> = (0..workers)
         .map(|_| {
             let sh = sh.clone();
@@ -569,6 +610,34 @@ fn join_display(parent: &str, name: &str) -> String {
 mod tests {
     use super::*;
     use crate::volume::volume_of;
+
+    /// 并行度那格设置的安全夹紧（2026-10-29，2026-10-30 按实测改上界）。
+    ///
+    /// 这一组钉的正是人类伙伴那条要求：「确保用户拉满倍率导致崩溃的情况发生」不会成立。
+    /// `settings.json` 是一个**外面能手改的文件**，所以上界必须在内核这一侧，
+    /// 不能只靠界面的滑块 `max`。
+    ///
+    /// 上界是**核数**（不是核数 ×2）—— 依据是 `examples/delprobe.rs` 的实测：
+    /// 8 核机上并发 8 是加速比最高的一档（2.45×），16 反而慢 2%。
+    #[test]
+    fn workers_are_clamped_so_a_hand_edited_setting_cannot_kill_the_process() {
+        // `None` = 改之前的行为：本机逻辑核数
+        assert_eq!(clamp_workers(None, 8), 8);
+        // 显式要 4 条 → 4（诚实采纳）
+        assert_eq!(clamp_workers(Some(4), 8), 4);
+        // 0 条 worker 会让 join 立刻返回一棵**空树**（比崩溃更难查）→ 抬到 1
+        assert_eq!(clamp_workers(Some(0), 8), 1);
+        // 手改文件写了 99999 → 夹到**核数**，不是"照办"，也不是旧的核数×2
+        assert_eq!(clamp_workers(Some(99_999), 8), 8);
+        // 反面对照：旧上界（核数×2）必须**不再**被接受 —— 实测 16 是负收益那一档
+        assert_ne!(clamp_workers(Some(99_999), 8), 16, "上界回退成核数×2 了");
+        // 一台 1 核的机器：上界 1
+        assert_eq!(clamp_workers(Some(64), 1), 1);
+        // `cores = 0` 这种不可能的输入也不许让下界失守
+        assert_eq!(clamp_workers(Some(5), 0), 1);
+        // 恰好等于核数时原样通过（上界是闭区间）
+        assert_eq!(clamp_workers(Some(8), 8), 8);
+    }
 
     #[test]
     fn join_display_matches_pathbuf_join_on_the_awkward_shapes() {

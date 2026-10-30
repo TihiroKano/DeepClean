@@ -546,7 +546,7 @@ dependencies = [
 
 [[package]]
 name = "deepclean-app"
-version = "1.0.0"
+version = "1.0.7"
 dependencies = [
  "deepclean-appfacts",
  "deepclean-cleaner",
@@ -563,7 +563,7 @@ dependencies = [
 
 [[package]]
 name = "deepclean-appfacts"
-version = "1.0.0"
+version = "1.0.7"
 dependencies = [
  "serde_json",
  "windows-sys 0.61.2",
@@ -571,7 +571,7 @@ dependencies = [
 
 [[package]]
 name = "deepclean-cleaner"
-version = "1.0.0"
+version = "1.0.7"
 dependencies = [
  "deepclean-rules",
  "deepclean-scanner",
@@ -582,7 +582,7 @@ dependencies = [
 
 [[package]]
 name = "deepclean-devenv"
-version = "1.0.0"
+version = "1.0.7"
 dependencies = [
  "deepclean-rules",
  "serde",
@@ -591,7 +591,7 @@ dependencies = [
 
 [[package]]
 name = "deepclean-license"
-version = "1.0.0"
+version = "1.0.7"
 dependencies = [
  "ed25519-dalek",
  "hex",
@@ -604,7 +604,7 @@ dependencies = [
 
 [[package]]
 name = "deepclean-rules"
-version = "1.0.0"
+version = "1.0.7"
 dependencies = [
  "deepclean-scanner",
  "serde",
@@ -614,7 +614,7 @@ dependencies = [
 
 [[package]]
 name = "deepclean-scanner"
-version = "1.0.0"
+version = "1.0.7"
 dependencies = [
  "serde",
  "serde_json",

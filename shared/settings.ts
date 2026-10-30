@@ -38,8 +38,8 @@
  * 所以将来加设置的人要动的是三处（这个 interface、消费它的那段真逻辑、那一格控件），
  * 而不是只往这个 interface 里添一行 —— 后者产出的就是"看着接上了、其实没有"的那种界面。
  */
+import { DEFAULT_LOCALE, sanitizeLocale, type Locale } from './i18n'
 
-/** 设置里的重复检测门槛（真读者：重复检测的候选门槛）。 */
 export interface AppSettings {
   /**
    * 重复文件检测的最小尺寸，单位 MB（服务端按 1024×1024 字节折算）。
@@ -72,6 +72,17 @@ export interface AppSettings {
   glassOpacity: number
   /** 外观：背景壁纸。真读者是 `.dc-app` 的 `background-image`。 */
   wallpaper: WallpaperRef
+  /**
+   * 并行扫描的 worker 数（2026-10-29）。真读者是
+   * `deepclean_scanner::scan_parallel::scan_tree_parallel_with` 的 worker 池大小。
+   *
+   * **0 = 用推荐值**（`SCAN_WORKERS_AUTO`）—— 落进内核时变成"这台机器的逻辑核数"。
+   * 这一格存在的理由是人类伙伴原话「确保用户拉满倍率导致崩溃的情况发生」，
+   * 所以安全上界**不在这一格里**，而在内核的 `clamp_workers` 里（它知道本机几条核）。
+   */
+  scanWorkers: number
+  /** 界面语言（2026-10-29）。闭集见 `shared/i18n.ts` 的 `LOCALES`。 */
+  locale: Locale
 }
 
 /**
@@ -122,15 +133,35 @@ export const MIN_GLASS_OPACITY = 0.06
 export const MAX_GLASS_OPACITY = 0.9
 
 /**
+ * 并行扫描那三格（2026-10-29），与服务端 `settings.rs` 逐条同一份。
+ *
+ * ⚠️ **上界分两层**：
+ *  - `MAX_SCAN_WORKERS`（这里，=16）是**滑块**能拉到的最大倍率；
+ *  - 服务端的 `MAX_SCAN_WORKERS_HARD`（=64）是"文件里写了什么都能收下"的硬顶；
+ *  - 真正的安全上界在内核 `clamp_workers`（逻辑核数 ×2）—— 它才知道本机几条核。
+ *
+ * 为什么滑块不直接给到"逻辑核数"：渲染端拿不到那个数（要过一道 IPC，而这一格
+ * 在设置页首次渲染时就得画出来）。给 1–16 的固定档，再由内核按本机核数夹住 ——
+ * 在小机器上滑块拉到 16 等于拉到"核数×2"，在大机器上拉到 16 就是 16。
+ */
+export const MIN_SCAN_WORKERS = 1
+export const MAX_SCAN_WORKERS = 16
+/** `scanWorkers = 0` = 用推荐值（本机逻辑核数）。滑块上它显示成「推荐」。 */
+export const SCAN_WORKERS_AUTO = 0
+
+/**
  * `Object.freeze` 不是装饰：这个对象会被直接返回给 IPC 的另一侧，也会被 `sanitizeSettings`
  * 当兜底值回出去。没有冻住的话，任何一个拿到它的模块改一笔，全仓的默认值就跟着变了，
  * 而改动点离定义点有三层目录。
  *
  * ⚠️ 外观那四格的默认值**必须与 `global.css` / `glass/tokens.css` 里的现值逐字相同**：
  * `blur 30` = `--glass-blur-page`、`saturate 1.5` = `--glass-saturate`、
- * `brightness 1.05` = `--glass-brightness`、`opacity 0.22` = `--glass-fill-page` 的 alpha。
+ * `brightness 1.05` = `--glass-brightness`、`opacity 0.36` = `--glass-fill-quiet` 的 alpha。
  * 不同的话，用户第一次打开设置页、什么都还没碰，界面就会跳到另一个样子 ——
  * 那条判据在 `settings-glass-bounds.test.ts` 里（它读 CSS 文件取值，不是再抄一份常数）。
+ *
+ * 2026-10-29 加了 `scanWorkers` / `locale` 两格。默认值都是"与 1.0.0 逐字相同"的那一档：
+ * 不碰设置页的用户，扫描并发度与界面语言都必须一个像素/一条线程都不变。
  */
 export const DEFAULT_SETTINGS: AppSettings = Object.freeze({
   dupMinSizeMb: 4,
@@ -138,7 +169,9 @@ export const DEFAULT_SETTINGS: AppSettings = Object.freeze({
   glassSaturate: 1.5,
   glassBrightness: 1.05,
   glassOpacity: 0.36,
-  wallpaper: DEFAULT_WALLPAPER
+  wallpaper: DEFAULT_WALLPAPER,
+  scanWorkers: SCAN_WORKERS_AUTO,
+  locale: DEFAULT_LOCALE
 })
 
 /** 服务端那道清洗的上下界（`settings.rs` 的 `MIN_DUP_MIN_SIZE_MB` / `MAX_DUP_MIN_SIZE_MB`）。
@@ -210,7 +243,12 @@ export function sanitizeSettings(raw: unknown): AppSettings {
     glassSaturate: saturate === null ? DEFAULT_SETTINGS.glassSaturate : saturate,
     glassBrightness: brightness === null ? DEFAULT_SETTINGS.glassBrightness : brightness,
     glassOpacity: opacity === null ? DEFAULT_SETTINGS.glassOpacity : opacity,
-    wallpaper: sanitizeWallpaper(o.wallpaper)
+    wallpaper: sanitizeWallpaper(o.wallpaper),
+    // 并行度（2026-10-29）：**夹紧而不是回落默认**，与外观那几格同一条口径。
+    // 0 / 负数 / 非数字 → 用推荐值（0 本来就是"自动"的哨兵）。
+    // 超过滑块上界的**夹到滑块上界**：用户写了 99 要的是"尽量多"，不是"偷偷变回推荐值"。
+    scanWorkers: sanitizeScanWorkers(o.scanWorkers),
+    locale: sanitizeLocale(o.locale)
   }
 }
 
@@ -240,4 +278,19 @@ export function settingsToCssVars(s: AppSettings): Record<string, string> {
      */
     '--settings-card-fill': `rgba(10, 28, 70, ${s.glassOpacity})`
   }
+}
+
+/**
+ * 并行度那一格：把任何输入收进 `0..=MAX_SCAN_WORKERS`（2026-10-29）。
+ *
+ * 口径与服务端 `sanitize_scan_workers` 逐条同一份，**但两处的上界不同**：
+ * 这里夹到滑块能拉到的 `MAX_SCAN_WORKERS`（16），服务端夹到硬顶 64。
+ * 这不是漂移 —— 服务端要收下"手改文件写了 40"这种值（那是用户的权利，
+ * 而且机器可能真有那么多核），而滑块列不出 40 这一档。
+ * 两处**下界与哨兵口径**必须一致：`0` / 负数 / 非数字 → 0（用推荐值）。
+ */
+export function sanitizeScanWorkers(raw: unknown): number {
+  if (typeof raw !== 'number' || !Number.isFinite(raw)) return SCAN_WORKERS_AUTO
+  if (raw <= 0) return SCAN_WORKERS_AUTO
+  return Math.min(MAX_SCAN_WORKERS, Math.round(raw))
 }

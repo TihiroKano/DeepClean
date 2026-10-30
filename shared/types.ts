@@ -1045,6 +1045,18 @@ export interface DeepCleanApi {
    * 所以界面上不许出现那一行。
    */
   getAppVersion(): Promise<string>
+  /**
+   * 这台机器的并行能力（2026-10-29）。今天是 `{ logicalCores }`。
+   *
+   * **真读者**是设置页「删除速率」那格滑块 —— 它要拿逻辑核数当**阈值**：
+   * 拉到阈值之外弹一句、然后自动拉回。渲染端自己算不出来
+   * （`navigator.hardwareConcurrency` 是 WebView2 那个进程看到的数，与 Rust
+   * `available_parallelism` 不是同一个来源，在开了 CPU 组的机器上会给出两个答案）。
+   *
+   * **读不到时不抛**：回 `{ logicalCores: 1 }`（最保守那一档）。
+   * 那一格读不到核数不该让整页设置白屏。
+   */
+  getHardware(): Promise<{ logicalCores: number }>
   /** §28 原则六：批中途取消。已删的不复活，剩下的不再碰。 */
   cancelCleanup(taskId: string): Promise<{ ok: boolean }>
   getCleanupTask(taskId: string): Promise<CleanTask | null>

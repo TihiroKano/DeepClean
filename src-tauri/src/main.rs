@@ -190,6 +190,7 @@ fn main() {
             commands::dc_license_activate,
             commands::dc_license_status,
             commands::dc_app_version,
+            commands::dc_hardware,
 
         ])
         .build(tauri::generate_context!())

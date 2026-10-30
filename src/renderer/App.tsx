@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useScan } from './hooks/useScan'
 import { Cleanup } from './pages/Cleanup'
 import { Home } from './pages/Home'
@@ -11,6 +11,9 @@ import { Settings } from './pages/Settings'
 import { WindowControls } from './components/WindowControls'
 import type { IconProps } from './components/icons'
 import type { View } from './view'
+import { LocaleContext, useT } from './i18n'
+import { useSettings } from './hooks/useSettings'
+import { LOCALE_HTML_LANG } from '../../shared/i18n'
 // 左上角品牌位（人类伙伴 2026-10-23 第六轮：主 logo 精修版）。两张图拆开摆：
 // 图标（抠底、带镂空）+ 字标。Vite 会把它们换成产物里的哈希文件名，随 dist 进二进制。
 import appIcon from './assets/app-icon.png'
@@ -29,6 +32,19 @@ const NAV: { id: View | null; label: string; note?: string; icon: (p: IconProps)
 
 export function App(): JSX.Element {
   const scan = useScan()
+  /*
+   * 界面语言（2026-10-29）。
+   *
+   * `App` 自己读一次设置来决定语言，而不是让 `Settings` 页那个 `useSettings` 反过来喂给外面 ——
+   * 那样语言会在"进设置页之前"一直是默认值，而用户可能上次就选了日语。
+   *
+   * 代价如实登记：这一层与设置页各有一份 `useSettings()`（两条独立的读盘与写盘）。
+   * 为什么可以接受：`useSettings` 的"回执赢"是**每次写盘回执都重新采纳服务端那份**，
+   * 所以两条各自持有一份时，A 写完之后 B 下一次写会把 A 的改动叠上去（它写的是 patch，
+   * 而基线是服务端当前值）—— 不产生"互相覆盖成对方没改过"的那一族缺陷。
+   * 真要合并成一条得把设置提到更外层；那是更大的重构，与这一轮要修的五条无关。
+   */
+  const { value: settingsValue } = useSettings()
   const [view, setView] = useState<View>('home')
   /**
    * 清理日志详情页看的是**哪一次**清理（`null` = 不在详情页，显示列表）。
@@ -83,6 +99,26 @@ export function App(): JSX.Element {
     setView((v) => (v === 'home' ? 'map' : v))
   }, [scan.status, scan.scanId])
 
+  /*
+   * 切回**首页**时重读一次盘容量（2026-10-30 修 bug）。
+   *
+   * 用户报的原话：「我日志记录了我刚刚进行了一次删除，但是主页面的值和我实际 C 盘
+   * 剩余的值不一样，还是显示清理前的数值」（实际空闲 3.31 GB，界面还写 1.0 GB）。
+   *
+   * 根因是 `listDrives()` 只在 `useScan` 首次挂载时读过一次 —— 整个进程生命周期里
+   * 盘容量都是那一次的快照。清理删掉 2 GB 之后没有任何地方重新读盘。
+   *
+   * 三处补上（这一处是第三处，另两处在 `useScan` 里）：
+   *  ① 清理完成 → `onCleanDone` 那一行；
+   *  ② 扫描进入终态 → `useScan` 自己的 effect；
+   *  ③ **切回首页** → 这里。用户可能是在别的程序里删的东西（回收站、资源管理器），
+   *     DeepClean 没有任何事件能知道；"回到首页时看一眼"是唯一诚实的那一档。
+   */
+  useEffect(() => {
+    if (view === 'home') scan.refreshDrives()
+    // `scan.refreshDrives` 是 useCallback 稳定引用，进依赖不会造成循环
+  }, [view, scan.refreshDrives])
+
   // dev-only 截图脚手架（main/index.ts 的 --shot）。打包版拿不到这个入口。
   useEffect(() => {
     const w = window as unknown as {
@@ -118,6 +154,76 @@ export function App(): JSX.Element {
    */
   const hasInlineBar = view === 'map'
 
+  /*
+   * `<html lang>` 与 `<html data-dc-locale>` 跟着设置走（2026-10-29）。
+   *
+   * 两个属性各有一件真事：
+   *  - `lang` —— 屏幕阅读器按它挑发音、浏览器按它挑**字形**。`lang="zh-CN"` 下
+   *    日语汉字会走简体中文字形（「直」「骨」那几笔不一样），那是"看着像没译对"
+   *    的一半来源，所以切到日语时必须真的换掉它；
+   *  - `data-dc-locale` —— CSS 按它调各自的排版（见 `global.css` 末尾那一节：
+   *    日语的 `line-height` 与韩语的断词规则与中文不同）。
+   *
+   * 这个 effect 挂在 App 上而不是 tauri-main 里：它要跟着设置变，
+   * 而入口那一层只在启动时跑一次。
+   */
+  useEffect(() => {
+    document.documentElement.lang = LOCALE_HTML_LANG[settingsValue.locale]
+    document.documentElement.dataset.dcLocale = settingsValue.locale
+  }, [settingsValue.locale])
+
+  return (
+    <LocaleContext.Provider value={settingsValue.locale}>
+      <AppShell
+        scan={scan}
+        view={view}
+        setView={setView}
+        hasInlineBar={hasInlineBar}
+        journalRunId={journalRunId}
+        setJournalRunId={setJournalRunId}
+        cleanRefreshNonce={cleanRefreshNonce}
+        setCleanRefreshNonce={setCleanRefreshNonce}
+        tilePaths={tilePaths}
+        setTilePaths={setTilePaths}
+        cleanSelected={cleanSelected}
+        setCleanSelected={setCleanSelected}
+      />
+    </LocaleContext.Provider>
+  )
+}
+
+/** 外壳本体。**拆出来是因为 `t()` 必须在 `LocaleContext.Provider` 里面才拿得到当前语言** ——
+ *  同一个组件里既挂 Provider 又调 `useT()`，拿到的是外层的值（默认简体），
+ *  于是切了语言侧栏还是一动不动。这是 React context 的一条经典形状缺陷。 */
+function AppShell({
+  scan,
+  view,
+  setView,
+  hasInlineBar,
+  journalRunId,
+  setJournalRunId,
+  cleanRefreshNonce,
+  setCleanRefreshNonce,
+  tilePaths,
+  setTilePaths,
+  cleanSelected,
+  setCleanSelected
+}: {
+  scan: ReturnType<typeof useScan>
+  view: View
+  setView: (v: View) => void
+  hasInlineBar: boolean
+  journalRunId: string | null
+  setJournalRunId: (v: string | null) => void
+  cleanRefreshNonce: number
+  setCleanRefreshNonce: (f: (n: number) => number) => void
+  tilePaths: string[]
+  setTilePaths: (f: string[] | ((prev: string[]) => string[])) => void
+  cleanSelected: string[]
+  setCleanSelected: (v: string[] | ((prev: string[]) => string[])) => void
+}): JSX.Element {
+  const t = useT()
+
   return (
     <div className="dc-app">
       <aside className="dc-side">
@@ -145,18 +251,23 @@ export function App(): JSX.Element {
               key={n.label}
               className={`dc-nav ${n.id === view ? 'dc-nav-on' : ''}`}
               disabled={n.id === null}
-              title={n.note}
+              title={n.note === undefined ? undefined : t(n.note)}
               onClick={() => n.id && setView(n.id)}
             >
               {/* 中文标签必须是按钮自己的 textContent，**不许换成 CSS `content`**：
                   `--shot` 有四处靠 `.dc-side button` + `textContent.includes(导航名)` 找入口
                   （main/index.ts 的 1288/1291/1380/1610 一带），生成内容不进 textContent 那四步会全红；
                   读屏软件也念不出 `content` 里的字。第四轮侧栏变宽、标签常驻可见，
-                  这条约束一个字没变 —— §23 那条 `navLabels` 判据继续守着它。 */}
+                  这条约束一个字没变 —— §23 那条 `navLabels` 判据继续守着它。
+
+                  ⚠️ 2026-10-29 加了界面语言之后，`textContent` 里是**译过的那一条**
+                  （简体中文下逐字等于原文，那四条 `--shot` 判据一字未改照旧成立）。
+                  靠 `textContent.includes('首页')` 找入口的验收脚本只在简体下有效 ——
+                  这是那条判据的边界，记在 `.dc-nav-label` 那段注释旁边。 */}
               <span className="dc-nav-ic">
                 <n.icon size={19} />
               </span>
-              <span className="dc-nav-label">{n.label}</span>
+              <span className="dc-nav-label">{t(n.label)}</span>
             </button>
           ))}
         </nav>
@@ -189,41 +300,52 @@ export function App(): JSX.Element {
           <WindowControls />
         </div>
         <div className="dc-view">
-        {view === 'home' && <Home scan={scan} onOpenMap={() => setView('map')} />}
-        {view === 'map' && (
-          <SpaceMap
-            scanId={scan.scanId}
-            status={scan.status}
-            truncated={scan.snapshot?.truncated === true}
-            onAddToCleanup={(p) => {
-              setTilePaths((prev) => (prev.includes(p) ? prev : [...prev, p]))
-              setView('cleanup')
-            }}
-          />
-        )}
-        {view === 'cleanup' && (
-          <Cleanup
-            scanId={scan.scanId}
-            snapshot={scan.snapshot}
-            tilePaths={tilePaths}
-            selected={cleanSelected}
-            onSelectedChange={setCleanSelected}
-            onRemoveTilePath={(p) => setTilePaths((prev) => prev.filter((x) => x !== p))}
-            onClearTilePaths={() => setTilePaths([])}
-            refreshNonce={cleanRefreshNonce}
-            onCleanDone={() => setCleanRefreshNonce((n) => n + 1)}
-          />
-        )}
-        {view === 'devenv' && (
-          <DevEnv scanId={scan.scanId} selected={cleanSelected} onSelectedChange={setCleanSelected} />
-        )}
-        {view === 'journal' &&
-          (journalRunId === null ? (
-            <CleanHistory onOpenDetail={setJournalRunId} />
-          ) : (
-            <CleanJournalDetail runId={journalRunId} onBack={() => setJournalRunId(null)} />
-          ))}
-        {view === 'settings' && <Settings />}
+          {view === 'home' && <Home scan={scan} onOpenMap={() => setView('map')} />}
+          {view === 'map' && (
+            <SpaceMap
+              scanId={scan.scanId}
+              status={scan.status}
+              truncated={scan.snapshot?.truncated === true}
+              onAddToCleanup={(p) => {
+                setTilePaths((prev) => (prev.includes(p) ? prev : [...prev, p]))
+                setView('cleanup')
+              }}
+            />
+          )}
+          {view === 'cleanup' && (
+            <Cleanup
+              scanId={scan.scanId}
+              snapshot={scan.snapshot}
+              tilePaths={tilePaths}
+              selected={cleanSelected}
+              onSelectedChange={setCleanSelected}
+              onRemoveTilePath={(p) => setTilePaths((prev) => prev.filter((x) => x !== p))}
+              onClearTilePaths={() => setTilePaths([])}
+              refreshNonce={cleanRefreshNonce}
+              onCleanDone={() => {
+                setCleanRefreshNonce((n) => n + 1)
+                /*
+                 * **清理完成立刻重读盘容量**（2026-10-30 修 bug）。
+                 *
+                 * 这一条是那个缺陷的正面：删完 2 GB，首页的「已使用 / 剩余 / 环」
+                 * 必须当场变。`cleanRefreshNonce` 管的是**清理预览**的缓存键
+                 * （`usePreview` 那一份），与盘容量是两回事 —— 原来只有前者被
+                 * 递增，后者一个字节都没动。
+                 */
+                scan.refreshDrives()
+              }}
+            />
+          )}
+          {view === 'devenv' && (
+            <DevEnv scanId={scan.scanId} selected={cleanSelected} onSelectedChange={setCleanSelected} />
+          )}
+          {view === 'journal' &&
+            (journalRunId === null ? (
+              <CleanHistory onOpenDetail={setJournalRunId} />
+            ) : (
+              <CleanJournalDetail runId={journalRunId} onBack={() => setJournalRunId(null)} />
+            ))}
+          {view === 'settings' && <Settings />}
         </div>
       </main>
     </div>

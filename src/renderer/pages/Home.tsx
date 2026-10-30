@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { formatBytes, formatCount, formatDay, formatElapsed } from '../../../shared/format'
 import { OVERVIEW_BUCKET_LABELS, summarizeGroups, toOverviewRows, type GroupSummary } from '../../../shared/group-summary'
+import type { DriveInfo } from '../../../shared/types'
+import { useT } from '../i18n'
 import type { Scan } from '../hooks/useScan'
 import { usePreview } from '../hooks/usePreview'
 import { ScanHud } from '../components/ScanHud'
@@ -125,7 +127,121 @@ function FolderArt(): JSX.Element {
  *    随图撤掉，入口换成这颗下拉 —— 换的是画法，不是又冒出第二个控件写同一份 `root`。
  *    （"同屏两个控件写同一份 state"是本项目定过的形状缺陷，这条不许破。）
  */
+/**
+ * 卷标的显示口径（2026-10-29）。
+ *
+ * 服务端在**卷没有卷标**时回空串（`list_drives` 那段注释写了为什么不在那边兜底成
+ * "本地磁盘"：那是一句写死的中文，切了语言它不会跟着变）。
+ * 所以"这盘没名字"这件事只能在这里按当前语言说 —— `t('本地磁盘')`。
+ */
+function driveLabel(d: { label: string }, t: (s: string) => string): string {
+  return d.label === '' ? t('本地磁盘') : d.label
+}
+
+/**
+ * 切盘那颗药丸（2026-10-29 修 bug ①）。
+ *
+ * ## 为什么不是 `<select>`
+ *
+ * 上一版是 `<label class="dc-drive-pick"><select>…</select></label>`。人类伙伴报
+ * 「图一这个 Windows 无法点击」—— 复现下来是**点在药丸的 padding 上完全没反应**，
+ * 点在下拉文字上偶尔能开。原因是 label 与 select 的点击转发在"菜单已经开着"时
+ * 会被当成第二次激活，于是开→关→开闪一下就没了；而药丸的可视面积大部分是 padding。
+ *
+ * ## 换成 button + 自己画的菜单，代价与收益
+ *
+ * 收益：`<button>` 天生可聚焦、`Enter`/`Space`/方向键都能用、点哪里都算它自己的。
+ * 代价：菜单要自己画（portal、定位、外点关闭、Esc 关闭），比 `<select>` 多二十行。
+ *
+ * **不自己实现键盘列表导航**：菜单项就是真正的 `<button>`，Tab 能到、Enter 能选 ——
+ * 这是最低成本且读屏天然可用的那一档。自己写 `aria-activedescendant` 那套会引入
+ * 一整类只有键盘用户才会撞到的缺陷，而这里一共几个盘，不值。
+ */
+function DrivePicker({
+  drives,
+  value,
+  disabled,
+  onChange
+}: {
+  drives: readonly DriveInfo[]
+  value: string
+  disabled: boolean
+  onChange: (root: string) => void
+}): JSX.Element {
+  const t = useT()
+  const [open, setOpen] = useState(false)
+  const box = useRef<HTMLDivElement | null>(null)
+  const current = drives.find((d) => d.root === value)
+
+  // 外点关闭 / Esc 关闭。两个监听都只在开着时挂 —— 常挂着一份全局 click 监听
+  // 会让这一屏每一次点击都多走一遍它，而那与"点不动"是同一个位置的缺陷。
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent): void => {
+      if (box.current && !box.current.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  // 扫描进行中时菜单要关掉：`disabled` 已经挡住重新展开，但已经展开的那一份会悬在那里，
+  // 而它后面的列表在这一刻已经不该被读了（扫描中的盘符不会变）。
+  useEffect(() => {
+    if (disabled) setOpen(false)
+  }, [disabled])
+
+  return (
+    <div className="dc-drive-pick" ref={box}>
+      <button
+        type="button"
+        className="dc-drive-trigger"
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={t('选择要分析的磁盘')}
+        title={t('要分析的磁盘 —— 全窗唯一的切盘入口')}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <DriveIcon size={14} />
+        <span className="dc-drive-trigger-label">{current ? current.label : '—'}</span>
+        <ChevronDownIcon size={13} className="dc-drive-caret" />
+      </button>
+      {open && (
+        <ul className="dc-drive-menu" role="listbox" aria-label={t('选择要分析的磁盘')}>
+          {drives.length === 0 ? (
+            <li className="dc-drive-menu-empty">{t('读取磁盘列表失败：{err}', { err: '—' })}</li>
+          ) : (
+            drives.map((d) => (
+              <li key={d.root} role="option" aria-selected={d.root === value}>
+                <button
+                  type="button"
+                  className={`dc-drive-item ${d.root === value ? 'dc-drive-item-on' : ''}`}
+                  onClick={() => {
+                    onChange(d.root)
+                    setOpen(false)
+                  }}
+                >
+                  <span className="dc-drive-item-label">{driveLabel(d, t)}</span>
+                  <span className="dc-drive-item-free dc-mono">{formatBytes(d.freeBytes)}</span>
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void }): JSX.Element {
+  const t = useT()
   /*
    * 扫描范围那三格（选盘 / 指定位置 / 那行路径）**不在这里 state** —— 它们住在 `useScan`，
    * 因为扫完应用会自己跳到空间地图，Home 重新挂载会把局部 state 打回初值，
@@ -133,7 +249,7 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
    * （局部 state，已经死了）：两处各自成立、合起来互相矛盾，用户会以为刚才扫的是 C 盘。
    * 见 2026-10-15 验收 §4.1。这里只做别名解构，下面的 JSX 一行都不用改。
    */
-  const { root, setRoot, scope, setScope, customPath: custom, setCustomPath: setCustom, startTarget } = scan
+  const { root, setRoot, scope, setScope, customPath: custom, setCustomPath: setCustom, startTarget, scannedRoot } = scan
   const [exportNote, setExportNote] = useState<string | null>(null)
   const [overview, setOverview] = useState<GroupSummary | null>(null)
   const [overviewError, setOverviewError] = useState<string | null>(null)
@@ -177,7 +293,26 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
     }
   }, [scan.scanId, scan.status, scan.running])
 
-  const drive = scan.drives.find((d) => d.root === root)
+  /*
+   * 这一屏"这块盘"的读数按 `scannedRoot` 取（2026-10-29 两轮修）。
+   *
+   * ① 人类伙伴第一轮报「当清理位置选择为其他盘时，主页面数据应该也跟着改变，而不是依旧
+   *    显示 Windows 占用」—— 那时这里读的是盘符下拉那一格（"下次扫哪"），
+   *    与右半边读的快照（"刚才扫了哪"）是两处各自算一遍，合起来矛盾。
+   *
+   * ② 第二轮报「首次进入应该默认显示 C 盘数据啊，怎么全是 0」—— 第一版修法
+   *    把 `scannedRoot` 定成 `snapshot?.root ?? null`，于是**没扫过就什么都不显示**。
+   *    那是把口径改对了、把"没扫过时该显示什么"改错了：盘的容量来自 `listDrives()`，
+   *    与扫描无关。现在 `scannedRoot` 在没扫描时等于 `startTarget`（下拉此刻选着的盘），
+   *    两件事各归各位。
+   *
+   * 扫的是自定义目录（`D:\Games` 这种不是盘根）时，`drives` 里没有它的整盘读数 ——
+   * 这时按**盘符前缀**找到所在的那块盘，因为"已使用 / 总容量"本来就只能是整盘口径。
+   * 找不到（网络路径、已拔掉的盘）就回 undefined：宁可空着，不要编。
+   */
+  const scannedDrive =
+    scan.drives.find((d) => d.root === scannedRoot) ?? scan.drives.find((d) => scannedRoot.startsWith(d.root))
+  const drive = scannedDrive
   const pct = drive && drive.totalBytes > 0 ? (drive.usedBytes / drive.totalBytes) * 100 : 0
   const reclaimable = payload && payload.scanStatus === 'completed' ? payload.preview.reportReclaimableBytes : null
   const used = splitBytes(drive ? formatBytes(drive.usedBytes) : '—')
@@ -201,34 +336,36 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
             <span className="dc-panel-h-ic">
               <DriveIcon size={18} />
             </span>
-            <h2 className="dc-panel-h-title">{drive ? `本地磁盘 (${drive.label})` : '本地磁盘'}</h2>
+            <h2 className="dc-panel-h-title">
+              {drive ? t('本地磁盘 ({label})', { label: driveLabel(drive, t) }) : t('本地磁盘')}
+            </h2>
             {/* 切盘：`<select>` 是这一屏唯一的 `root` 写入点。它同时是标题行右侧那颗药丸，
-                不是标题行下拉 + 别处再来一个 —— 一个控件一种画法不是缺陷，两个控件才是。 */}
-            <label className="dc-drive-pick" title="要分析的磁盘 —— 全窗唯一的切盘入口">
-              <DriveIcon size={14} />
-              <select
-                className="dc-drive-select"
-                value={root}
-                disabled={scan.running}
-                onChange={(e) => setRoot(e.target.value)}
-                aria-label="选择要分析的磁盘"
-              >
-                {scan.drives.length === 0 ? (
-                  <option value={root}>{'—'}</option>
-                ) : (
-                  scan.drives.map((d) => (
-                    <option key={d.root} value={d.root}>
-                      {d.label}
-                    </option>
-                  ))
-                )}
-              </select>
-              <ChevronDownIcon size={13} className="dc-drive-caret" />
-            </label>
+                不是标题行下拉 + 别处再来一个 —— 一个控件一种画法不是缺陷，两个控件才是。
+
+                ⚠️ 它原来点不动（2026-10-29 修 bug ①）。人类伙伴原话：「图一这个 windows 无法点击」。
+                三个原因叠在一起，缺一条都不至于完全点不动：
+                 ① `<label>` 包着 `<select>`，而药丸的 padding 让 label 比 select 大一整圈 ——
+                    点在 padding 上的那一下会被 label 的默认行为"转发"给 select，
+                    但 Chromium 对**已经包在 label 里的 select** 再走一次 label 激活时，
+                    闭合菜单的那一次点击会被当成"再开一次"，表现为"点了没反应 / 闪一下就关"；
+                 ② `title` 挂在 label 上，不是替身按钮；
+                 ③ 真正致命的是 `.dc-drive-pick` 有 `cursor: pointer` 但**它自己不是可聚焦元素**，
+                    键盘/读屏根本到不了它 —— 鼠标那一路在 ① 里坏掉之后就没有第二条路了。
+
+                修法：**换成 `<button>` + 原生菜单**。`<button>` 天生可聚焦、可键盘操作、
+                点哪里都算按钮自己的 —— 不再依赖 label 的转发语义。
+                盘符列表本来就只有 A–Z 那么多，菜单用绝对定位的一张列表就够了。 */}
+            <DrivePicker drives={scan.drives} value={root} disabled={scan.running} onChange={setRoot} />
           </div>
 
           <div className="dc-gauge-row">
-            <Donut pct={pct} sub="已使用" ariaLabel={drive ? `${drive.label} 已使用 ${pct.toFixed(1)}%` : '磁盘用量'} />
+            <Donut
+              pct={pct}
+              sub={t('已使用')}
+              ariaLabel={
+                drive ? t('{label} 已使用 {pct}%', { label: driveLabel(drive, t), pct: pct.toFixed(1) }) : t('磁盘用量')
+              }
+            />
             <div className="dc-gauge-meta">
               {/* 两个大数中间立一根分隔线（图上就是一根竖线），不是"两个数 + 右挂可清理"那套。 */}
               <div className="dc-stats">
@@ -237,7 +374,7 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
                     {used.num}
                     {used.unit && <small>{used.unit}</small>}
                   </b>
-                  <i>已使用</i>
+                  <i>{t('已使用')}</i>
                 </div>
                 <span className="dc-stat-sep" aria-hidden="true" />
                 <div className="dc-stat">
@@ -245,7 +382,7 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
                     {total.num}
                     {total.unit && <small>{total.unit}</small>}
                   </b>
-                  <i>总容量</i>
+                  <i>{t('总容量')}</i>
                 </div>
               </div>
 
@@ -258,10 +395,10 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
                 </div>
                 <div className="dc-usage-legend">
                   <span className="dc-legend-item">
-                    <i className="dc-dot" />已使用 {used.num} {used.unit}
+                    <i className="dc-dot" />{t('已使用')} {used.num} {used.unit}
                   </span>
                   <span className="dc-legend-item">
-                    <i className="dc-dot dc-dot-free" />剩余 {free}
+                    <i className="dc-dot dc-dot-free" />{t('剩余')} {free}
                   </span>
                 </div>
               </div>
@@ -273,38 +410,40 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
               <button
                 className="dc-cta"
                 disabled={startTarget.length === 0}
-                title={startTarget.length === 0 ? '先在「扫描范围」里选一个磁盘' : undefined}
+                title={startTarget.length === 0 ? t('先在「扫描范围」里选一个磁盘') : undefined}
                 onClick={() => void scan.start(startTarget)}
               >
                 <SparkleIcon size={17} />
-                开始深度扫描
+                {t('开始深度扫描')}
                 <ChevronRightIcon size={16} />
               </button>
             ) : (
               <div className="dc-cta-stack">
                 <button className="dc-btn" onClick={() => void (scan.paused ? scan.resume() : scan.pause())}>
-                  {scan.paused ? '继续扫描' : '暂停扫描'}
+                  {scan.paused ? t('继续扫描') : t('暂停扫描')}
                 </button>
                 <button className="dc-btn dc-btn-danger" onClick={() => void scan.cancel()}>
-                  取消扫描
+                  {t('取消扫描')}
                 </button>
-                <span className="dc-live">{scan.paused ? '已暂停（已发现的树照常能看）' : '扫描中…'}</span>
+                <span className="dc-live">{scan.paused ? t('已暂停（已发现的树照常能看）') : t('扫描中…')}</span>
               </div>
             )}
             {/* 扫描范围已搬出主面板，落在下排那块卡里（图上它在下排右侧）。 */}
           </div>
 
           <div className="dc-panel-notes">
-            {scan.drivesError && <p className="dc-warn dc-fineprint">读取磁盘列表失败：{scan.drivesError}</p>}
+            {scan.drivesError && (
+              <p className="dc-warn dc-fineprint">{t('读取磁盘列表失败：{err}', { err: scan.drivesError })}</p>
+            )}
             {scan.startError && <p className="dc-warn">{scan.startError}</p>}
-            {scan.status === 'failed' && <p className="dc-warn">扫描失败：根目录不可读。试试换一个盘或提权运行。</p>}
+            {scan.status === 'failed' && <p className="dc-warn">{t('扫描失败：根目录不可读。试试换一个盘或提权运行。')}</p>}
             {scan.snapshot && scan.status !== 'running' && (
               <p className="dc-muted dc-fineprint">
-                {scan.status === 'completed' ? '扫描完成' : '扫描已取消'}，用时 {formatElapsed(scan.snapshot.elapsedMs)} ·
-                共 {formatBytes(scan.snapshot.totalBytes)}
+                {scan.status === 'completed' ? t('扫描完成') : t('扫描已取消')}，{t('用时')} {formatElapsed(scan.snapshot.elapsedMs)} ·{' '}
+                {formatBytes(scan.snapshot.totalBytes)}
               </p>
             )}
-            <p className="dc-muted dc-fineprint dc-notes-tail">扫描 ≠ 删除 · 清理须逐项确认</p>
+            <p className="dc-muted dc-fineprint dc-notes-tail">{t('扫描 ≠ 删除 · 清理须逐项确认')}</p>
           </div>
         </section>
 
@@ -318,7 +457,7 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
             snap ? (
               <ScanHud s={snap} variant="card" />
             ) : (
-              <p className="dc-muted dc-fineprint dc-side-empty">正在准备扫描…</p>
+              <p className="dc-muted dc-fineprint dc-side-empty">{t('正在准备扫描…')}</p>
             )
           ) : (
             <>
@@ -326,8 +465,8 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
                 <span className="dc-panel-head-ic">
                   <PieIcon size={16} />
                 </span>
-                <h2 className="dc-panel-title">空间概览</h2>
-                {drive && <span className="dc-panel-tag">{drive.label}</span>}
+                <h2 className="dc-panel-title">{t('空间概览')}</h2>
+                {drive && <span className="dc-panel-tag">{driveLabel(drive, t)}</span>}
               </div>
               {overview !== null ? (
                 <>
@@ -336,7 +475,7 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
                       <li key={r.bucket} className={`dc-ov-row dc-ov-${r.bucket}`}>
                         <div className="dc-ov-row-head">
                           <i className={`dc-dot dc-dot-${r.bucket}`} />
-                          <span className="dc-ov-name">{OVERVIEW_BUCKET_LABELS[r.bucket]}</span>
+                          <span className="dc-ov-name">{t(OVERVIEW_BUCKET_LABELS[r.bucket])}</span>
                           <span className="dc-ov-pct">
                             {bucketTotal > 0 ? `${((r.bytes / bucketTotal) * 100).toFixed(0)}%` : '—'}
                           </span>
@@ -349,8 +488,8 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
                   </ul>
                   {residual > 0 && (
                     <p className="dc-muted dc-fineprint">
-                      另有 {formatBytes(residual)} 没能归类，未计入上面四档。
-                      {scan.snapshot?.truncated ? '（本轮被条数上限截断）' : ''}
+                      {t('另有 {bytes} 没能归类，未计入上面四档。', { bytes: formatBytes(residual) })}
+                      {scan.snapshot?.truncated ? t('（本轮被条数上限截断）') : ''}
                     </p>
                   )}
                 </>
@@ -359,8 +498,8 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
                   {overviewError !== null
                     ? overviewError
                     : scan.snapshot
-                      ? '正在向主进程取根层分类…'
-                      : '还没有扫描记录。点上面「开始深度扫描」，这里会把磁盘空间按类别摊开。'}
+                      ? t('正在向主进程取根层分类…')
+                      : t('还没有扫描记录。点上面「开始深度扫描」，这里会把磁盘空间按类别摊开。')}
                 </p>
               )}
             </>
@@ -443,7 +582,7 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
             <div className="dc-scope-opts">
               <label className="dc-radio">
                 <input type="radio" name="dc-scope" checked={scope === 'drive'} onChange={() => setScope('drive')} disabled={scan.running} />
-                <span>{drive ? `本地磁盘 ${drive.label}` : '当前磁盘'}</span>
+                <span>{drive ? t('本地磁盘 {label}', { label: driveLabel(drive, t) }) : t('当前磁盘')}</span>
               </label>
               <label className="dc-radio">
                 <input type="radio" name="dc-scope" checked={scope === 'custom'} onChange={() => setScope('custom')} disabled={scan.running} />
@@ -476,7 +615,7 @@ export function Home({ scan, onOpenMap }: { scan: Scan; onOpenMap: () => void })
                   <option value="">选择磁盘…</option>
                   {scan.drives.map((d) => (
                     <option key={d.root} value={d.root}>
-                      磁盘 ({d.label}) · {formatBytes(d.freeBytes)} 可用
+                      {t('磁盘 ({label}) · {free} 可用', { label: driveLabel(d, t), free: formatBytes(d.freeBytes) })}
                     </option>
                   ))}
                 </select>

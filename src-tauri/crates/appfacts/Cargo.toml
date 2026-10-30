@@ -1,6 +1,6 @@
 [package]
 name = "deepclean-appfacts"
-version = "1.0.0"
+version = "1.0.7"
 edition = "2021"
 description = "M5-P2：「这台机器装没装过 X」的只读取证层（三态机器事实表，弃权优先）"
 

@@ -21,6 +21,8 @@
     "core/**/*.ts",
     "shared/**/*.ts",
     "src/renderer/components/mobius-geometry.ts",
+    "src/renderer/i18n/dict.ts",
+    "src/renderer/i18n/dicts/*.ts",
     "tests/**/*.ts",
     "vitest.config.ts",
     "vitest.integration.config.ts"

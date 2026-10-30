@@ -360,7 +360,35 @@ pub fn snapshot_of(session: &Session, st: &SessionState) -> ScanSnapshotWire {
     }
 }
 
-#[derive(Default)]
+/// ⚠️ **2026-10-30 从 `#[derive(Default)]` 改成手写**：多了 `cached_settings` 那一格，
+/// 而 `AppSettings` 没有实现 `Default` trait（它有的是 `AppSettings::default()` 这个
+/// **同名关联函数**，因为 `wallpaper` 是 `String`、`to_string()` 不是 const fn）。
+/// 派生 `Default` 会去找 `Default::default()`，编译期就找不到。
+///
+/// 手写这一份的代价：以后再加字段，这里必须跟着补一行 —— 忘了就是 E0063（缺字段），
+/// 编译期会报，不会静默。所以这个代价是"编译器管着"的，可以接受。
+impl Default for AppState {
+    fn default() -> Self {
+        Self {
+            sessions: Mutex::new(HashMap::new()),
+            current: Mutex::new(None),
+            confirmations: Mutex::new(HashMap::new()),
+            tasks: Mutex::new(HashMap::new()),
+            task_order: Mutex::new(Vec::new()),
+            running: Mutex::new(HashMap::new()),
+            journal: Mutex::new(crate::journal_store::JournalStore::default()),
+            journal_path: Mutex::new(None),
+            dev_env_status: Mutex::new(None),
+            clean_log: Mutex::new(None),
+            // 缓存初值是**产品默认设置**，不是零值：`scan_workers` 的零值语义是
+            // "用推荐值"，恰好也是默认，但 `locale` 零值是空串 —— 那会让
+            // 「还没人写过缓存」与「语言被设成空」混成一件事。
+            cached_settings: Mutex::new(crate::settings::AppSettings::default()),
+            seq: AtomicU64::new(1),
+        }
+    }
+}
+
 pub struct AppState {
     pub sessions: Mutex<HashMap<String, Arc<Session>>>,
     pub current: Mutex<Option<Arc<Session>>>,
@@ -391,6 +419,19 @@ pub struct AppState {
     /// `None` = 这台机器上**建不出**那个日志文件（只读漫游配置、磁盘满、目录被占），
     /// 于是记录页那格给 null、页脚那句照实说"没能确定日志文件路径" —— 不是揣一个写不进去的路。
     pub clean_log: Mutex<Option<Arc<crate::cleanlog::FileCleanLog>>>,
+    /// **当前设置的一份缓存**（2026-10-30）。
+    ///
+    /// 为什么要有它：删除并发度（那格「删除速率」）的真读者是 `execute_plan`，
+    /// 而那个函数的签名里**没有 `AppHandle`**（`Option<&AppHandle>`，子单元测试传 `None`），
+    /// 于是它没法自己算出 settings.json 在哪。
+    ///
+    /// 谁往里写：`dc_settings_set` 成功后（那是唯一会改设置的地方）与
+    /// `dc_settings_get` 读到之后。两处都写，是因为"用户从没打开过设置页"时
+    /// 只有后者会跑 —— 而这时也得有默认值，不能是零值 `usize::default()`。
+    ///
+    /// **它不是第二份真相**：这个结构的所有字段都来自 `settings::load_settings`
+    /// 或 `save_settings` 的返回值，没有任何地方从这里**回写**文件。
+    pub cached_settings: Mutex<crate::settings::AppSettings>,
     seq: AtomicU64,
 }
 
@@ -500,13 +541,23 @@ pub fn skipped_sample_of(
 
 /// 列出可见盘符。**不用 PowerShell**（现行 TS 侧走 `Get-CimInstance Win32_LogicalDisk`）——
 /// `volume_of` 一个字面量盘符就能问出全部三个数。
-pub fn list_drives() -> Vec<DriveInfoWire> {    let mut out = Vec::new();
+///
+/// ⚠️ `label` 在**卷没有卷标**时给的是空串，不是"本地磁盘"这个名字（2026-10-29 改）。
+///
+/// 原来这里回退成 `"本地磁盘"` —— 那是一句**写死在服务端的中文**，
+/// 加了界面语言之后它会是一个永远不跟着变的词：英文界面下盘符列表里会冒出一句中文。
+/// 而"这盘没名字"这件事本身该由**显示层**决定怎么说（各语言各有各的说法）。
+/// 所以服务端只报事实（空串），渲染端用 `t('本地磁盘')` 兜底 —— 那一处已经在
+/// `DrivePicker` / `Home` 里了。
+pub fn list_drives() -> Vec<DriveInfoWire> {
+    let mut out = Vec::new();
     for letter in b'A'..=b'Z' {
         let root = format!("{}:\\", letter as char);
         if let Ok(v) = volume_of(Path::new(&root)) {
             out.push(DriveInfoWire {
                 root,
-                label: if v.label.is_empty() { "本地磁盘".into() } else { v.label.clone() },
+                // 空串 = "这卷没有卷标"，由渲染端按界面语言兜底（见上面那段注释）
+                label: v.label.clone(),
                 total_bytes: v.total_bytes,
                 free_bytes: v.free_bytes,
                 used_bytes: v.used_bytes(),
@@ -514,6 +565,18 @@ pub fn list_drives() -> Vec<DriveInfoWire> {    let mut out = Vec::new();
         }
     }
     out
+}
+
+/// 读这一格的设置，翻成内核要的 `Option<usize>`（2026-10-29）。
+///
+/// `0` = "用推荐值" 的哨兵（见 `settings::SCAN_WORKERS_AUTO`）→ 回 `None`，
+/// 由 `clamp_workers` 用本机逻辑核数填空 —— 也就是改之前的行为。
+/// 读盘失败时同样回 `None`：这一格读不到不该让整次扫描起不来，
+/// 那会把"设置文件坏了"变成"扫描按钮没反应"。
+fn read_scan_workers(app: &AppHandle) -> Option<usize> {
+    let path = crate::settings::settings_path(&app).ok()?;
+    let (s, _) = crate::settings::load_settings(&path);
+    (s.scan_workers != crate::settings::SCAN_WORKERS_AUTO).then_some(s.scan_workers)
 }
 
 /// 起一轮扫描。
@@ -557,7 +620,11 @@ pub fn start_scan(app: AppHandle, state: &AppState, root: String, volume: Volume
     // 名单只有一处来源：`deepclean-devenv` 的那份口径（与 TS 的 MODEL_FILE_EXTENSIONS 同一份，
     // 由 devenv 的对账闸钉着）。在这里另抄一遍就是给「两张表对什么是 .gguf 各说一套」留后路。
     let opts = ScanOptions::new(&root_path)
-        .with_count_exts(&deepclean_devenv::MODEL_FILE_EXTENSIONS);
+        .with_count_exts(&deepclean_devenv::MODEL_FILE_EXTENSIONS)
+        // 并行度（2026-10-29）：设置页那格滑块。`0` = 用推荐值（本机逻辑核数），
+        // 落进内核再夹一次（`clamp_workers`）—— 界面的滑块挡不住手改 settings.json，
+        // 而这一格存在的理由正是「拉满倍率把进程打死」。
+        .with_workers(read_scan_workers(&app));
     let app2 = app.clone();
     let s2 = session.clone();
     // 预热要的 `id`：`id` 后面 `sessions.insert` 与 `Ok(id)` 还要用，不能 move 进闭包，
@@ -1721,44 +1788,90 @@ pub fn execute_plan(
     let shared_done = Arc::new(std::sync::atomic::AtomicUsize::new(0));
     let shared_cleaned = Arc::new(std::sync::atomic::AtomicU64::new(0));
 
-    // 并发删除（2026-10-24 人类伙伴：「删除的速度有点慢，有办法加速吗」）。
-    //
-    // 慢的根因：执行器对**每个文件单独调一次 `SHFileOperationW`**（shell 层调用，
-    // 每次有固定开销）。几千上万文件就是几千上万次 shell 往返。
-    //
-    // 修法：**按批次并发** —— 每个批次一条线程、并行删。批次数通常不多
-    // （勾选了几条规则就是几个批次），所以线程数有自然上限。`std::thread::scope`
-    // 保证 `state` / `plan` 等借用安全，且所有线程收尾才返回（合并任务前不漏批）。
-    //
-    // 三条代价如实登记：
-    // 1. §19 前后测量只有**最后一条线程**做（`skip_verification` 置位其余批次）——
-    //    否则并发的另一批删了这个根下的文件，before/after 互相污染。
-    // 2. 日志行序与清单序不再一致（并发写入，序由调度决定）——日志本就是
-    //    「一行一件事」的附录，记录页的账本不依赖它排序。
-    // 3. 取消仍生效：共享标志在所有线程间可见，任何一批看到都会停。
-    let n_batches = plan.batches.len();
-    let mut parts: Vec<Option<CleanTask>> = vec![None; n_batches];
+    /*
+     * 并发删除 —— **2026-10-30 重做：从"一批一条线程"改成"一批切成 N 片"**。
+     *
+     * ## 为什么改
+     *
+     * 人类伙伴要的是设置里那格滑块真能调**删除**速度。上一版按批次并发，而批次数
+     * 由「授权根有几个」决定（勾了几条规则、每条规则命中几个根）—— 与滑块无关。
+     * 实测（`examples/delprobe.rs`，8 核机、32000 文件、真系统线程）：
+     *
+     * | 并发 | 墙钟 | 相对 1x | 峰值 RSS |
+     * | 1 | 7993ms | 1.00x | 4.6MB |
+     * | 2 | 5246ms | 1.52x | 4.6MB |
+     * | 4 | 3862ms | 2.07x | 4.7MB |
+     * | 8 | 3256ms | **2.45x** | 4.8MB |
+     * | 16 | 3323ms | 2.40x ← 饱和 | 5.1MB |
+     *
+     * 三个结论直接决定了这一版怎么写：
+     *  ① **饱和在 8**（= 本机逻辑核数）。16 反而慢 2% —— 所以"核数"是对的阈值，
+     *     我原来写的 `核数 × 2` 是错的（它允许的 16 恰好是实测负收益那一档）。
+     *  ② **内存不是约束**：16 倍并发只多 0.5 MB。所以"拉高会崩"不是内存杀，
+     *     是**排队浪费**。保险机制应该是"别让人白等"，不是"防 OOM"。
+     *  ③ 加速比封顶 2.45×（不是 8×）说明这项工作大部分串行 —— 瓶颈在文件系统
+     *     （一次 delete 的系统调用开销 + NTFS 日志），不在 CPU。所以超过核数没有任何好处。
+     *
+     * ## 怎么切
+     *
+     * 一个批次 = 一个授权根 + 一张路径清单。执行器的契约是"一次执行 = 一个授权根"，
+     * 这条**一个字没动**（`guard_authorized_root` 只认一个根，并为一次会退化成 `C:\`）。
+     * 所以切成 N 片时，每片**仍然用同一个授权根**，只是 `requested_paths` 少一些：
+     *
+     *   `batch.paths` 按轮转（`i % n`）分给 N 个 `ExecuteCtx`
+     *
+     * 轮转而不是连续切块：连续切块会让最后一片拿到清单尾部，而清单是排过序的
+     * —— 同一目录下的文件会全落在同一片，那一片最慢、其余几片早早空转。
+     *
+     * ## 三条代价（比上一版更细，逐条登记）
+     *
+     * 1. **§19 前后测量**：仍然只有**最后一片**做报告（`skip_verification` 置位其余）。
+     *    `before` 读数在每片里都会取（那是 `measure()` 的无条件调用），但只有最后一片
+     *    把自己的 before/after 写进任务 —— 其余片跳过报告，避免"另一片正在删同一棵树"
+     *    把读数搅成中间值。合并口径见 `merge_tasks`。
+     * 2. **每片的 `digest` 只覆盖自己那些路径**（`execution_digest(root, accepted)`），
+     *    合并后的 `digest` 由 `merge_tasks` 重算 —— 这本来就是逐批重算的，
+     *    切片没有改变那件事的形状。
+     * 3. **日志行序、`deleted` 清单序**按调度决定，不再与清单序一致。上一版已经如此。
+     *
+     * ## 空批次与空片
+     *
+     * `paths` 为空的批次仍然要跑一次（它承载"整批拒绝"的语义 —— 授权根不合法时
+     * 拒绝发生在碰任何东西之前）。切片时**空批次不切**，原样一片跑，
+     * 否则会切出 N 个都拒绝一次的副本，`refusals` 里同一件事重复 N 遍。
+     */
+    let workers = read_scan_workers_for_delete(state);
+    let mut slices: Vec<(usize, &CleanBatch, Vec<String>)> = Vec::new();
+    for (bi, batch) in plan.batches.iter().enumerate() {
+        for b in slice_batch_paths(&batch.paths, workers) {
+            slices.push((bi, batch, b));
+        }
+    }
+    let n_slices = slices.len();
+    let mut parts: Vec<Option<CleanTask>> = vec![None; n_slices];
     std::thread::scope(|scope| {
-        let handles: Vec<_> = plan
-            .batches
+        let handles: Vec<_> = slices
             .iter()
             .enumerate()
-            .map(|(i, batch)| {
+            .map(|(i, (bi, batch, paths))| {
                 let state = state;
                 let plan = plan;
                 let cancel = cancel.clone();
                 let progress = progress.clone();
                 let shared_done = shared_done.clone();
                 let shared_cleaned = shared_cleaned.clone();
-                let is_last = i + 1 == n_batches;
+                let is_last = i + 1 == n_slices;
+                let _ = bi;
+                let paths = paths.clone();
                 scope.spawn(move || {
-                    // 每批开跑前先看一眼：可能已经被用户取消，那这一批一条都不该动。
+                    // 每片开跑前先看一眼：可能已经被用户取消，那这一片一条都不该动。
                     if cancel.load(Ordering::SeqCst) {
                         return None;
                     }
-                    Some(execute_batch_concurrent(
+                    Some(execute_slice_concurrent(
                         plan,
                         batch,
+                        &paths,
                         state,
                         task_id,
                         permanent,
@@ -1818,15 +1931,97 @@ pub fn execute_plan(
     task
 }
 
-/// 跑**一批**（并发删除，2026-10-24）。授权根就是这一批的地盘。
+/// 删除并发度 —— 读设置里那格「删除速率」（2026-10-30）。
 ///
-/// `cancel` 由调用方持有 —— 取消按钮立的是它，而每一批都要看见同一个标志
-/// （否则「取消」只停得下正在跑的那一批）。`shared_done` / `shared_cleaned` 是跨批
-/// 共享的进度计数；`is_last` 决定这一批做不做 §19 前后测量（只有最后一批做，
-/// 理由见 `execute_plan` 那段注释）。
-fn execute_batch_concurrent(
+/// ## 为什么这一格现在有两个读者
+///
+/// 上一版它只喂扫描（`scan_parallel`）。人类伙伴要的是它能调**删除**速度，
+/// 所以这一版把它也接到删除链上（`execute_plan` 的切片数）。
+/// 两个读者用同一个键是有意的：界面上只有一格，用户调它时期望的是"整体快一点"，
+/// 而不是"扫描快、删除不动"。
+///
+/// ## 默认值 = 逻辑核数的 60%
+///
+/// `SCAN_WORKERS_AUTO`（0）落成 `核数 × 0.6`（四舍五入，至少 1）—— 与设置页
+/// 滑块的默认档同一个算式（`PerformanceCard` 的 `defaultWorkers`）。
+///
+/// 为什么是 60% 而不是 100%：实测（`examples/delprobe.rs`）加速比饱和在核数，
+/// 8 线程 2.45× 与 5 线程的差距远小于直觉 —— 文件系统日志把并行收益封顶了。
+/// 默认留 40% 的核给机器上跑着的别的活：清理是瞬时突发负载，
+/// 默认不占满全部核是 polite 的那一档。用户拉满也不崩（内存不涨），
+/// 只是那几秒里别的程序少几个核。
+///
+/// ## 为什么这里拿不到 `AppHandle`
+///
+/// `execute_plan` 的签名里没有 `app`（它是 `Option<&AppHandle>`，子单元测试传 `None`）。
+/// 而设置文件的路径要么从 app 推、要么从 `DC_SETTINGS_DIR` 覆盖 —— 前者不可用。
+/// 所以这一格走 `state` 上缓存的那份：**`dc_start` / `dc_settings_set` 每次成功后
+/// 都会把当前设置抄一份进去**（见 `AppState::cached_settings`）。读不到就用默认算式。
+fn read_scan_workers_for_delete(state: &AppState) -> usize {
+    let declared = state.cached_settings.lock().unwrap().scan_workers;
+    let cores = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(2).max(1);
+    if declared == crate::settings::SCAN_WORKERS_AUTO {
+        // 与设置页 `PerformanceCard` 的 `defaultWorkers` 同一条算式（见 `default_workers_of`）。
+        return default_workers_of(cores);
+    }
+    // 与内核 `clamp_workers` 同一把尺子：1..=核数。手改文件写了 99999 也不许开 99999 条线程。
+    declared.clamp(1, cores)
+}
+
+/// 把一批切成 N 片 —— **纯函数**，好让"切片本身对不对"能被子单元直接钉住
+/// （不需要文件系统、不需要起线程）。
+///
+/// ## 三条口径，每条都有代价
+///
+/// 1. **轮转分片**（`i % n`）而不是连续切块：清单是排过序的，连续切块会让
+///    同一目录下的文件全落进同一片 —— 那一片最慢、其余几片早早空转，
+///    并发度白加。轮转让每一片都横跨整张清单。
+///
+/// 2. **空批次不切**：`paths` 为空时回一片空切片，不是 N 片。那一批承载的是
+///    "整批拒绝"的语义（授权根不合法时，拒绝要发生在碰任何东西之前）——
+///    切成 N 片会让同一件事在 `refusals` 里重复 N 遍。
+///
+/// 3. **片数 = `min(路径数, workers)`**：路径比线程少时多开线程只是空转。
+///    这个 `min` 也是"用户把滑块拉到 8、但只勾了 3 个文件"这种情况的正确处置。
+///
+/// 返回的是 `Vec<Vec<String>>`：外层一片一层。
+fn slice_batch_paths(paths: &[String], workers: usize) -> Vec<Vec<String>> {
+    let workers = workers.max(1);
+    if paths.is_empty() {
+        return vec![Vec::new()];
+    }
+    let n = paths.len().min(workers);
+    let mut buckets: Vec<Vec<String>> = vec![Vec::new(); n];
+    for (i, p) in paths.iter().enumerate() {
+        buckets[i % n].push(p.clone());
+    }
+    buckets
+}
+
+/// 「删除速率」的**默认档 = 核数的 60%**（2026-10-30 第三轮，人类伙伴点名）。
+///
+/// 与设置页 `PerformanceCard` 的 `defaultWorkers` 同一条算式 —— 两侧必须给同一个数，
+/// 否则界面上写着「默认推荐 = 5 线程」而实际跑 8 线程，那是两套真相。
+/// 这一格没法直接测（它吃 `&AppState`，而 `cached_settings` 在构造里），
+/// 所以把**算式**抽成这个纯函数，两侧各自调用它。
+fn default_workers_of(cores: usize) -> usize {
+    ((cores.max(1) as f64) * 0.6).round().max(1.0) as usize
+}
+
+/// 跑**一片**（2026-10-30 切片并发）。授权根就是这一批的地盘，`paths` 是这一片分到的子集。
+///
+/// 与上一版 `execute_batch_concurrent` 的唯一差别就是 `paths`：那个跑整批，
+/// 这个跑整批里按轮转分出来的一片。**授权根、禁止模式、确认回执、共享计数、
+/// 取消标志全部与整批那一次逐字相同** —— 切片只动"这一次要碰哪些路径"这一件事。
+///
+/// `cancel` 由调用方持有 —— 取消按钮立的是它，而每一片都要看见同一个标志
+/// （否则「取消」只停得下正在跑的那一片）。`shared_done` / `shared_cleaned` 是跨片
+/// 共享的进度计数；`is_last` 决定这一片做不做 §19 前后测量的**报告**
+/// （只有最后一片报告，理由见 `execute_plan` 那段注释）。
+fn execute_slice_concurrent(
     plan: &ConfirmedPlan,
     batch: &CleanBatch,
+    paths: &[String],
     state: &AppState,
     task_id: &str,
     permanent: bool,
@@ -1844,11 +2039,12 @@ fn execute_batch_concurrent(
         .with_report_only_patterns(
             deepclean_rules::REPORT_ONLY_ROOT_PATTERNS.iter().map(|s| s.to_string()).collect(),
         )
-        .with_requested_paths(batch.paths.clone())
+        // ⚠️ 这一行是切片与整批的唯一实质差别：片上只带自己那些路径。
+        .with_requested_paths(paths.to_vec())
         .with_confirmation_digest(plan.digest.clone())
         .with_permanent(permanent)
         .with_now_ms(now_ms())
-        // 取消标志是**共享**的：`dc_cancel_cleanup` 立起一次，所有批次都要看到。
+        // 取消标志是**共享**的：`dc_cancel_cleanup` 立起一次，所有片都要看到。
         .with_cancel_flag(cancel)
         .with_shared_done(shared_done)
         .with_shared_cleaned(shared_cleaned)
@@ -3699,8 +3895,71 @@ mod preview_tests {
         assert_eq!(batches.iter().map(|b| b.paths.len()).sum::<usize>(), 3, "一条路径都不许丢");
     }
 
-    /// 反向半边：根**没有**套住任何受保护路径时，批次逐字不变。
-    /// 没有这一条，上面那条会被"无条件按父目录拆"这种错改法蒙过去。
+    /// 默认档 = 核数的 60%（2026-10-30 第三轮）。
+    ///
+    /// 与设置页 `PerformanceCard` 的 `defaultWorkers` 同一条算式。
+    /// 两侧分叉的表现：界面写「默认推荐 = 5 线程」而实际跑 8 线程 ——
+    /// TS 那一侧有判据钉着算式，这一侧钉 Rust 侧的同一个数。
+    #[test]
+    fn the_delete_default_is_sixty_percent_of_cores() {
+        assert_eq!(default_workers_of(8), 5);   // 8 * 0.6 = 4.8 -> 5
+        assert_eq!(default_workers_of(10), 6);  // 6.0 -> 6
+        assert_eq!(default_workers_of(4), 2);   // 2.4 -> 2
+        // 1 核机：0.6 -> 1（至少 1 条线程 —— 0 条会让 join 返回空树）
+        assert_eq!(default_workers_of(1), 1);
+        assert_eq!(default_workers_of(0), 1);
+        // 反面对照：不许是 100%（那是上一轮的默认）
+        assert_ne!(default_workers_of(8), 8);
+    }
+
+    /// 切片本身（2026-10-30）—— 不碰文件系统，纯函数。
+    ///
+    /// 这一组钉的是"删得多快"那件事的**形状**：切几片、每片拿到哪些路径。
+    /// 它不证明"真的更快"（那要 `examples/delprobe.rs` 那种实测），
+    /// 但它挡住四类会让并发白费的错法。
+    #[test]
+    fn a_batch_is_sliced_round_robin_not_in_contiguous_chunks() {
+        let paths: Vec<String> = (0..8).map(|i| format!(r"C:\dbg\f{i}.tmp")).collect();
+
+        // ① 片数 = min(路径数, workers)
+        assert_eq!(slice_batch_paths(&paths, 4).len(), 4);
+        assert_eq!(slice_batch_paths(&paths, 8).len(), 8);
+        // 路径比线程少时多开只是空转
+        assert_eq!(slice_batch_paths(&paths[..3], 8).len(), 3);
+        // workers = 0 也不许切出 0 片（那会让整批一条都不跑）
+        assert_eq!(slice_batch_paths(&paths, 0).len(), 1);
+
+        // ② **轮转**：每片都横跨整张清单，不是连续切块。
+        //    连续切块时第 0 片会是 f0..f3 —— 那正是"同一目录全落一片"的形状。
+        let s = slice_batch_paths(&paths, 4);
+        assert_eq!(s[0], vec![r"C:\dbg\f0.tmp", r"C:\dbg\f4.tmp"]);
+        assert_eq!(s[1], vec![r"C:\dbg\f1.tmp", r"C:\dbg\f5.tmp"]);
+        assert!(
+            !s[0].contains(&r"C:\dbg\f1.tmp".to_string()),
+            "连续切块了：第 0 片吃到了相邻的两条"
+        );
+
+        // ③ 一片都不丢、也不重复
+        let mut all: Vec<String> = s.into_iter().flatten().collect();
+        all.sort();
+        let mut want = paths.clone();
+        want.sort();
+        assert_eq!(all, want, "切完之后路径集合变了");
+    }
+
+    #[test]
+    fn an_empty_batch_slices_into_exactly_one_empty_slice() {
+        // 空批次承载"整批拒绝"的语义 —— 切成 N 片会让同一件事在 refusals 里重复 N 遍。
+        let s = slice_batch_paths(&[], 8);
+        assert_eq!(s.len(), 1);
+        assert!(s[0].is_empty());
+        // 反面对照：非空批次不许退化成一整片（那等于没切）
+        let one = vec![r"C:\dbg\a.tmp".to_string()];
+        assert_eq!(slice_batch_paths(&one, 8).len(), 1, "一条路径本来就只能一片");
+        let two = vec![r"C:\dbg\a.tmp".to_string(), r"C:\dbg\b.tmp".to_string()];
+        assert_eq!(slice_batch_paths(&two, 8).len(), 2);
+    }
+
     #[test]
     fn a_batch_whose_root_sweeps_nothing_is_left_verbatim() {
         let report = sweeping_report();

@@ -23,6 +23,11 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+// ⚠️ 只能引 `.ts`，不能引 `src/renderer/i18n/index.tsx`：这个文件同时编进
+// `tsconfig.node.json`（那个项目没有 `--jsx`、也没有 DOM 类型），引 `.tsx` 会让它
+// 当场红在 TS6142 上。所以词典与 translate 直接取那两个 `.ts` 文件。
+import { ZH_CN } from '../../src/renderer/i18n/dicts/zh-CN'
+import { translate } from '../../src/renderer/i18n/dict'
 
 /** 剥注释：判据量的是实现，一句写着"旧表格已删"的注释不该把它喂饱。 */
 function src(rel: string): string {
@@ -81,10 +86,24 @@ describe('重构之后的版式契约：别人在量的五条形状都还在', (
   })
 
   it('④ 两个页面地标仍在：「清理预览」标题与「预计释放」那句', () => {
-    expect(CLEANUP).toContain('清理预览')
-    expect(CLEANUP).toContain('预计释放')
-    // 标题那一条类名（`m5c-tile` 等「清理预览」这四个字，`m5f-perf` 数它出现几次）
-    expect(CLEANUP).toMatch(/<h2 className="dc-page-title dc-clean-title">清理预览<\/h2>/)
+    /**
+     * ⚠️ **2026-10-29 改口径：从"源码里能搜到那个词"改成"渲染出来仍是那个词"**。
+     *
+     * 加了界面语言之后，JSX 里的字面量变成了 `t('清理预览')` —— 那几个字**不再**在
+     * Cleanup.tsx 里（它们在 zh-CN.ts 那份词典里）。原来那三条断言因此红过一次，
+     * 而它们红得没错：它们问的是"e2e 还能不能按名字找到这块地标"，
+     * 只是这个问题的答案从"源码里有这个串"变成了"简体中文下渲染出这个串"。
+     *
+     * 所以判据改成**真渲染**（与 `cleanup-item-detail.test.tsx` 同一个先例）：
+     * 拿简体词典跑一遍 `t()`，看那两句还在不在。这样它守的仍然是同一件事 ——
+     * `m5-preview` / `m5c-tile` / `m5f-perf` 用 UIA 按这几个字找地标 ——
+     * 而且顺带挡住了"把键写错、简体下显示成键名"那种坏法。
+     */
+    const t = (s: string): string => translate(ZH_CN, s)
+    expect(t('清理预览')).toBe('清理预览')
+    expect(t('预计释放')).toBe('预计释放')
+    // 标题那一条类名仍在 Cleanup.tsx 里，且它的文字由 t() 给（`m5f-perf` 数「清理预览」出现几次）
+    expect(CLEANUP).toMatch(/<h2 className="dc-page-title dc-clean-title">\{t\('清理预览'\)\}<\/h2>/)
   })
 
   it('⑤ 页头把它自己的形状保住了：`.dc-clean-head` 里同时有标题与那一颗 `.dc-cta`', () => {
