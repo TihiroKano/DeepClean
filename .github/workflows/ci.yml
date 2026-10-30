@@ -73,11 +73,17 @@ jobs:
       - name: 类型检查（core / tests，已知 6 条既有错误）
         run: npx tsc -p tsconfig.node.json --noEmit || true
 
-      # 1133 条。dot 报告器是为了日志短；红了再让人本地跑 verbose。
-      # 2026-10-30：加 maxWorkers=4 —— runner 2 核上默认并行 fork 76 个 worker
-      # 会顶穿 7GB 内存（一个 worker 被 OOM kill → 退出 1），本机 8 核复现不了。
+      # 1133 条。dot 报告器是为了日志短。
+      # ⚠️ 失败时自动用 verbose 重跑一遍：dot 只打点数，看不出哪条红、
+      # 而 CI 日志曾因权限问题拉不下来 —— 让失败详情自己进日志。
       - name: 单测
-        run: npx vitest run --reporter=dot
+        run: |
+          npx vitest run --reporter=dot
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "=== vitest 失败（exit $LASTEXITCODE），verbose 重跑采集详情 ==="
+            npx vitest run --reporter=verbose 2>&1 | Select-Object -Last 260
+            exit $LASTEXITCODE
+          }
 
   rust:
     name: Rust / 单测
