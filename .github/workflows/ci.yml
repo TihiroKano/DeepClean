@@ -286,8 +286,15 @@ jobs:
               throw
             }
           }
-          if (-not $rel.upload_url) { throw "响应里没有 upload_url —— Release 对象异常" }
-          $upload = $rel.upload_url -replace '\{\?.*$', ''
+          if (-not $rel.upload_url) {
+            # 复用分支查到的对象没有 upload_url（GET tags 端点的响应字段不同源）——
+            # 不猜了，upload 端点是确定性的：`https://uploads.github.com/.../releases/{id}/assets`。
+            if (-not $rel.id) { throw "Release 对象里既没有 upload_url 也没有 id" }
+            $upload = "https://uploads.github.com/repos/$env:GITHUB_REPOSITORY/releases/$($rel.id)/assets"
+            Write-Output "用 release id 拼上传端点：$upload"
+          } else {
+            $upload = $rel.upload_url -replace '\{\?.*$', ''
+          }
           Write-Output "上传资产到：$upload"
           try {
             Invoke-RestMethod -Method Post `
