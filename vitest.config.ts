@@ -22,8 +22,10 @@ export default defineConfig({
      * 4 个足够让 2 核 runner 饱和；8 核本机也几乎不慢（fork 的固定开销
      * 从 76 次降到 4 次，反而省启动时间）。CI 两次失败（fd653c0 / 7199941）
      * 都在这一处，与测试内容无关。
+     *
+     * ⚠️ 只有 maxWorkers、没有 minWorkers —— vitest 5 的 InlineConfig 不认
+     * minWorkers（TS2769，CI 上第一个修复版就是被它顶掉的）。
      */
-    maxWorkers: 4,
-    minWorkers: 1
+    maxWorkers: 4
   }
 })
