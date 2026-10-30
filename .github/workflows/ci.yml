@@ -253,25 +253,50 @@ jobs:
           $exe = Get-ChildItem src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
           # 幂等（2026-10-30 补）：Release 已存在就复用（上次 run 建成了 Release、
           # 挂资产那步失败 —— 重跑不能再 422）。拿 upload_url 用同一个端点。
+          #
+          # ⚠️ 每一步失败都把异常**打进输出**：Actions 日志匿名拿不到，
+          # 但 step 的 stdout 会出现在 annotations / 日志里，盲修到此为止。
+          $tag = $env:GITHUB_REF_NAME
+          $exe = Get-ChildItem src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
+          Write-Output "tag=$tag exe=$($exe.Name) 大小=$($exe.Length)"
           $rel = $null
           try {
             $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" `
-              -Headers @{ Authorization = "Bearer $env:GH_TOKEN" } -ErrorAction Stop
-            Write-Output "Release 已存在，复用：$($rel.html_url)"
-          } catch { }
+              -Headers @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' } `
+              -ErrorAction Stop
+            Write-Output "Release 已存在，复用：$($rel.html_url)（upload_url 有无：$([bool]$rel.upload_url)）"
+          } catch {
+            Write-Output "查询 Release/tags 失败（大概率 404 不存在）：$($_.Exception.Message)"
+          }
           if (-not $rel) {
             $note = if (Test-Path "docs/release-$($tag.TrimStart('v'))-note.md") {
               Get-Content "docs/release-$($tag.TrimStart('v'))-note.md" -Raw
             } else { "$tag" }
-            $rel = Invoke-RestMethod -Method Post `
-              -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases" `
-              -Headers @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' } `
-              -Body (@{ tag_name = $tag; name = "DeepClean $tag"; body = $note; draft = $false; prerelease = $false } | ConvertTo-Json)
-            Write-Output "Release 建成：$($rel.html_url)"
+            Write-Output "建新 Release，note 长度 $($note.Length)"
+            try {
+              $rel = Invoke-RestMethod -Method Post `
+                -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases" `
+                -Headers @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' } `
+                -Body (@{ tag_name = $tag; name = "DeepClean $tag"; body = $note; draft = $false; prerelease = $false } | ConvertTo-Json) `
+                -ErrorAction Stop
+              Write-Output "Release 建成：$($rel.html_url)"
+            } catch {
+              Write-Output "::error::建 Release 失败：$($_.Exception.Message)"
+              if ($_.ErrorDetails.Message) { Write-Output "::error::响应体：$($_.ErrorDetails.Message)" }
+              throw
+            }
           }
+          if (-not $rel.upload_url) { throw "响应里没有 upload_url —— Release 对象异常" }
           $upload = $rel.upload_url -replace '\{\?.*$', ''
-          Invoke-RestMethod -Method Post `
-            -Uri "$upload?name=$($exe.Name)" `
-            -Headers @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json'; 'Content-Type' = 'application/octet-stream' } `
-            -InFile $exe.FullName
-          "资产已上传: $($exe.Name)"
+          Write-Output "上传资产到：$upload"
+          try {
+            Invoke-RestMethod -Method Post `
+              -Uri "$upload?name=$($exe.Name)" `
+              -Headers @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json'; 'Content-Type' = 'application/octet-stream' } `
+              -InFile $exe.FullName -ErrorAction Stop
+            Write-Output "资产已上传: $($exe.Name)"
+          } catch {
+            Write-Output "::error::挂资产失败：$($_.Exception.Message)"
+            if ($_.ErrorDetails.Message) { Write-Output "::error::响应体：$($_.ErrorDetails.Message)" }
+            throw
+          }
