@@ -62,12 +62,12 @@ jobs:
       - name: 类型检查（渲染端）
         run: npx tsc -p tsconfig.web.json --noEmit
 
-      # ⚠️ `tsconfig.node.json` 有 **5 个既有类型错误**（`usePreview.ts` 被 node 项目
+      # ⚠️ `tsconfig.node.json` 有 **6 个既有类型错误**（`usePreview.ts` 被 node 项目
       # 编译 + `preview-cache-key.test.ts` 3 处断言与实现签名不符）。它们与本次改动无关，
-      # 对 `c6c1a8e` 基线复现过同样 5 条 —— 见 README 的「未闭合」。
+      # 对 `c6c1a8e` 基线复现过同样 6 条 —— 见 README 的「未闭合」。
       #
-      # 所以这一步 `continue-on-error`。**这不是把红藏起来**：日志里照样有那 5 条，
-      # 只是不让它们把整个 CI 判红。等它们修掉之后把这一行删掉。
+      # 所以这一步 `continue-on-error`。**这不是把红藏起来**：日志里照样有那 6 条，
+      # 只是不让它们把整个 CI 判红。等它们修掉之后把这一行删掉。第 6 条（shot-leak-gate 的 TS2305）10-29 就在，当时数错了。
       - name: 类型检查（core / tests，已知 5 条既有错误）
         continue-on-error: true
         run: npx tsc -p tsconfig.node.json --noEmit
