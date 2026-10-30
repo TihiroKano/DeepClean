@@ -68,7 +68,9 @@ describe.skipIf(!HAS_SHOTS)('验收图不许是整块桌面', () => {
  */
 describe('没有验收图时的行为（公开仓的形状）', () => {
   it('`shotsDirExists()` 与目录实际存在性一致（不是写死的 true/false）', () => {
-    const actual = existsSync(join(process.cwd(), 'docs', 'acceptance'))
+    // 与 shotsDirExists 检查同一个目录（assets 子目录 —— 见它的注释）。
+    // 2026-10-30 之前两边都写 acceptance，而 md 在公开仓存在 ⇒ CI 上判断成「有图」。
+    const actual = existsSync(join(process.cwd(), 'docs', 'acceptance', 'assets'))
     expect(shotsDirExists()).toBe(actual)
   })
 

@@ -68,7 +68,10 @@ export function repoRoot() {
  * `把阈值压到 100 时必须红` 那条判据仍然钉着闸真的会红。
  */
 export function shotsDirExists() {
-  return existsSync(join(repoRoot(), 'docs', 'acceptance'))
+  // ⚠️ 检查的是 **assets** 子目录，不是 acceptance 本身 —— md 文档在公开仓里存在、
+  // 图（assets/，97.83 MB）不在。2026-10-30 之前这里查的是 acceptance，
+  // CI 上 md 在 ⇒ skipIf 判断成「有图」⇒ 三条用例跑了 ⇒ walk 进不存在的 assets 抛错。
+  return existsSync(join(repoRoot(), 'docs', 'acceptance', 'assets'))
 }
 
 export function offenders(limit = MAX_SHOT_WIDTH) {
