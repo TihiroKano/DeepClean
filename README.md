@@ -4,8 +4,8 @@
 
 **Windows 磁盘空间分析与清理工具**
 
-扫描一棵目录树，告诉你空间去哪了；再把可以删的东西逐项列出来。<br>
-每一步都要你自己勾、自己确认，它才动手。
+扫描每一个文件，告诉你空间去哪了；再把可以删的东西逐项列出来。<br>
+每一步都自己确认。
 
 [![Release](https://img.shields.io/github/v/release/TihiroKano/DeepClean?style=flat-square)](https://github.com/TihiroKano/DeepClean/releases)
 [![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue?style=flat-square)](LICENSE)
@@ -36,11 +36,11 @@
 
 市面上的清理软件有个通病：**它替你决定删什么**。
 
-「一键优化」按下去，屏幕转两圈，告诉你清出了 3.2 GB。至于那 3.2 GB 是缓存、是日志，
+「一键优化」按下去，告诉你清出了 3.2 GB。至于那 3.2 GB 是缓存、是日志，
 还是你昨天刚下的安装包 —— 你不看，它也不说。
 
-这个项目反过来。它只做两件事：把空间去哪了**画出来**，把能清的东西**列出来**。
-删不删、删哪些，由你按下去。整个界面里没有一个「一键优化」按钮。
+这个项目反过来。它只做两件事：把空间去哪了**画出来**，把能清的东西**列出来给用户看**。
+删不删、删哪些，由你按下去。
 
 首页上那句「扫描 ≠ 删除 · 清理须逐项确认」不是装饰，是这一页唯一的产品主张。
 
@@ -181,7 +181,7 @@ VS Code 缓存、崩溃转储、GPU 驱动残留、孤立应用数据……
 
 ## 安装
 
-从 [Releases](https://github.com/TihiroKano/DeepClean/releases/latest) 下载
+从 [发布](https://github.com/TihiroKano/DeepClean/releases/latest) 下载
 `DeepClean_1.0.7_x64-setup.exe`（约 3.3 MB），双击安装。
 
 **需要管理员权限。** 删系统目录里的垃圾需要它，所以 exe 的 manifest 是
@@ -315,28 +315,6 @@ DC-FIX-0005
 > 独立码表 —— 那份表不进仓库，按台发放。
 
 </details>
-
----
-
-## 踩过的坑
-
-写在这里，省下一个人一天。
-
-- **`Win32::UI::Controls::Dialogs` 不是 `Win32::UI::Shell`** —— `GetOpenFileNameW`
-  在 `Shell` 下也有同名声明，照着名字导会报 `E0432` 解不出来。
-- **调 `GetOpenFileNameW` 前必须 `CoInitializeEx`** —— Tauri 的 async 命令跑在线程池上，
-  那上面的线程不保证初始化过 COM；不初始化时它回 0，而且原因说不清。
-- **`tauri build` 和 `cargo build` 不是一回事** —— `#[cfg(debug_assertions)]` 门控的
-  import 只在 release 档暴露。改完跑一次 `cargo check --release`，别拿十几分钟的打包
-  当编译检查。
-- **壁纸只存文件名，不存绝对路径** —— 存路径等于把「选一张图」变成「读任意文件」。
-- **缓存键要放「已删集合的快照」而不是「非空」** —— 后者会让清理过一次之后缓存永久失效，
-  此后每次勾选都重跑全量。
-- **PowerShell 里 `"$var?name=x"` 是错的** —— `?` 是合法的变量名字符，`$var?` 会被当成
-  一个变量名展开成空串。要写成 `"${var}?name=x"`。（CI 里挂 Release 资产那一步因此
-  连红五次。）
-- **`GET /releases/tags/{tag}` 对 draft 一律 404** —— 拿它当「存不存在」的判据，
-  每次重跑都会再建一条，仓库里会堆一串同名空壳。
 
 ---
 
