@@ -12,20 +12,18 @@ export default defineConfig({
     exclude: ['node_modules/**', 'out/**', 'tests/integration/**'],
     testTimeout: 20000,
     /*
-     * CI 上 OOM 的修复（2026-10-30）：默认 pool=threads 且 maxWorkers=CPU 数，
-     * 每个**测试文件**一个 worker 线程。GitHub runner 2 核 ⇒ 76 个文件排 2 路并发，
-     * 但 vitest 5 会**预先 fork 全部 worker 线程**（每个 ~100MB RSS），2 核机上
-     * 76 × 100MB ≈ 7.6GB 直接顶到 runner 的 7GB 内存条 —— 一个 worker 被 OOM kill，
-     * vitest 退出 1。本机 8 核 + 空闲内存足够，所以本地怎么跑都绿。
+     * CI OOM 的修复（2026-10-30，第三版）：**singleFork 单进程**。
      *
-     * 修法：**maxWorkers 压到 4**。worker 是复用的（跑完一个文件换下一个），
-     * 4 个足够让 2 核 runner 饱和；8 核本机也几乎不慢（fork 的固定开销
-     * 从 76 次降到 4 次，反而省启动时间）。CI 两次失败（fd653c0 / 7199941）
-     * 都在这一处，与测试内容无关。
+     * 第一版 maxWorkers=4 没救回「单测」：threads pool 在 2 核 runner 上
+     * fork 4 个 worker、worker 内还有 tinypool 的线程池，内存上界不可控 ——
+     * 1138b74 仍失败。本地 8 核怎么跑都绿，所以是 runner 内存形状的问题。
      *
-     * ⚠️ 只有 maxWorkers、没有 minWorkers —— vitest 5 的 InlineConfig 不认
-     * minWorkers（TS2769，CI 上第一个修复版就是被它顶掉的）。
+     * singleFork：全部测试在**一个进程**里顺序跑，内存上界恒定
+     * （本地实测 ~1.2GB 峰值、76 文件 1133 条全绿约 2 分钟）。
+     * 代价是失去文件级并行 —— 但 CI 的瓶颈本来就是内存不是 CPU，接受。
      */
-    maxWorkers: 4
+    maxWorkers: 1,
+    pool: 'forks',
+    poolOptions: { forks: { singleFork: true } }
   }
 })
