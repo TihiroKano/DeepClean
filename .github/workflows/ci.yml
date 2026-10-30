@@ -81,7 +81,8 @@ jobs:
           npx vitest run --reporter=dot
           if ($LASTEXITCODE -ne 0) {
             Write-Output "=== vitest 失败（exit $LASTEXITCODE），verbose 重跑采集详情 ==="
-            npx vitest run --reporter=verbose 2>&1 | Select-Object -Last 260
+            npx vitest run --reporter=verbose 2>&1 | Select-Object -Last 200 | Out-File "$env:GITHUB_STEP_SUMMARY" -Append
+            npx vitest run --reporter=verbose 2>&1 | Select-Object -Last 60
             exit $LASTEXITCODE
           }
 
